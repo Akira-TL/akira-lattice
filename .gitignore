@@ -1,0 +1,36 @@
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Generated document artifacts
+*.docx
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+!docs/assets/**/*.png
+!docs/assets/**/*.jpg
+!docs/assets/**/*.jpeg
+!docs/assets/**/*.webp
+
+# Temporary files
+.tmp/
+tmp/
+*.tmp
+*.bak
