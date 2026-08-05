@@ -4,7 +4,7 @@
 
 This skill generates and revises DOCX files through Word-native document semantics. It builds pages, sections, styles, paragraphs, tables, captions, fields, pagination, and character formatting instead of transferring Markdown or web UI conventions into Word.
 
-Its default output is formal, restrained, printable, and visually stable. Text, headings, table styling, borders, headers, footers, and decorative elements remain black and white unless the user explicitly requests another visual system. Photographs, scientific figures, screenshots, maps, diagrams, and data visualizations may retain original or informative color.
+Its default output is formal, restrained, printable, and visually stable. Word-native non-image content—including text, headings, tables, fills, borders, shapes, headers, footers, and decorative elements—uses only black, white, and necessary grayscale unless the user explicitly requests color. Images inserted into the document, including photographs, scientific figures, screenshots, maps, exported diagrams, and exported data visualizations, may retain original or informative color.
 
 ## When to use it
 
@@ -14,7 +14,7 @@ It adapts to academic papers, research reports, project proposals, business repo
 
 ## Key behavior
 
-The skill starts from a blank DOCX unless the user explicitly requires a supplied template. It defines a coherent Word style system, converts content into semantic document objects, applies character-level scientific formatting where needed, and renders the result page by page for visual inspection before delivery.
+The skill starts from a blank DOCX unless the user explicitly requires a supplied template. It defines a coherent Word style system, converts content into semantic document objects, applies character-level scientific formatting where needed, and renders the result page by page for visual inspection before delivery. Color is determined by object type: an exported chart or diagram inserted as an image may remain colored, while editable Word charts, shapes, SmartArt, text boxes, and tables remain non-colored by default.
 
 Chinese text uses full-width Chinese punctuation and “double” or ‘nested’ quotation marks. Latin genus and species names use real italic formatting. Statistical symbols such as *P* use semantic italic formatting rather than visible Markdown markers.
 
