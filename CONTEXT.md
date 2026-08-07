@@ -24,6 +24,6 @@
 
 ## Current boundary
 
-The first maintained capability is `general-word-document-generation` under the `productivity` category.
+The maintained stable capabilities under `productivity` are `general-word-document-generation` and `visible-browser-form-automation`.
 
-Repository publishing, semantic versioning, Changesets, installer compatibility, marketplace packaging, CI validation, and licensing remain undecided. Do not infer those decisions from the upstream repository used as structural inspiration.
+The repository can be consumed locally by the `skills` CLI through `npx skills add <local-path>`. A public Git remote, semantic versioning, Changesets, marketplace packaging, CI validation, and licensing remain undecided. Do not infer those decisions from the upstream repository used as structural inspiration.

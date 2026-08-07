@@ -26,4 +26,10 @@ Runtime instructions are maintained at:
 skills/productivity/general-word-document-generation/SKILL.md
 ```
 
-Installation and update commands will be documented after the repository's distribution method is chosen.
+The repository can currently be installed locally with `npx skills`. From the `akira-skills` repository root, for example:
+
+```bash
+npx skills add . --skill general-word-document-generation --agent codex -g -y
+```
+
+For multi-agent and remote-source installation patterns, see the repository `README.md`.

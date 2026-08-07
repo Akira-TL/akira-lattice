@@ -25,6 +25,43 @@ akira-skills/
 
 `general-word-document-generation`：从空白 DOCX 生成正式、克制、可打印的 Word 文档，按 Word 原生样式、段落、分页、表格、题注和字符级格式组织内容，避免 Markdown 视觉习惯污染成品。
 
+`visible-browser-form-automation`：让 Agent 在 WSL 等自动化环境中通过 CDP 控制用户可见的 Windows Chrome，适合问卷、报销、申请和报名表等需要“自动填写、人工复核、明确确认后再提交”的工作流。
+
+## Install with npx skills
+
+在本仓库根目录可以直接安装本地 Skill。例如安装可视化表单自动化 Skill 到 Codex：
+
+```bash
+npx skills add . --skill visible-browser-form-automation --agent codex -g -y
+```
+
+同时安装到多个 Agent：
+
+```bash
+npx skills add . \
+  --skill visible-browser-form-automation \
+  -g \
+  -a codex \
+  -a claude-code \
+  -a opencode \
+  -a hermes-agent \
+  -y
+```
+
+安装到 CLI 检测到的所有 Agent：
+
+```bash
+npx skills add . --skill visible-browser-form-automation --agent '*' -g -y
+```
+
+查看仓库中可安装的 Skill：
+
+```bash
+npx skills add . --list
+```
+
+当前仓库尚未配置 Git remote，因此现在使用本地路径最可靠。发布到 GitHub 后，可把 `.` 替换为 `<owner>/akira-skills` 或完整 GitHub URL。
+
 ## Status
 
-仓库当前处于初始化阶段。发布方式、许可证、自动校验、Changesets 和 Agent 插件分发将在需求明确后分别决策，不在初始化阶段预设。
+仓库当前处于初始化阶段。许可证、自动校验、Changesets 和正式远程发布仍将在需求明确后分别决策；本地 `npx skills` 安装已经可用。
