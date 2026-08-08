@@ -1,0 +1,27 @@
+# DevSpace 与 worktree 参考
+
+仅在需要确认 DevSpace workspace 或 Git worktree 边界时读取本文。多 Agent 的具体执行流程由 `devspace-orchestration` Skill 负责。
+
+## workspace
+
+- `workspaceId` 只是当前 DevSpace 工具会话的句柄，不是持久项目 ID。
+- 普通任务使用 `checkout` 打开实际项目目录或已有 worktree。
+- 同一个实际目录再次以 `checkout` 打开仍是磁盘上的同一份代码，即使新会话获得不同 `workspaceId`。
+
+## worktree
+
+- 需要隔离或并行开发时，可用 `mode="worktree"` 在 `~/.devspace/worktrees/` 创建 DevSpace 托管的 Git worktree。
+- 对同一主仓库再次使用 `mode="worktree"` 可能创建新的隔离 worktree；继续已有任务时，应以 `checkout` 直接打开已有 worktree 的实际路径。
+- DevSpace worktree 是标准 Git linked worktree：与主仓库共享对象数据库、分支和提交，但工作目录不会自动同步、合并、cherry-pick 或推送。
+- 不得把 worktree 嵌套在主项目 checkout 内。
+
+## 移动与删除
+
+移动主仓库或 worktree 后，如路径引用失效，应从仍可访问的仓库执行：
+
+```bash
+git worktree repair <worktree-path>
+git worktree list
+```
+
+删除主仓库与移动主仓库不同。主仓库的 `.git` 对象数据库被删除后，linked worktree 不能作为完整独立仓库继续使用。移动或删除项目前，应先检查全部 worktree，并处理未提交修改、推送、移除或修复工作树。
