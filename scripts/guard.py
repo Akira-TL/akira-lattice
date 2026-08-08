@@ -396,14 +396,13 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
     return result
 
 
-def cmd_skills(_: argparse.Namespace) -> int:
+def check_skills_root(root: Path) -> int:
     failed = False
     names: Counter[str] = Counter()
 
-    for skill_file in sorted(AKIRA_SKILLS_ROOT.glob("*/*/SKILL.md")):
-        relative = skill_file.relative_to(REPO_ROOT)
-        skill_relative = skill_file.relative_to(AKIRA_SKILLS_ROOT)
-        category = skill_relative.parts[0]
+    for skill_file in sorted(root.glob("*/*/SKILL.md")):
+        relative = skill_file.relative_to(root)
+        category = relative.parts[0]
         directory_name = skill_file.parent.name
         frontmatter = parse_frontmatter(skill_file)
         name = frontmatter.get("name", "")
@@ -422,9 +421,9 @@ def cmd_skills(_: argparse.Namespace) -> int:
             names[name] += 1
 
         if category not in {"in-progress", "deprecated"}:
-            doc = AKIRA_SKILLS_ROOT / "docs" / category / f"{directory_name}.md"
+            doc = root / "docs" / category / f"{directory_name}.md"
             if not doc.is_file():
-                fail(f"{relative}: 稳定 Skill 缺少子模块文档 {doc.relative_to(REPO_ROOT)}")
+                fail(f"{relative}: 稳定 Skill 缺少文档 {doc.relative_to(root)}")
                 failed = True
 
     for name, count in names.items():
@@ -433,8 +432,12 @@ def cmd_skills(_: argparse.Namespace) -> int:
             failed = True
 
     if not failed:
-        ok("Skill 结构与文档映射正常")
+        ok(f"Skill 结构与文档映射正常：{root}")
     return 1 if failed else 0
+
+
+def cmd_skills(_: argparse.Namespace) -> int:
+    return check_skills_root(AKIRA_SKILLS_ROOT)
 
 
 def cmd_architecture(args: argparse.Namespace) -> int:
@@ -535,7 +538,9 @@ def cmd_check(args: argparse.Namespace) -> int:
 
     if target == REPO_ROOT.resolve():
         results.append(cmd_config(argparse.Namespace()))
-        results.append(cmd_skills(argparse.Namespace()))
+        results.append(check_skills_root(AKIRA_SKILLS_ROOT))
+    elif target == AKIRA_SKILLS_ROOT.resolve():
+        results.append(check_skills_root(target))
 
     return 1 if any(results) else 0
 
