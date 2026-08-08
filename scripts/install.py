@@ -19,6 +19,8 @@ BACKUP_ROOT = REPO_ROOT / "backup"
 LEGACY_ROOT = REPO_ROOT / "context"
 LEGACY_DOC = REPO_ROOT / "docs" / "context-management.md"
 LEGACY_ADR = REPO_ROOT / ".agents" / "adr" / "0001-agent-context-source-and-runtime.md"
+MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
+MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
 
 
 def remove_path(path: Path) -> None:
@@ -121,36 +123,109 @@ def find_npx() -> str | None:
     return shutil.which("npx") or shutil.which("npx.cmd")
 
 
-def install_owned_skills() -> None:
+def ensure_matt_submodule() -> None:
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPO_ROOT),
+            "submodule",
+            "update",
+            "--init",
+            "--recursive",
+            "skills/matt",
+        ]
+    )
+    if result.returncode != 0:
+        raise RuntimeError("无法初始化 skills/matt Git submodule")
+
+    required_skill = MATT_SKILLS_ROOT / "skills" / "engineering" / "ask-matt" / "SKILL.md"
+    if not required_skill.is_file():
+        raise RuntimeError("skills/matt 已初始化，但缺少 ask-matt")
+
+    upstream = subprocess.run(
+        ["git", "-C", str(MATT_SKILLS_ROOT), "remote", "get-url", "upstream"],
+        capture_output=True,
+        text=True,
+    )
+    if upstream.returncode != 0:
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(MATT_SKILLS_ROOT),
+                "remote",
+                "add",
+                "upstream",
+                MATT_SKILLS_UPSTREAM,
+            ],
+            check=True,
+        )
+    else:
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(MATT_SKILLS_ROOT),
+                "remote",
+                "set-url",
+                "upstream",
+                MATT_SKILLS_UPSTREAM,
+            ],
+            check=True,
+        )
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(MATT_SKILLS_ROOT),
+            "remote",
+            "set-url",
+            "--push",
+            "upstream",
+            "DISABLED",
+        ],
+        check=True,
+    )
+
+
+def install_runtime_skills() -> None:
     npx = find_npx()
     if npx is None:
-        print("WARN   npx 不可用，跳过 devspace-orchestration 安装", file=sys.stderr)
+        print("WARN   npx 不可用，跳过运行时 Skill 安装", file=sys.stderr)
         return
 
-    command = [
-        npx,
-        "skills",
-        "add",
-        str(REPO_ROOT),
-        "--skill",
-        "devspace-orchestration",
-        "--agent",
-        "*",
-        "-g",
-        "-y",
-    ]
-    result = subprocess.run(command, cwd=REPO_ROOT)
-    runtime_skill = HUB / "skills" / "devspace-orchestration" / "SKILL.md"
-    if not runtime_skill.is_file():
-        raise RuntimeError(
-            "devspace-orchestration 未安装到 ~/.agents/skills；请检查上方 npx skills 输出"
-        )
-    if result.returncode != 0:
-        print(
-            "WARN   skills CLI 对部分不支持全局 Skill 的 Agent 返回失败；"
-            "通用运行时 Skill 已存在，继续部署。",
-            file=sys.stderr,
-        )
+    ensure_matt_submodule()
+
+    installs = (
+        (str(REPO_ROOT), "devspace-orchestration", "devspace-orchestration"),
+        (str(MATT_SKILLS_ROOT), "*", "ask-matt"),
+    )
+    for source, selector, required_skill in installs:
+        command = [
+            npx,
+            "skills",
+            "add",
+            source,
+            "--skill",
+            selector,
+            "--agent",
+            "*",
+            "-g",
+            "-y",
+        ]
+        result = subprocess.run(command, cwd=REPO_ROOT)
+        runtime_skill = HUB / "skills" / required_skill / "SKILL.md"
+        if not runtime_skill.is_file():
+            raise RuntimeError(
+                f"{required_skill} 未安装到 ~/.agents/skills；请检查上方 npx skills 输出"
+            )
+        if result.returncode != 0:
+            print(
+                f"WARN   {source} 安装时部分 Agent 不支持全局 Skill；"
+                f"运行时 {required_skill} 已存在，继续部署。",
+                file=sys.stderr,
+            )
 
 
 def cleanup_runtime_hub() -> None:
@@ -200,7 +275,7 @@ def deploy(*, cleanup_legacy: bool) -> None:
         stamp,
     )
 
-    install_owned_skills()
+    install_runtime_skills()
 
     if cleanup_legacy:
         cleanup_legacy_source()

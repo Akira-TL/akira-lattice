@@ -37,7 +37,7 @@
 - `sonnet`：默认子 Agent；代码实现、修复、重构、调查、测试分析和常规模块任务
 - `haiku`：简单查找、信息摘取、机械核对、格式整理等低风险任务
 
-DevSpace 子 Agent 默认使用 `sonnet`；确需独立高层判断时使用 `opus`，简单机械任务使用 `haiku`。底层模型 ID 和路由由本机配置解析，Agent 不负责替换。需要并行 Agent、tmux 或隔离 worktree 编排时，使用 `devspace-orchestration` Skill；涉及 DevSpace/worktree 的事实与路径边界时可读取 `~/.agents/references/devspace.md`。不要为了使用多 Agent 而拆分本可由单 Agent 清晰完成的任务。
+DevSpace 子 Agent 默认使用 `sonnet`；确需独立高层判断时使用 `opus`，简单机械任务使用 `haiku`。底层模型 ID 和路由由本机配置解析，Agent 不负责替换。需要并行 Agent、tmux 或隔离 worktree 编排时，使用 `devspace-orchestration` Skill；涉及 DevSpace/worktree 的事实与路径边界时可读取 `~/.agents/references/devspace.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。不要为了使用多 Agent 而拆分本可由单 Agent 清晰完成的任务。
 
 ## CodeGraph
 

@@ -14,6 +14,9 @@ REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
 HUB = Path.home() / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
+MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
+MATT_SKILLS_ORIGIN = "git@github.com:Akira-TL/matt-skills.git"
+MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
 
 DYNAMIC_LIMIT = 800
 STATIC_LIMIT = 1000
@@ -101,8 +104,12 @@ def architecture_scan_tree(root: Path) -> list[str]:
     violations: list[str] = []
 
     for current_root, dirnames, filenames in os.walk(root):
-        dirnames[:] = [name for name in dirnames if name not in IGNORED_DIRS]
         current = Path(current_root)
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if name not in IGNORED_DIRS and not (current / name / ".git").exists()
+        ]
         relative_dir = current.relative_to(root)
 
         direct_files = [name for name in filenames if name != ".DS_Store"]
@@ -297,8 +304,60 @@ def cmd_config(_: argparse.Namespace) -> int:
             fail(f"缺少运行时 Skill: {skill}")
             failed = True
 
+    gitmodules = REPO_ROOT / ".gitmodules"
+    if not gitmodules.is_file():
+        fail("缺少 .gitmodules，Matt skills 必须作为 Git submodule 管理")
+        failed = True
+    else:
+        configured = run_git(
+            ["config", "-f", str(gitmodules), "--get", "submodule.skills/matt.url"],
+            REPO_ROOT,
+        )
+        configured_url = str(configured.stdout).strip()
+        if configured.returncode == 0 and configured_url == MATT_SKILLS_ORIGIN:
+            ok(f"Matt submodule URL: {MATT_SKILLS_ORIGIN}")
+        else:
+            fail(f"skills/matt submodule URL={configured_url!r}，预期 {MATT_SKILLS_ORIGIN}")
+            failed = True
+
+    submodule = run_git(["submodule", "status", "--", "skills/matt"], REPO_ROOT)
+    submodule_status = str(submodule.stdout).strip()
+    if submodule.returncode != 0 or not submodule_status or submodule_status.startswith("-"):
+        fail("skills/matt Git submodule 未初始化")
+        failed = True
+    elif submodule_status.startswith("+"):
+        fail("skills/matt 当前 commit 与父仓库记录不一致，应提交 submodule pointer")
+        failed = True
+    elif submodule_status.startswith("U"):
+        fail("skills/matt Git submodule 存在合并冲突")
+        failed = True
+    else:
+        ok(f"Matt submodule: {submodule_status.split()[0]}")
+
+    if MATT_SKILLS_ROOT.is_dir():
+        for remote, expected in (
+            ("origin", MATT_SKILLS_ORIGIN),
+            ("upstream", MATT_SKILLS_UPSTREAM),
+        ):
+            actual = run_git(["remote", "get-url", remote], MATT_SKILLS_ROOT)
+            actual_url = str(actual.stdout).strip()
+            if actual.returncode == 0 and actual_url == expected:
+                ok(f"Matt {remote}: {expected}")
+            else:
+                fail(f"Matt {remote}={actual_url!r}，预期 {expected}")
+                failed = True
+        upstream_push = run_git(["remote", "get-url", "--push", "upstream"], MATT_SKILLS_ROOT)
+        if upstream_push.returncode == 0 and str(upstream_push.stdout).strip() == "DISABLED":
+            ok("Matt upstream push 已禁用")
+        else:
+            fail("Matt upstream push 必须设置为 DISABLED")
+            failed = True
+
     if (HUB / ".skill-lock.json").is_file():
         print("INFO  .skill-lock.json 继续由 skills CLI 管理")
+    else:
+        fail(f"缺少 skills CLI 状态文件：{HUB / '.skill-lock.json'}")
+        failed = True
     return 1 if failed else 0
 
 

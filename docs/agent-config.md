@@ -15,13 +15,14 @@ akira-skills/
 │   ├── install.py           # 跨平台部署运行时入口
 │   └── guard.py             # 确定性机械检查
 ├── skills/                  # 大型规则、多步骤流程与可复用能力
+│   └── matt/                # Git submodule：我们的 Akira-TL/matt-skills fork
 └── .agents/adr/             # 本仓库的长期架构决策
 ```
 
 遵循以下边界：
 
 - **Core** 保留短小、稳定、跨项目且频繁使用的个人默认，例如 Git 语义、Python/前端默认、Documentation、Run & Debug、模型选择和工具路由。Git 交互节奏也在 Core 中明确：收到用户新的开发回复时先判断上一轮原子修改是否应提交，再计划本轮开发、实现、做最低限度语法检查、展示全部本地分支/worktree，并按需给出可选构建或检查说明。不要为了追求极短而把几行规则拆成额外读取。
-- **Reference** 只放低频且有独立阅读价值的事实、边界或长说明。当前典型例子是 DevSpace/worktree 语义。
+- **Reference** 只放低频且有独立阅读价值的事实、边界或长说明。当前典型例子是 DevSpace/worktree 语义，以及 Matt skills fork/upstream 的维护边界。
 - **Skill** 保存大型规则、检查清单和多步骤过程；代码项目先通过 `ask-matt` 决定应进入的 Matt flow。
 - **Guard** 承担确定性、可机械判断的约束。Prompt 不重复维护可以由程序可靠验证的细节。
 - **Project context** 由 Matt flow 的 `CONTEXT.md`、ADR 和相关项目文档维护，不由本仓库复制。
@@ -62,7 +63,7 @@ commit        验证提交格式、暂存架构后执行 git commit
 check         运行当前项目适用的组合检查，并输出所有本地分支与 worktree 概览
 ```
 
-`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。DevSpace 对 Git/MCP 宿主能力的边界记录在 `core/references/devspace.md`。
+`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。`config` 还会检查 `skills/matt` 是否作为 Git submodule 指向我们的 `Akira-TL/matt-skills` fork，以及其 `origin`/`upstream` 边界。DevSpace 对 Git/MCP 宿主能力的边界记录在 `core/references/devspace.md`。
 
 Guard 是全局入口，不要求每个项目安装全局 Git hook，因此不会与 Husky、pre-commit 或项目自有 Git hooks 抢占所有权。
 
@@ -84,7 +85,7 @@ uv run ~/Projects/akira-skills/scripts/install.py --cleanup-legacy
 
 安装器替换已有运行时文件或目录前，会把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`，`~/.agents/references` 的备份位于 `backup/.agents/references.backup.<timestamp>`。`backup/` 只保存本机恢复材料，整个目录由 Git 忽略；不在各 Agent 配置目录旁边散落备份。安装器也会收拢旧版本安装器在这些受管路径旁产生的 `.backup.*` / `.bak.*` 文件，但不会移动 Claude、Hermes 等软件自己维护的备份目录。
 
-安装器不会直接管理 `~/.agents/skills/`、`.skill-lock.json`。对于仓库自身且被 Core 直接引用的 Skill，它只调用 `npx skills` 完成安装，因此状态所有权仍属于 skills CLI。外部 Skill（例如 `ask-matt`）按其自身来源安装，Guard 会检查这些运行时依赖是否存在。
+安装器不会直接写入 `~/.agents/skills/` 或 `.skill-lock.json`，而是统一调用 skills CLI，因此运行时状态所有权仍属于 skills CLI。Lattice 自有 Skill 从本仓库安装；Matt 派生 Skill 从本地 `skills/matt` submodule 全量安装。该 submodule 的 GitHub `origin` 是我们维护的 fork `Akira-TL/matt-skills`，Matt 原仓库只作为内部 `upstream`。这样运行时版本始终与父仓库锁定的 fork commit 一致。submodule 的 `origin`/`upstream` 边界与合并流程记录在 `core/references/matt-skills.md`。
 
 ## 维护原则
 
