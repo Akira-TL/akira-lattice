@@ -19,6 +19,7 @@ Accepted
 - `~/.agents` 仅作为运行时 hub，不再初始化 Git；`AGENTS.md`、`references/`、`scripts/` 等自定义内容通过软链接指向仓库源码。
 - Claude、Codex、OpenCode 的全局提示词入口使用各自原生文件名，并直接软链接到 `core/AGENTS.md`；`~/.agents/AGENTS.md` 只作为通用运行时入口，不承担二次转发。
 - `~/.agents/skills/`、`.skill-lock.json` 以及未来由 MCP、插件或其他软件生成的状态不纳入该源码部署链路，也不由本仓库直接版本管理。
+- 安装器替换受管运行时内容时，把旧内容集中移动到仓库内 Git 忽略的 `backup/`，按用户 Home 相对路径镜像保存；不在运行时目录旁创建散落备份，也不接管各软件自己维护的备份目录。
 - 跨 Git 仓库边界使用软链接而不是硬链接，避免 Git checkout/reset 替换 inode 后链接失效。
 
 ## Consequences

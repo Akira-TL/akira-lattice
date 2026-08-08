@@ -13,6 +13,7 @@ SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
 HUB = Path.home() / ".agents"
+BACKUP_ROOT = REPO_ROOT / "backup"
 
 DYNAMIC_LIMIT = 800
 STATIC_LIMIT = 1000
@@ -269,6 +270,17 @@ def cmd_config(_: argparse.Namespace) -> int:
     ]
     for target, expected in links:
         failed = not check_link(target, expected) or failed
+
+    gitignore_lines = {
+        line.strip()
+        for line in (REPO_ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    if "backup/" in gitignore_lines:
+        ok(f"{BACKUP_ROOT} 已由 Git 忽略")
+    else:
+        fail(f"{BACKUP_ROOT} 必须通过仓库 .gitignore 的 backup/ 规则忽略")
+        failed = True
 
     core_lines = len((CORE_ROOT / "AGENTS.md").read_text(encoding="utf-8").splitlines())
     if core_lines <= CORE_LINE_LIMIT:

@@ -13,7 +13,9 @@ SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
-HUB = Path.home() / ".agents"
+HOME = Path.home()
+HUB = HOME / ".agents"
+BACKUP_ROOT = REPO_ROOT / "backup"
 LEGACY_ROOT = REPO_ROOT / "context"
 LEGACY_DOC = REPO_ROOT / "docs" / "context-management.md"
 LEGACY_ADR = REPO_ROOT / ".agents" / "adr" / "0001-agent-context-source-and-runtime.md"
@@ -26,10 +28,52 @@ def remove_path(path: Path) -> None:
         shutil.rmtree(path)
 
 
-def backup_path(path: Path, stamp: str) -> Path:
-    backup = path.with_name(f"{path.name}.backup.{stamp}")
-    path.rename(backup)
+def backup_destination(path: Path, stamp: str) -> Path:
+    try:
+        relative = path.absolute().relative_to(HOME.absolute())
+    except ValueError as exc:
+        raise RuntimeError(f"仅允许备份 Home 目录下的运行时文件：{path}") from exc
+
+    backup = BACKUP_ROOT / relative.parent / f"{relative.name}.backup.{stamp}"
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    if backup.exists() or backup.is_symlink():
+        raise RuntimeError(f"备份目标已存在，拒绝覆盖：{backup}")
     return backup
+
+
+def backup_path(path: Path, stamp: str) -> Path:
+    backup = backup_destination(path, stamp)
+    shutil.move(str(path), str(backup))
+    return backup
+
+
+def move_legacy_backup(path: Path) -> None:
+    try:
+        relative = path.absolute().relative_to(HOME.absolute())
+    except ValueError:
+        return
+    target = BACKUP_ROOT / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.exists() or target.is_symlink():
+        print(f"WARN   旧备份目标已存在，保留原文件：{path}", file=sys.stderr)
+        return
+    shutil.move(str(path), str(target))
+    print(f"MOVE   {path} -> {target}")
+
+
+def migrate_legacy_backups() -> None:
+    candidates = list(HUB.glob("*.backup.*"))
+    candidates.extend(HUB.glob("*.bak.*"))
+    for prompt in (
+        HOME / ".codex" / "AGENTS.md",
+        HOME / ".claude" / "CLAUDE.md",
+        HOME / ".config" / "opencode" / "AGENTS.md",
+    ):
+        candidates.extend(prompt.parent.glob(f"{prompt.name}.backup.*"))
+        candidates.extend(prompt.parent.glob(f"{prompt.name}.bak.*"))
+
+    for path in sorted(set(candidates)):
+        move_legacy_backup(path)
 
 
 def same_file_content(source: Path, target: Path) -> bool:
@@ -140,6 +184,7 @@ def deploy(*, cleanup_legacy: bool) -> None:
     ):
         path.mkdir(parents=True, exist_ok=True)
 
+    migrate_legacy_backups()
     cleanup_runtime_hub()
 
     ensure_link(CORE_ROOT / "AGENTS.md", HUB / "AGENTS.md", stamp)

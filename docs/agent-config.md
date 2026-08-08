@@ -82,6 +82,8 @@ uv run ~/Projects/akira-skills/scripts/install.py --cleanup-legacy
 
 该参数会在完成运行时部署后删除仓库中旧的 `context/` 迁移目录。
 
+安装器替换已有运行时文件或目录前，会把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`，`~/.agents/references` 的备份位于 `backup/.agents/references.backup.<timestamp>`。`backup/` 只保存本机恢复材料，整个目录由 Git 忽略；不在各 Agent 配置目录旁边散落备份。安装器也会收拢旧版本安装器在这些受管路径旁产生的 `.backup.*` / `.bak.*` 文件，但不会移动 Claude、Hermes 等软件自己维护的备份目录。
+
 安装器不会直接管理 `~/.agents/skills/`、`.skill-lock.json`。对于仓库自身且被 Core 直接引用的 Skill，它只调用 `npx skills` 完成安装，因此状态所有权仍属于 skills CLI。外部 Skill（例如 `ask-matt`）按其自身来源安装，Guard 会检查这些运行时依赖是否存在。
 
 ## 维护原则
