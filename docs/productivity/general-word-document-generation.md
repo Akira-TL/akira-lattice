@@ -23,13 +23,13 @@ Chinese text uses full-width Chinese punctuation and “double” or ‘nested�
 Runtime instructions are maintained at:
 
 ```text
-skills/productivity/general-word-document-generation/SKILL.md
+skills/akira/productivity/general-word-document-generation/SKILL.md
 ```
 
-The repository can currently be installed locally with `npx skills`. From the `akira-skills` repository root, for example:
+The Akira skills submodule can be installed locally with `npx skills`. From the Lattice repository root, for example:
 
 ```bash
-npx skills add . --skill general-word-document-generation --agent codex -g -y
+npx skills add ./skills/akira --skill general-word-document-generation --agent codex -g -y
 ```
 
 For multi-agent and remote-source installation patterns, see the repository `README.md`.

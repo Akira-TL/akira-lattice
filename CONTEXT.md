@@ -2,11 +2,11 @@
 
 ## Purpose
 
-`akira-skills` is Akira's maintained source repository for reusable agent workflows and durable static Agent configuration. It is not a dynamic-context or Memory system, not an installation directory, and not a dump of local runtime state.
+`akira-lattice` is Akira's maintained Agent infrastructure repository for durable static Agent configuration, deployment, Guard rules, and pinned Skill repositories. It is not a dynamic-context or Memory system, not an installation directory, and not a dump of local runtime state.
 
 ## Ubiquitous language
 
-**Skill source** means the runtime instructions an agent loads for a reusable workflow. It lives in `skills/` and is authoritative for that workflow.
+**Akira Skill source** means the runtime instructions we maintain for reusable workflows. It lives in the `skills/akira` Git submodule and is authoritative for those workflows. `skills/matt` is a separate submodule tracking our fork of Matt Pocock's skills.
 
 **Global configuration source** means the maintained cross-project static instructions under `core/`. `core/AGENTS.md` is the always-loaded core; `core/references/` contains low-frequency facts and tool boundaries.
 

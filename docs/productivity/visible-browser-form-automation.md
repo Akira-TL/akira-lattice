@@ -44,27 +44,27 @@
 主运行规则位于：
 
 ```text
-skills/productivity/visible-browser-form-automation/SKILL.md
+skills/akira/productivity/visible-browser-form-automation/SKILL.md
 ```
 
 CDP 命令、DOM 勘察表达式、文件上传和跨系统路径处理示例位于：
 
 ```text
-skills/productivity/visible-browser-form-automation/REFERENCE.md
+skills/akira/productivity/visible-browser-form-automation/REFERENCE.md
 ```
 
 ## 使用 npx skills 安装
 
-从 `akira-skills` 仓库根目录安装到 Codex：
+从 Lattice 根目录的 `skills/akira` 子模块安装到 Codex：
 
 ```bash
-npx skills add . --skill visible-browser-form-automation --agent codex -g -y
+npx skills add ./skills/akira --skill visible-browser-form-automation --agent codex -g -y
 ```
 
 同时安装到 Codex、Claude Code、OpenCode 和 Hermes Agent：
 
 ```bash
-npx skills add . \
+npx skills add ./skills/akira \
   --skill visible-browser-form-automation \
   -g \
   -a codex \
@@ -77,13 +77,13 @@ npx skills add . \
 安装到所有被 CLI 检测到的 Agent：
 
 ```bash
-npx skills add . --skill visible-browser-form-automation --agent '*' -g -y
+npx skills add ./skills/akira --skill visible-browser-form-automation --agent '*' -g -y
 ```
 
 先只检查仓库中能识别到哪些 Skill：
 
 ```bash
-npx skills add . --list
+npx skills add ./skills/akira --list
 ```
 
-如果未来把仓库发布到 GitHub，可以把 `.` 替换为 `<owner>/akira-skills` 或完整 GitHub URL。当前仓库没有配置 Git remote，因此现阶段最可靠的是从本地仓库路径安装。
+也可以直接从 GitHub 的自研 Skill 仓库 `Akira-TL/skills` 安装；Lattice 通过 `skills/akira` submodule 锁定实际使用的版本。

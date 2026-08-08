@@ -19,6 +19,7 @@ BACKUP_ROOT = REPO_ROOT / "backup"
 LEGACY_ROOT = REPO_ROOT / "context"
 LEGACY_DOC = REPO_ROOT / "docs" / "context-management.md"
 LEGACY_ADR = REPO_ROOT / ".agents" / "adr" / "0001-agent-context-source-and-runtime.md"
+AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
 
@@ -123,7 +124,7 @@ def find_npx() -> str | None:
     return shutil.which("npx") or shutil.which("npx.cmd")
 
 
-def ensure_matt_submodule() -> None:
+def ensure_skill_submodules() -> None:
     result = subprocess.run(
         [
             "git",
@@ -133,14 +134,19 @@ def ensure_matt_submodule() -> None:
             "update",
             "--init",
             "--recursive",
+            "skills/akira",
             "skills/matt",
         ]
     )
     if result.returncode != 0:
-        raise RuntimeError("无法初始化 skills/matt Git submodule")
+        raise RuntimeError("无法初始化 skills/akira 或 skills/matt Git submodule")
 
-    required_skill = MATT_SKILLS_ROOT / "skills" / "engineering" / "ask-matt" / "SKILL.md"
-    if not required_skill.is_file():
+    required_akira_skill = AKIRA_SKILLS_ROOT / "engineering" / "devspace-orchestration" / "SKILL.md"
+    if not required_akira_skill.is_file():
+        raise RuntimeError("skills/akira 已初始化，但缺少 devspace-orchestration")
+
+    required_matt_skill = MATT_SKILLS_ROOT / "skills" / "engineering" / "ask-matt" / "SKILL.md"
+    if not required_matt_skill.is_file():
         raise RuntimeError("skills/matt 已初始化，但缺少 ask-matt")
 
     upstream = subprocess.run(
@@ -195,10 +201,10 @@ def install_runtime_skills() -> None:
         print("WARN   npx 不可用，跳过运行时 Skill 安装", file=sys.stderr)
         return
 
-    ensure_matt_submodule()
+    ensure_skill_submodules()
 
     installs = (
-        (str(REPO_ROOT), "devspace-orchestration", "devspace-orchestration"),
+        (str(AKIRA_SKILLS_ROOT), "devspace-orchestration", "devspace-orchestration"),
         (str(MATT_SKILLS_ROOT), "*", "ask-matt"),
     )
     for source, selector, required_skill in installs:

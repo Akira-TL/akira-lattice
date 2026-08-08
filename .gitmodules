@@ -1,3 +1,6 @@
 [submodule "skills/matt"]
 	path = skills/matt
 	url = git@github.com:Akira-TL/matt-skills.git
+[submodule "skills/akira"]
+	path = skills/akira
+	url = git@github.com:Akira-TL/skills.git

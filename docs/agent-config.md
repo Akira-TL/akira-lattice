@@ -7,15 +7,16 @@
 ## 分层
 
 ```text
-akira-skills/
+akira-lattice/
 ├── core/
 │   ├── AGENTS.md            # 短小、稳定、跨项目的默认规则与路由
 │   └── references/          # 少量低频工具事实与边界
 ├── scripts/
 │   ├── install.py           # 跨平台部署运行时入口
 │   └── guard.py             # 确定性机械检查
-├── skills/                  # 大型规则、多步骤流程与可复用能力
-│   └── matt/                # Git submodule：我们的 Akira-TL/matt-skills fork
+├── skills/
+│   ├── akira/               # Git submodule：Akira-TL/skills，自研 Skills
+│   └── matt/                # Git submodule：Akira-TL/matt-skills，Matt fork
 └── .agents/adr/             # 本仓库的长期架构决策
 ```
 
@@ -85,7 +86,7 @@ uv run ~/Projects/akira-skills/scripts/install.py --cleanup-legacy
 
 安装器替换已有运行时文件或目录前，会把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`，`~/.agents/references` 的备份位于 `backup/.agents/references.backup.<timestamp>`。`backup/` 只保存本机恢复材料，整个目录由 Git 忽略；不在各 Agent 配置目录旁边散落备份。安装器也会收拢旧版本安装器在这些受管路径旁产生的 `.backup.*` / `.bak.*` 文件，但不会移动 Claude、Hermes 等软件自己维护的备份目录。
 
-安装器不会直接写入 `~/.agents/skills/` 或 `.skill-lock.json`，而是统一调用 skills CLI，因此运行时状态所有权仍属于 skills CLI。Lattice 自有 Skill 从本仓库安装；Matt 派生 Skill 从本地 `skills/matt` submodule 全量安装。该 submodule 的 GitHub `origin` 是我们维护的 fork `Akira-TL/matt-skills`，Matt 原仓库只作为内部 `upstream`。这样运行时版本始终与父仓库锁定的 fork commit 一致。submodule 的 `origin`/`upstream` 边界与合并流程记录在 `core/references/matt-skills.md`。
+安装器不会直接写入 `~/.agents/skills/` 或 `.skill-lock.json`，而是统一调用 skills CLI，因此运行时状态所有权仍属于 skills CLI。Lattice 自有 Skill 从本地 `skills/akira` submodule 安装，其 GitHub `origin` 为 `Akira-TL/skills`；Matt 派生 Skill 从 `skills/matt` 全量安装，其 GitHub `origin` 为我们的 fork `Akira-TL/matt-skills`，Matt 原仓库只作为内部 `upstream`。这样两类 Skill 都由独立 Git 历史维护，而 Lattice 只锁定各自 submodule commit。Matt submodule 的同步边界记录在 `core/references/matt-skills.md`。
 
 ## 维护原则
 

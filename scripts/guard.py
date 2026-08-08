@@ -14,6 +14,8 @@ REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
 HUB = Path.home() / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
+AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
+AKIRA_SKILLS_ORIGIN = "git@github.com:Akira-TL/skills.git"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 MATT_SKILLS_ORIGIN = "git@github.com:Akira-TL/matt-skills.git"
 MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
@@ -306,33 +308,47 @@ def cmd_config(_: argparse.Namespace) -> int:
 
     gitmodules = REPO_ROOT / ".gitmodules"
     if not gitmodules.is_file():
-        fail("缺少 .gitmodules，Matt skills 必须作为 Git submodule 管理")
+        fail("缺少 .gitmodules，Akira 与 Matt skills 必须作为 Git submodule 管理")
         failed = True
     else:
-        configured = run_git(
-            ["config", "-f", str(gitmodules), "--get", "submodule.skills/matt.url"],
-            REPO_ROOT,
-        )
-        configured_url = str(configured.stdout).strip()
-        if configured.returncode == 0 and configured_url == MATT_SKILLS_ORIGIN:
-            ok(f"Matt submodule URL: {MATT_SKILLS_ORIGIN}")
-        else:
-            fail(f"skills/matt submodule URL={configured_url!r}，预期 {MATT_SKILLS_ORIGIN}")
-            failed = True
+        for name, expected in (
+            ("skills/akira", AKIRA_SKILLS_ORIGIN),
+            ("skills/matt", MATT_SKILLS_ORIGIN),
+        ):
+            configured = run_git(
+                ["config", "-f", str(gitmodules), "--get", f"submodule.{name}.url"],
+                REPO_ROOT,
+            )
+            configured_url = str(configured.stdout).strip()
+            if configured.returncode == 0 and configured_url == expected:
+                ok(f"{name} submodule URL: {expected}")
+            else:
+                fail(f"{name} submodule URL={configured_url!r}，预期 {expected}")
+                failed = True
 
-    submodule = run_git(["submodule", "status", "--", "skills/matt"], REPO_ROOT)
-    submodule_status = str(submodule.stdout).strip()
-    if submodule.returncode != 0 or not submodule_status or submodule_status.startswith("-"):
-        fail("skills/matt Git submodule 未初始化")
-        failed = True
-    elif submodule_status.startswith("+"):
-        fail("skills/matt 当前 commit 与父仓库记录不一致，应提交 submodule pointer")
-        failed = True
-    elif submodule_status.startswith("U"):
-        fail("skills/matt Git submodule 存在合并冲突")
-        failed = True
-    else:
-        ok(f"Matt submodule: {submodule_status.split()[0]}")
+    for name in ("skills/akira", "skills/matt"):
+        submodule = run_git(["submodule", "status", "--", name], REPO_ROOT)
+        submodule_status = str(submodule.stdout).strip()
+        if submodule.returncode != 0 or not submodule_status or submodule_status.startswith("-"):
+            fail(f"{name} Git submodule 未初始化")
+            failed = True
+        elif submodule_status.startswith("+"):
+            fail(f"{name} 当前 commit 与父仓库记录不一致，应提交 submodule pointer")
+            failed = True
+        elif submodule_status.startswith("U"):
+            fail(f"{name} Git submodule 存在合并冲突")
+            failed = True
+        else:
+            ok(f"{name} submodule: {submodule_status.split()[0]}")
+
+    if AKIRA_SKILLS_ROOT.is_dir():
+        origin = run_git(["remote", "get-url", "origin"], AKIRA_SKILLS_ROOT)
+        origin_url = str(origin.stdout).strip()
+        if origin.returncode == 0 and origin_url == AKIRA_SKILLS_ORIGIN:
+            ok(f"Akira skills origin: {AKIRA_SKILLS_ORIGIN}")
+        else:
+            fail(f"Akira skills origin={origin_url!r}，预期 {AKIRA_SKILLS_ORIGIN}")
+            failed = True
 
     if MATT_SKILLS_ROOT.is_dir():
         for remote, expected in (
@@ -382,9 +398,10 @@ def cmd_skills(_: argparse.Namespace) -> int:
     failed = False
     names: Counter[str] = Counter()
 
-    for skill_file in sorted((REPO_ROOT / "skills").glob("*/*/SKILL.md")):
+    for skill_file in sorted(AKIRA_SKILLS_ROOT.glob("*/*/SKILL.md")):
         relative = skill_file.relative_to(REPO_ROOT)
-        category = relative.parts[1]
+        skill_relative = skill_file.relative_to(AKIRA_SKILLS_ROOT)
+        category = skill_relative.parts[0]
         directory_name = skill_file.parent.name
         frontmatter = parse_frontmatter(skill_file)
         name = frontmatter.get("name", "")
@@ -513,7 +530,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     architecture_parser.set_defaults(func=cmd_architecture)
 
-    skills_parser = subparsers.add_parser("skills", help="检查 akira-skills 的 Skill 结构")
+    skills_parser = subparsers.add_parser("skills", help="检查 skills/akira 的自研 Skill 结构")
     skills_parser.set_defaults(func=cmd_skills)
 
     commit_parser = subparsers.add_parser("commit", help="验证提交信息和暂存架构后执行 Git commit")

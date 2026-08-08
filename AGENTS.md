@@ -4,7 +4,7 @@ This repository is the source of truth for Akira's agent skills and maintained g
 
 ## Source and documentation
 
-Skill runtime source lives under `skills/<category>/<skill-name>/`. Each stable skill has one canonical `SKILL.md`; optional sibling reference files are loaded through explicit context pointers.
+Akira-maintained Skill runtime source lives in the `skills/akira` Git submodule under `<category>/<skill-name>/`. Each stable skill has one canonical `SKILL.md`; optional sibling reference files are loaded through explicit context pointers. `skills/matt` is a separate submodule for the maintained Matt skills fork and is not part of Akira-authored Skill source.
 
 Human-facing explanations live under `docs/<category>/<skill-name>.md`. Documentation explains what a skill does, when to use it, and how to install it. It must not duplicate the entire runtime source.
 
@@ -16,9 +16,9 @@ Keep large procedures in skills, small stable defaults in the core, and mechanic
 
 Stable skills live in a named category such as `productivity` or `engineering`.
 
-Unsettled skills live under `skills/in-progress/` and must not be advertised as stable.
+Unsettled Akira skills live under `skills/akira/in-progress/` and must not be advertised as stable.
 
-Retired skills move to `skills/deprecated/` with a migration note. Do not silently delete a published skill name.
+Retired Akira skills move to `skills/akira/deprecated/` with a migration note. Do not silently delete a published skill name.
 
 ## Authoring discipline
 

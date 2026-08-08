@@ -1,21 +1,20 @@
-# Akira Skills
+# Akira Lattice
 
-Akira 的个人 Agent 能力与静态配置仓库。这里维护可组合、可检查、可迭代的 Skill，以及跨项目长期生效的全局工程默认；本地 Agent 目录只作为运行时入口，不再维护第二份正文。
+Akira 的个人 Agent 基础设施仓库。这里维护跨项目长期生效的 Core、Guard、部署与运行时边界，并通过独立 Git submodule 管理自研 Skills 与 Matt skills fork；本地 Agent 目录只作为运行时入口，不再维护第二份正文。
 
 仓库保持单一 canonical source：短小稳定规则常驻 Core，大型流程进入 Skill，低频事实进入 Reference，可机械判断的约束进入 Python Guard。项目知识由 Matt flow 管理，动态上下文与 Memory 不在本仓库处理。
 
 ## Repository layout
 
 ```text
-akira-skills/
+akira-lattice/
 ├── core/                   # 个人全局静态 Agent 配置 canonical source
 │   ├── AGENTS.md           # 每次会话加载的 Core
 │   └── references/         # 低频事实与工具边界
 ├── scripts/                # Python Guard 与运行时安装
-├── skills/                 # Agent 实际读取的 Skill 源码
-│   ├── productivity/       # 通用生产力与文档工作流
-│   ├── in-progress/        # 尚未稳定、不可作为正式能力发布
-│   └── deprecated/         # 已弃用但暂时保留迁移说明的 Skill
+├── skills/
+│   ├── akira/              # submodule → Akira-TL/skills.git，自研 Skills
+│   └── matt/               # submodule → Akira-TL/matt-skills.git
 ├── docs/                   # 面向使用者的说明
 ├── .agents/adr/            # 影响仓库长期维护的架构决策
 ├── AGENTS.md               # Agent 在本仓库中的维护规则
@@ -53,16 +52,16 @@ uv run scripts/guard.py config
 
 ## Install with npx skills
 
-在本仓库根目录可以直接安装本地 Skill。例如安装可视化表单自动化 Skill 到 Codex：
+在 Lattice 根目录可以从 `skills/akira` 子模块安装自研 Skill。例如安装可视化表单自动化 Skill 到 Codex：
 
 ```bash
-npx skills add . --skill visible-browser-form-automation --agent codex -g -y
+npx skills add ./skills/akira --skill visible-browser-form-automation --agent codex -g -y
 ```
 
 同时安装到多个 Agent：
 
 ```bash
-npx skills add . \
+npx skills add ./skills/akira \
   --skill visible-browser-form-automation \
   -g \
   -a codex \
@@ -75,16 +74,16 @@ npx skills add . \
 安装到 CLI 检测到的所有 Agent：
 
 ```bash
-npx skills add . --skill visible-browser-form-automation --agent '*' -g -y
+npx skills add ./skills/akira --skill visible-browser-form-automation --agent '*' -g -y
 ```
 
-查看仓库中可安装的 Skill：
+查看自研仓库中可安装的 Skill：
 
 ```bash
-npx skills add . --list
+npx skills add ./skills/akira --list
 ```
 
-当前仓库尚未配置 Git remote，因此现在使用本地路径最可靠。发布到 GitHub 后，可把 `.` 替换为 `<owner>/akira-skills` 或完整 GitHub URL。
+也可以直接从 GitHub 安装：`npx skills add Akira-TL/skills ...`。Matt 派生 Skills 则来自 `skills/matt`，其 GitHub origin 为 `Akira-TL/matt-skills`。
 
 ## Status
 
