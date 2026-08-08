@@ -420,9 +420,9 @@ def cmd_skills(_: argparse.Namespace) -> int:
             names[name] += 1
 
         if category not in {"in-progress", "deprecated"}:
-            doc = REPO_ROOT / "docs" / category / f"{directory_name}.md"
+            doc = AKIRA_SKILLS_ROOT / "docs" / category / f"{directory_name}.md"
             if not doc.is_file():
-                fail(f"{relative}: 稳定 Skill 缺少 {doc.relative_to(REPO_ROOT)}")
+                fail(f"{relative}: 稳定 Skill 缺少子模块文档 {doc.relative_to(REPO_ROOT)}")
                 failed = True
 
     for name, count in names.items():

@@ -6,7 +6,7 @@ This repository is the source of truth for Akira's agent skills and maintained g
 
 Akira-maintained Skill runtime source lives in the `skills/akira` Git submodule under `<category>/<skill-name>/`. Each stable skill has one canonical `SKILL.md`; optional sibling reference files are loaded through explicit context pointers. `skills/matt` is a separate submodule for the maintained Matt skills fork and is not part of Akira-authored Skill source.
 
-Human-facing explanations live under `docs/<category>/<skill-name>.md`. Documentation explains what a skill does, when to use it, and how to install it. It must not duplicate the entire runtime source.
+Akira-maintained Skill user documentation lives with its source under `skills/akira/docs/<category>/<skill-name>.md`. Lattice `docs/` is reserved for this repository's infrastructure and configuration documentation; it must not keep a second copy of Skill-specific docs.
 
 Global static Agent configuration lives under `core/`. `core/AGENTS.md` contains short stable cross-project defaults and routing; `core/references/` contains low-frequency facts and boundaries. Deterministic checks and deployment live under `scripts/`. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
 
@@ -32,7 +32,7 @@ Skill directory names and frontmatter `name` values use lowercase kebab-case and
 
 ## Changes
 
-Update the matching user documentation when behavior visible to users changes. Record published behavior changes in `CHANGELOG.md`. After changing Core rules, Guard rules, or stable skills, run `uv run scripts/guard.py check .` before considering the repository change complete.
+When an Akira Skill changes behavior, update its documentation inside `skills/akira` and commit that child repository before updating the Lattice submodule pointer. Record Lattice-visible infrastructure changes in `CHANGELOG.md`. After changing Core rules, Guard rules, or submodule integration, run `uv run scripts/guard.py check .` before considering the repository change complete.
 
 Do not add release tooling, package metadata, CI, marketplace manifests, or a license by assumption. Treat each as a separate repository decision.
 

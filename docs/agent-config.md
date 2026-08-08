@@ -15,8 +15,9 @@ akira-lattice/
 │   ├── install.py           # 跨平台部署运行时入口
 │   └── guard.py             # 确定性机械检查
 ├── skills/
-│   ├── akira/               # Git submodule：Akira-TL/skills，自研 Skills
+│   ├── akira/               # Git submodule：Akira-TL/skills，自研 Skills + 用户文档
 │   └── matt/                # Git submodule：Akira-TL/matt-skills，Matt fork
+├── docs/                    # 仅保存 Lattice 基础设施与配置说明
 └── .agents/adr/             # 本仓库的长期架构决策
 ```
 
@@ -59,7 +60,7 @@ uv run ~/.agents/scripts/guard.py <command>
 ```text
 config        检查静态配置部署、链接和 Core 依赖的运行时 Skill
 architecture  检查代码文件与目录规模
-skills        检查 akira-skills 的 Skill 结构和文档映射
+skills        检查 skills/akira 子模块中的 Skill 结构和文档映射
 commit        验证提交格式、暂存架构后执行 git commit
 check         运行当前项目适用的组合检查，并输出所有本地分支与 worktree 概览
 ```
@@ -86,7 +87,7 @@ uv run ~/Projects/akira-skills/scripts/install.py --cleanup-legacy
 
 安装器替换已有运行时文件或目录前，会把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`，`~/.agents/references` 的备份位于 `backup/.agents/references.backup.<timestamp>`。`backup/` 只保存本机恢复材料，整个目录由 Git 忽略；不在各 Agent 配置目录旁边散落备份。安装器也会收拢旧版本安装器在这些受管路径旁产生的 `.backup.*` / `.bak.*` 文件，但不会移动 Claude、Hermes 等软件自己维护的备份目录。
 
-安装器不会直接写入 `~/.agents/skills/` 或 `.skill-lock.json`，而是统一调用 skills CLI，因此运行时状态所有权仍属于 skills CLI。Lattice 自有 Skill 从本地 `skills/akira` submodule 安装，其 GitHub `origin` 为 `Akira-TL/skills`；Matt 派生 Skill 从 `skills/matt` 全量安装，其 GitHub `origin` 为我们的 fork `Akira-TL/matt-skills`，Matt 原仓库只作为内部 `upstream`。这样两类 Skill 都由独立 Git 历史维护，而 Lattice 只锁定各自 submodule commit。Matt submodule 的同步边界记录在 `core/references/matt-skills.md`。
+安装器不会直接写入 `~/.agents/skills/` 或 `.skill-lock.json`，而是统一调用 skills CLI，因此运行时状态所有权仍属于 skills CLI。Lattice 自有 Skill 从本地 `skills/akira` submodule 安装，其 GitHub `origin` 为 `Akira-TL/skills`，对应用户文档也随 Skill 保存在该子模块的 `docs/`；Matt 派生 Skill 从 `skills/matt` 全量安装，其 GitHub `origin` 为我们的 fork `Akira-TL/matt-skills`，Matt 原仓库只作为内部 `upstream`。这样两类 Skill 都由独立 Git 历史维护，而 Lattice 只锁定各自 submodule commit。Matt submodule 的同步边界记录在 `core/references/matt-skills.md`。
 
 ## 维护原则
 

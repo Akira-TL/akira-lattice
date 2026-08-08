@@ -15,7 +15,7 @@ akira-lattice/
 ├── skills/
 │   ├── akira/              # submodule → Akira-TL/skills.git，自研 Skills
 │   └── matt/               # submodule → Akira-TL/matt-skills.git
-├── docs/                   # 面向使用者的说明
+├── docs/                   # Lattice 基础设施与配置说明
 ├── .agents/adr/            # 影响仓库长期维护的架构决策
 ├── AGENTS.md               # Agent 在本仓库中的维护规则
 ├── CONTEXT.md              # 仓库术语与边界
@@ -40,15 +40,9 @@ uv run scripts/guard.py config
 
 ## Current skills
 
-### Engineering
+自研 Skill 的正文、README 与详细用户文档都由 `skills/akira` 子模块中的 `Akira-TL/skills` 独立维护；Lattice 只锁定其 commit，不保留第二份 Skill 文档。当前主要能力包括 `devspace-orchestration`、`general-word-document-generation` 和 `visible-browser-form-automation`。
 
-`devspace-orchestration`：在 DevSpace 中按任务长度、依赖关系和写入范围选择 Claude 原生 Agent、tmux 与 Git worktree，并由父 Agent 统一验收与清理。Core 会引用该 Skill，因此部署后应通过 skills CLI 安装到运行时。
-
-### Productivity
-
-`general-word-document-generation`：从空白 DOCX 生成正式、克制、可打印的 Word 文档，按 Word 原生样式、段落、分页、表格、题注和字符级格式组织内容，避免 Markdown 视觉习惯污染成品。
-
-`visible-browser-form-automation`：让 Agent 在 WSL 等自动化环境中通过 CDP 控制用户可见的 Windows Chrome，适合问卷、报销、申请和报名表等需要“自动填写、人工复核、明确确认后再提交”的工作流。
+Matt 派生 Skill 则由 `skills/matt` 对应的 `Akira-TL/matt-skills` fork 独立维护。
 
 ## Install with npx skills
 
