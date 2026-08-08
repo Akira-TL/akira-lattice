@@ -9,6 +9,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable
 
+from upstream import sync_matt
+
 SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
@@ -446,16 +448,16 @@ def cmd_architecture(args: argparse.Namespace) -> int:
     return report_architecture(architecture_scan_tree(target))
 
 
-def cmd_commit(args: argparse.Namespace) -> int:
-    message_errors = validate_commit_message(args.message)
+def guarded_commit(
+    root: Path,
+    message: str,
+    *,
+    allow_architecture_warnings: bool = False,
+) -> int:
+    message_errors = validate_commit_message(message)
     if message_errors:
         for error in message_errors:
             fail(error)
-        return 1
-
-    root = git_root(Path.cwd())
-    if root is None:
-        fail("当前目录不在 Git 仓库中")
         return 1
 
     staged = run_git(["diff", "--cached", "--quiet"], root)
@@ -466,7 +468,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
     violations = architecture_scan_staged(root)
     if violations:
         report_architecture(violations)
-        if not args.allow_architecture_warnings:
+        if not allow_architecture_warnings:
             fail("架构阈值检查未通过；处理后重试，或确认合理后显式使用 --allow-architecture-warnings")
             return 2
 
@@ -478,8 +480,34 @@ def cmd_commit(args: argparse.Namespace) -> int:
     for path in staged_paths:
         print(f"      {path}")
 
-    result = subprocess.run(["git", "-C", str(root), "commit", "-m", args.message])
+    result = subprocess.run(["git", "-C", str(root), "commit", "-m", message])
     return result.returncode
+
+
+def cmd_commit(args: argparse.Namespace) -> int:
+    root = git_root(Path.cwd())
+    if root is None:
+        fail("当前目录不在 Git 仓库中")
+        return 1
+    return guarded_commit(
+        root,
+        args.message,
+        allow_architecture_warnings=args.allow_architecture_warnings,
+    )
+
+
+def cmd_upstream(args: argparse.Namespace) -> int:
+    if args.target != "matt":
+        fail(f"暂不支持 upstream target: {args.target}")
+        return 1
+    return sync_matt(
+        parent=REPO_ROOT,
+        matt=MATT_SKILLS_ROOT,
+        origin_url=MATT_SKILLS_ORIGIN,
+        upstream_url=MATT_SKILLS_UPSTREAM,
+        push=args.push,
+        guarded_commit=lambda root, message: guarded_commit(root, message),
+    )
 
 
 def report_git_structure(target: Path) -> None:
@@ -541,6 +569,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="明确接受已审查的代码规模阈值告警后继续提交",
     )
     commit_parser.set_defaults(func=cmd_commit)
+
+    upstream_parser = subparsers.add_parser(
+        "upstream",
+        help="同步受管 fork 的 upstream，并按需更新父仓库 submodule pointer",
+    )
+    upstream_parser.add_argument("target", choices=["matt"])
+    upstream_parser.add_argument(
+        "--push",
+        action="store_true",
+        help="把同步结果 push 到我们的 fork，并用 Guard 提交 Lattice submodule pointer",
+    )
+    upstream_parser.set_defaults(func=cmd_upstream)
 
     check_parser = subparsers.add_parser("check", help="运行当前项目适用的机械检查")
     check_parser.add_argument("path", nargs="?", default=".")

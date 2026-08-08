@@ -79,6 +79,14 @@ npx skills add ./skills/akira --list
 
 也可以直接从 GitHub 安装：`npx skills add Akira-TL/skills ...`。Matt 派生 Skills 则来自 `skills/matt`，其 GitHub origin 为 `Akira-TL/matt-skills`。
 
+同步 Matt 上游时使用受控入口：
+
+```bash
+uv run scripts/guard.py upstream matt
+# 确认结果后，如需发布 fork 并提交新的 submodule pointer：
+uv run scripts/guard.py upstream matt --push
+```
+
 ## Status
 
 仓库当前处于初始化阶段。许可证、自动校验、Changesets 和正式远程发布仍将在需求明确后分别决策；本地 `npx skills` 安装已经可用。

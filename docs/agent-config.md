@@ -13,7 +13,8 @@ akira-lattice/
 │   └── references/          # 少量低频工具事实与边界
 ├── scripts/
 │   ├── install.py           # 跨平台部署运行时入口
-│   └── guard.py             # 确定性机械检查
+│   ├── guard.py             # 统一机械检查与命令入口
+│   └── upstream.py          # fork/upstream Git 状态机实现
 ├── skills/
 │   ├── akira/               # Git submodule：Akira-TL/skills，自研 Skills + 用户文档
 │   └── matt/                # Git submodule：Akira-TL/matt-skills，Matt fork
@@ -62,10 +63,11 @@ config        检查静态配置部署、链接和 Core 依赖的运行时 Skill
 architecture  检查代码文件与目录规模
 skills        检查 skills/akira 子模块中的 Skill 结构和文档映射
 commit        验证提交格式、暂存架构后执行 git commit
+upstream matt 同步 Matt fork 的 upstream；显式 --push 时发布 fork 并提交 submodule pointer
 check         运行当前项目适用的组合检查，并输出所有本地分支与 worktree 概览
 ```
 
-`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。`config` 还会检查 `skills/matt` 是否作为 Git submodule 指向我们的 `Akira-TL/matt-skills` fork，以及其 `origin`/`upstream` 边界。DevSpace 对 Git/MCP 宿主能力的边界记录在 `core/references/devspace.md`。
+`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。`config` 还会检查 `skills/matt` 是否作为 Git submodule 指向我们的 `Akira-TL/matt-skills` fork，以及其 `origin`/`upstream` 边界。`upstream matt` 的具体安全流程记录在 `core/references/matt-skills.md`。DevSpace 对 Git/MCP 宿主能力的边界记录在 `core/references/devspace.md`。
 
 Guard 是全局入口，不要求每个项目安装全局 Git hook，因此不会与 Husky、pre-commit 或项目自有 Git hooks 抢占所有权。
 
