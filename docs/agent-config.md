@@ -34,16 +34,15 @@ akira-skills/
 
 ```text
 ~/Projects/akira-skills/core/AGENTS.md
-                 │
-                 ▼
-        ~/.agents/AGENTS.md
-          ┌──────┼──────────┐
-          ▼      ▼          ▼
- ~/.claude/   ~/.codex/   ~/.config/opencode/
- CLAUDE.md    AGENTS.md    AGENTS.md
+          ├──→ ~/.agents/AGENTS.md
+          ├──→ ~/.codex/AGENTS.md
+          ├──→ ~/.claude/CLAUDE.md
+          └──→ ~/.config/opencode/AGENTS.md
 ```
 
-`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向仓库根 `scripts/`。`~/.agents/skills/` 与 `.skill-lock.json` 始终由 skills CLI 管理。
+所有入口都使用对应 Agent 原生识别的系统提示词文件名，并**直接软链接**到 `core/AGENTS.md`，不再通过 `~/.agents/AGENTS.md` 二次转发，也不使用只负责提示“继续读取另一个文件”的跳板 Prompt。这样既保持单一 canonical source，也避免 Agent 为加载同一份全局规则再执行额外文件读取。
+
+`~/.agents/AGENTS.md` 仍作为通用运行时入口；`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向仓库根 `scripts/`。`~/.agents/skills/` 与 `.skill-lock.json` 始终由 skills CLI 管理。
 
 ## Guard
 

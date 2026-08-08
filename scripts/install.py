@@ -36,6 +36,13 @@ def same_file_content(source: Path, target: Path) -> bool:
     return source.is_file() and target.is_file() and filecmp.cmp(source, target, shallow=False)
 
 
+def direct_link_target(path: Path) -> Path:
+    raw_target = Path(os.readlink(path))
+    if raw_target.is_absolute():
+        return Path(os.path.abspath(raw_target))
+    return Path(os.path.abspath(path.parent / raw_target))
+
+
 def ensure_link(source: Path, target: Path, stamp: str) -> None:
     link_source = source.expanduser().absolute()
     resolved_source = link_source.resolve(strict=True)
@@ -43,7 +50,7 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
 
     if target.is_symlink():
         try:
-            if target.resolve(strict=True) == resolved_source:
+            if direct_link_target(target) == link_source:
                 return
         except OSError:
             pass
@@ -140,10 +147,10 @@ def deploy(*, cleanup_legacy: bool) -> None:
     ensure_link(SCRIPT_ROOT, HUB / "scripts", stamp)
     ensure_link(DOC_PATH, HUB / "README.md", stamp)
 
-    ensure_link(HUB / "AGENTS.md", Path.home() / ".codex" / "AGENTS.md", stamp)
-    ensure_link(HUB / "AGENTS.md", Path.home() / ".claude" / "CLAUDE.md", stamp)
+    ensure_link(CORE_ROOT / "AGENTS.md", Path.home() / ".codex" / "AGENTS.md", stamp)
+    ensure_link(CORE_ROOT / "AGENTS.md", Path.home() / ".claude" / "CLAUDE.md", stamp)
     ensure_link(
-        HUB / "AGENTS.md",
+        CORE_ROOT / "AGENTS.md",
         Path.home() / ".config" / "opencode" / "AGENTS.md",
         stamp,
     )

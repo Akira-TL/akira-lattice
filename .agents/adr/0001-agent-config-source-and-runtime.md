@@ -17,13 +17,13 @@ Accepted
 - 确定性规则与部署工具统一放在根 `scripts/`；`scripts/guard.py` 负责机械检查，`scripts/install.py` 负责跨平台部署。Agent Prompt 只保留需要语义判断的规则和 Guard 的调用边界。
 - 项目知识继续由 Matt flow 的 `CONTEXT.md`、ADR 等项目文件管理；动态上下文与 Memory 不属于本仓库，未来由 `contextd` 负责。
 - `~/.agents` 仅作为运行时 hub，不再初始化 Git；`AGENTS.md`、`references/`、`scripts/` 等自定义内容通过软链接指向仓库源码。
-- Claude、Codex、OpenCode 的全局提示词文件通过软链接指向 `~/.agents/AGENTS.md`。
+- Claude、Codex、OpenCode 的全局提示词入口使用各自原生文件名，并直接软链接到 `core/AGENTS.md`；`~/.agents/AGENTS.md` 只作为通用运行时入口，不承担二次转发。
 - `~/.agents/skills/`、`.skill-lock.json` 以及未来由 MCP、插件或其他软件生成的状态不纳入该源码部署链路，也不由本仓库直接版本管理。
 - 跨 Git 仓库边界使用软链接而不是硬链接，避免 Git checkout/reset 替换 inode 后链接失效。
 
 ## Consequences
 
-- 修改仓库中的 `core/AGENTS.md` 会立即反映到各 Agent 的全局提示词入口。
+- 修改仓库中的 `core/AGENTS.md` 会立即反映到各 Agent 的全局提示词入口，Agent 无需先读取一个跳板 Prompt 再加载 Core。
 - 克隆或移动仓库后需要重新运行 `uv run scripts/install.py` 恢复运行时链接。
 - 工具生成状态与人工维护源码的所有权边界清晰，不再互相污染 Git 历史。
 - 多步骤、大型流程继续优先沉淀为 Skill；几行即可表达的稳定工程默认直接留在 Core，避免为了极端缩短 Prompt 反而增加额外读取。

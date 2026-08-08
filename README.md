@@ -31,7 +31,7 @@ akira-skills/
 uv run scripts/install.py
 ```
 
-会将 `~/.agents/AGENTS.md`、Claude、Codex、OpenCode 等入口软链接回该源码，并保留 `~/.agents/skills/`、`.skill-lock.json` 等由外部工具管理的状态；Core 直接引用的仓库自有 Skill 会通过 `npx skills` 安装，不绕过 skills CLI。使用统一 Python Guard 检查配置：
+会将 `~/.agents/AGENTS.md` 以及 Claude 的 `CLAUDE.md`、Codex/OpenCode 的 `AGENTS.md` 等原生入口**直接软链接**到该源码，不通过中间 Prompt 二次转发；同时保留 `~/.agents/skills/`、`.skill-lock.json` 等由外部工具管理的状态。Core 直接引用的仓库自有 Skill 会通过 `npx skills` 安装，不绕过 skills CLI。使用统一 Python Guard 检查配置：
 
 ```bash
 uv run scripts/guard.py config

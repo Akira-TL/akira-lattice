@@ -224,18 +224,26 @@ def validate_commit_message(message: str) -> list[str]:
     return errors
 
 
+def direct_link_target(path: Path) -> Path:
+    raw_target = Path(os.readlink(path))
+    if raw_target.is_absolute():
+        return Path(os.path.abspath(raw_target))
+    return Path(os.path.abspath(path.parent / raw_target))
+
+
 def check_link(target: Path, expected: Path) -> bool:
     if not target.is_symlink():
         fail(f"{target} 不是软链接")
         return False
     try:
-        actual = target.resolve(strict=True)
-        wanted = expected.resolve(strict=True)
+        actual = direct_link_target(target)
+        wanted = expected.expanduser().absolute()
+        expected.resolve(strict=True)
     except OSError as exc:
         fail(f"{target} 链接无法解析：{exc}")
         return False
     if actual != wanted:
-        fail(f"{target} -> {actual}，预期 {wanted}")
+        fail(f"{target} -> {actual}，预期直接链接到 {wanted}")
         return False
     ok(str(target))
     return True
@@ -255,9 +263,9 @@ def cmd_config(_: argparse.Namespace) -> int:
         (HUB / "references", CORE_ROOT / "references"),
         (HUB / "scripts", SCRIPT_ROOT),
         (HUB / "README.md", REPO_ROOT / "docs" / "agent-config.md"),
-        (Path.home() / ".codex" / "AGENTS.md", HUB / "AGENTS.md"),
-        (Path.home() / ".claude" / "CLAUDE.md", HUB / "AGENTS.md"),
-        (Path.home() / ".config" / "opencode" / "AGENTS.md", HUB / "AGENTS.md"),
+        (Path.home() / ".codex" / "AGENTS.md", CORE_ROOT / "AGENTS.md"),
+        (Path.home() / ".claude" / "CLAUDE.md", CORE_ROOT / "AGENTS.md"),
+        (Path.home() / ".config" / "opencode" / "AGENTS.md", CORE_ROOT / "AGENTS.md"),
     ]
     for target, expected in links:
         failed = not check_link(target, expected) or failed
