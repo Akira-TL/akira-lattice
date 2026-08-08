@@ -8,6 +8,12 @@
 - 普通任务使用 `checkout` 打开实际项目目录或已有 worktree。
 - 同一个实际目录再次以 `checkout` 打开仍是磁盘上的同一份代码，即使新会话获得不同 `workspaceId`。
 
+## Git 与 MCP 宿主
+
+- DevSpace 的 shell 能力应允许标准 Git 操作，包括 `git status`、`git diff`、`git add -- <paths...>`、分支和 worktree 管理等；Agent 在暂存前仍必须先检查 diff ownership，只加入当前原子修改。
+- 某些 GPT / MCP 宿主会在工具描述中额外限制 shell 为 “git inspection only”。这是宿主提示词或 MCP 工具契约施加的模型侧限制，不代表 DevSpace 或本机 Git 本身缺少写能力；遇到此情况不得把限制误判为仓库权限问题，也不得偷偷绕过，应调整对应 DevSpace/MCP 工具契约后再执行。
+- DevSpace 技术上可以执行 `git commit`，但日常不建议直接使用。全局 Core 规定正式提交统一走 `uv run ~/.agents/scripts/guard.py commit -m '<message>'`，以确保提交格式和 staged architecture 经过同一机械入口检查。
+
 ## worktree
 
 - 需要隔离或并行开发时，可用 `mode="worktree"` 在 `~/.devspace/worktrees/` 创建 DevSpace 托管的 Git worktree。

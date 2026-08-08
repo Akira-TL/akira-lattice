@@ -20,7 +20,7 @@ akira-skills/
 
 遵循以下边界：
 
-- **Core** 保留短小、稳定、跨项目且频繁使用的个人默认，例如 Git 语义、Python/前端默认、Documentation、Run & Debug、模型选择和工具路由。不要为了追求极短而把几行规则拆成额外读取。
+- **Core** 保留短小、稳定、跨项目且频繁使用的个人默认，例如 Git 语义、Python/前端默认、Documentation、Run & Debug、模型选择和工具路由。Git 交互节奏也在 Core 中明确：收到用户新的开发回复时先判断上一轮原子修改是否应提交，再计划本轮开发、实现、做最低限度语法检查、展示全部本地分支/worktree，并按需给出可选构建或检查说明。不要为了追求极短而把几行规则拆成额外读取。
 - **Reference** 只放低频且有独立阅读价值的事实、边界或长说明。当前典型例子是 DevSpace/worktree 语义。
 - **Skill** 保存大型规则、检查清单和多步骤过程；代码项目先通过 `ask-matt` 决定应进入的 Matt flow。
 - **Guard** 承担确定性、可机械判断的约束。Prompt 不重复维护可以由程序可靠验证的细节。
@@ -62,7 +62,7 @@ commit        验证提交格式、暂存架构后执行 git commit
 check         运行当前项目适用的组合检查，并输出所有本地分支与 worktree 概览
 ```
 
-`commit` 不判断 diff ownership。Agent 必须先检查 diff 并选择性暂存当前原子修改，再交给 Guard 做机械校验和提交。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。
+`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。DevSpace 对 Git/MCP 宿主能力的边界记录在 `core/references/devspace.md`。
 
 Guard 是全局入口，不要求每个项目安装全局 Git hook，因此不会与 Husky、pre-commit 或项目自有 Git hooks 抢占所有权。
 
