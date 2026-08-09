@@ -4,22 +4,20 @@
 
 ## 基本顺序
 
-- 云端 CI 是本地验收后的第二层检查，不是本地检查的替代品。任何会让 GitHub Actions 开始运行的操作之前，必须先完成当前仓库要求的本地检查并确认通过。
-- 普通开发修改的顺序固定为：完成原子修改与提交 → 运行仓库规定的本地检查 → 确认工作区与提交状态正确 → push 已验收提交 → 按仓库约定显式触发云端 CI。
-- 如果仓库没有专门的完整检查入口，至少运行与本次修改直接相关的类型检查、测试、构建或等价验证；存在 `check`、`verify`、`release:verify`、Guard 等统一入口时优先使用统一入口。
-- 不得为了“让 CI 帮忙看看”而先推未经本地验证的修改。若仓库的 Actions 配置会让普通 push 自动触发不必要的 CI，应指出并按仓库要求调整，而不是把云端流水线当作交互式调试器。
+- 日常开发与正式发布分开处理。普通 commit / push 只执行仓库日常规则要求的最低限度语法检查、Guard 或与当前原子修改直接相关的验证，不自动运行完整 release gate，也不得触发云端 CI。
+- 完整本地 CI / release gate 只在准备正式版本 tag 时运行。顺序固定为：准备版本元数据 → 完整本地验收通过 → push 已验收的 release-ready 提交 → 创建并 push `vX.Y.Z` tag → 由 tag 启动云端 CI / 发布 workflow。
+- 不得为了“让 CI 帮忙看看”而触发云端流水线。普通 branch push、PR 更新、手动 dispatch 都不应成为默认 CI 入口；仓库若允许这些入口，除非用户明确要求保留，否则应收紧到正式发布 tag 流程。
 
 ## Push 与云端 CI
 
-- `git push` 只推送已经在本地验收通过的提交。提交前仍遵守全局 Git 原子提交与 diff ownership 规则。
-- 普通 push 与云端 CI 应尽量解耦；仓库提供 `workflow_dispatch` 时，在 push 完成后显式运行目标 workflow，并等待其结果后再进行依赖该结果的后续操作。
-- 云端 CI 失败时先读取失败日志并在本地复现、修复、重新完成本地检查，再提交和 push；不要靠连续 push 猜测修复。
-- 仓库若明确要求 PR 自动检查或其他触发方式，以仓库规则为准，但仍必须在触发这些检查的 push 之前先完成本地验证。
+- 日常 `git push` 只推送归属明确、已完成日常最低限度本地检查的提交；它本身不应启动云端 CI。
+- 不主动运行 `gh workflow run`、Actions 手动 dispatch 或其他独立云端 CI 入口。正式发布时由 `vX.Y.Z` tag push 自动进入仓库定义的 CI / release 流程。
+- 云端 CI 失败时先读取失败日志并在本地复现、修复；修复后重新完成发布所需的本地 release gate，再准备新的可发布状态。不要靠连续 push 或反复 dispatch 猜测修复。
 
 ## Release 与发布 tag
 
 - 创建或推送发布 tag 属于正式发布动作，不属于普通开发 push。只有用户明确要求发布，并且目标版本已经确定时才执行。
 - 自动发布只允许由稳定版本 tag `vX.Y.Z` 触发，其中 `X`、`Y`、`Z` 均为非负整数；普通 branch push、PR、非版本 tag 不得触发 npm/GitHub Release 等发布动作。
-- 推送 `vX.Y.Z` 前必须同时满足：本地 release gate 全部通过、release metadata 与 tag 一致、目标提交已 push、云端 CI 已通过、工作区无未归属修改。
-- 发布 workflow 自身仍应在真正 publish 前再次校验 tag、版本元数据、构建和测试；这些云端校验是最终防线，不替代前置本地验收。
+- 推送 `vX.Y.Z` 前必须同时满足：本地 release gate 全部通过、release metadata 与 tag 一致、目标提交已 push、工作区无未归属修改。
+- `vX.Y.Z` tag push 后，云端 workflow 必须先完成 CI 验证，只有 CI 全部通过才允许继续 npm / GitHub Release 发布。云端校验是最终防线，不替代 tag 前的完整本地验收。
 - 禁止使用 force push 或移动已有发布 tag 来修正发布。发布失败时修复原因并使用仓库既定的可重试流程；如版本内容已不可变，则准备新的版本号。
