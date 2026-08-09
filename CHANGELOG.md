@@ -13,6 +13,7 @@ All user-visible changes to stable skills will be documented in this file.
 - Documented local installation through `npx skills` for Codex, Claude Code, OpenCode, Hermes Agent, and other supported agents.
 - Added canonical global static Agent configuration under `core/`, with on-demand references and runtime links.
 - Added `devspace-orchestration` for choosing Claude native Agent, tmux, and Git worktree isolation in multi-Agent DevSpace tasks.
+- Added `scientific-presentation-authoring` for structuring scientific presentations, writing evidence-bounded result slides, adapting reference-deck design rules without copying template content, and applying `humanizer-zh` to Chinese slide text.
 - Added cross-platform `scripts/guard.py` and `scripts/install.py` entry points for static configuration deployment, architecture thresholds, Skill structure validation, and guarded Git commits.
 - Added `core/references/matt-skills.md` to record ownership and upstream-merge rules for the maintained `Akira-TL/matt-skills` fork.
 - Added `guard.py upstream matt` to fetch, compare and merge Matt upstream safely; explicit `--push` publishes our fork and commits the updated Lattice submodule pointer.
