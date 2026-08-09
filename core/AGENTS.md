@@ -26,7 +26,7 @@
 - 不同功能、模块、问题、代码与文档原则上不得混入同一提交；不得为了减少数量扩大提交范围，也不得机械切碎不可独立工作的修改。
 - 提交信息默认一行：`<TYPE>: (<SCOPE>) <DETAIL>`；`TYPE` 使用全大写的 `FIX`、`FEAT`、`REFACTOR`、`TEST`、`DOCS` 或 `CHORE`，`SCOPE` 使用简短英文单词，`DETAIL` 必须具体。确有必要使用多行时，每一行都必须独立完整地遵守同一格式。
 - 提交前可使用 `git add -- <paths...>` 选择性暂存归属明确的当前原子修改；正式提交只能使用 `uv run ~/.agents/scripts/guard.py commit -m '<message>'`，不得直接以 `git commit` 作为正常提交入口。Guard 统一校验提交格式和当前暂存修改是否新引入代码规模问题；语义归属仍由 Agent 负责。
-- 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。
+- 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。涉及 GitHub push、云端 CI、tag、release 或包发布时，先读取 `~/.agents/references/github-release.md` 并遵守其中的本地验收与发布顺序。
 
 ## 模型与多 Agent
 
