@@ -32,7 +32,7 @@
 
 ## Current boundary
 
-The maintained stable capabilities are `engineering/devspace-orchestration`, `productivity/general-word-document-generation`, and `productivity/visible-browser-form-automation`.
+The maintained stable capabilities are `engineering/devspace-orchestration`, `productivity/general-word-document-generation`, and `productivity/browser-access`.
 
 The repository can be consumed locally by the `skills` CLI through `npx skills add <local-path>`. Static global configuration is deployed through `uv run scripts/install.py`, which links runtime entry points back to the canonical source without taking ownership of externally managed state. Deterministic checks are exposed through `uv run scripts/guard.py <command>`.
 

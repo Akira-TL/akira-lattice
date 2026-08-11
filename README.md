@@ -40,23 +40,23 @@ uv run scripts/guard.py config
 
 ## Current skills
 
-自研 Skill 的正文、README 与详细用户文档都由 `skills/akira` 子模块中的 `Akira-TL/skills` 独立维护；Lattice 只锁定其 commit，不保留第二份 Skill 文档。当前主要能力包括 `devspace-orchestration`、`general-word-document-generation` 和 `visible-browser-form-automation`。
+自研 Skill 的正文、README 与详细用户文档都由 `skills/akira` 子模块中的 `Akira-TL/skills` 独立维护；Lattice 只锁定其 commit，不保留第二份 Skill 文档。当前主要能力包括 `devspace-orchestration`、`general-word-document-generation` 和 `browser-access`。
 
 Matt 派生 Skill 则由 `skills/matt` 对应的 `Akira-TL/matt-skills` fork 独立维护。
 
 ## Install with npx skills
 
-在 Lattice 根目录可以从 `skills/akira` 子模块安装自研 Skill。例如安装可视化表单自动化 Skill 到 Codex：
+在 Lattice 根目录可以从 `skills/akira` 子模块安装自研 Skill。例如安装通用浏览器访问 Skill 到 Codex：
 
 ```bash
-npx skills add ./skills/akira --skill visible-browser-form-automation --agent codex -g -y
+npx skills add ./skills/akira --skill browser-access --agent codex -g -y
 ```
 
 同时安装到多个 Agent：
 
 ```bash
 npx skills add ./skills/akira \
-  --skill visible-browser-form-automation \
+  --skill browser-access \
   -g \
   -a codex \
   -a claude-code \
@@ -68,7 +68,7 @@ npx skills add ./skills/akira \
 安装到 CLI 检测到的所有 Agent：
 
 ```bash
-npx skills add ./skills/akira --skill visible-browser-form-automation --agent '*' -g -y
+npx skills add ./skills/akira --skill browser-access --agent '*' -g -y
 ```
 
 查看自研仓库中可安装的 Skill：
