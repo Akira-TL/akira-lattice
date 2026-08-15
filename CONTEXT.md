@@ -14,6 +14,8 @@
 
 **Runtime configuration view** means `~/.agents` and tool-specific files such as `~/.claude/CLAUDE.md`. These paths expose canonical source through links and are not edited as independent copies.
 
+**本地上下文资料** 指 `~/.config/akira/` 中按任务域按需读取的长期个人资料，分为基础资料、学术资料、项目资料和系统资料。它不属于 Lattice 的静态配置源码；Core 只维护读取边界与路由，不复制这些事实本身。
+
 **Externally managed state** means files owned by another tool, including `~/.agents/skills/`, `.skill-lock.json`, MCP state, plugin state, caches, sessions, and similar generated configuration. It is not copied into this repository by default.
 
 **Skill documentation** means the human-facing explanation in `docs/`. It is an index and guide, not a second copy of runtime rules.

@@ -42,3 +42,7 @@ DevSpace 子 Agent 默认使用 `sonnet`；确需独立高层判断时使用 `op
 ## CodeGraph
 
 若仓库根目录存在 `.codegraph/`，每次需要理解或定位代码时，第一步先实际执行 CodeGraph 查询，再根据查询结果继续读取代码；不要把“存在 CodeGraph”仅当作可选提示而直接进入 grep/find 或逐文件阅读。MCP 可用时先调用 `codegraph_explore`：它通常可在一次查询中返回相关符号的原始源码及其调用路径，查询中可直接指定文件名或符号名以读取当前带行号源码；若结果列出但延后了某个符号，再按名称继续通过工具查询加载。MCP 不可用时执行 `codegraph explore "<symbol names or question>"`。不存在 `.codegraph/` 时直接跳过，不主动建立索引。
+
+## 本地上下文资料
+
+当任务已满足读取 `~/.config/akira/` 的条件时，先读取 `~/.agents/references/personal-context.md`，再按其中定义的资料域只加载任务所需文件。
