@@ -20,6 +20,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 收紧 Core 的专业与学术表述规范：专业术语首次出现默认采用“规范中文名（English Full Term, ACRONYM）”格式，术语与缩写须能由严谨专业来源核验；禁止自造术语、缩写、分类名或概念名，新的概念与命名须先经用户明确同意。
 - Made `ask-akira-research` legacy Analysis provenance reads schema-aware: `research-db analyses` now reads v13/v14 projects without touching later-only fields and reports unavailable provenance dimensions through `schema_capabilities` instead of leaking low-level SQLite row errors.
 - Renamed `visible-browser-form-automation` to `browser-access` and generalized it into a harness-first browser access layer with one-time user-browser authorization, persistent Profile reuse, authenticated page access, network resource resolution, and the existing dynamic-form safety behavior.
 - Clarified the color boundary in `general-word-document-generation`: inserted images may retain color, while tables, text, shapes, borders, and other Word-native non-image content remain limited to black, white, and necessary grayscale unless the user explicitly requests color.
