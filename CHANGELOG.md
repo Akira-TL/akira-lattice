@@ -20,6 +20,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 扩展 Core 的本地上下文读取边界：仅在确需本机系统、服务部署、端口、反向代理或开发环境信息时，允许按既有路由读取 `~/.config/akira/`，无关任务仍禁止读取。
 - 收紧 Core 的专业与学术表述规范：专业术语首次出现默认采用“规范中文名（English Full Term, ACRONYM）”格式，术语与缩写须能由严谨专业来源核验；禁止自造术语、缩写、分类名或概念名，新的概念与命名须先经用户明确同意。
 - Made `ask-akira-research` legacy Analysis provenance reads schema-aware: `research-db analyses` now reads v13/v14 projects without touching later-only fields and reports unavailable provenance dimensions through `schema_capabilities` instead of leaking low-level SQLite row errors.
 - Renamed `visible-browser-form-automation` to `browser-access` and generalized it into a harness-first browser access layer with one-time user-browser authorization, persistent Profile reuse, authenticated page access, network resource resolution, and the existing dynamic-form safety behavior.
