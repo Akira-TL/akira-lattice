@@ -301,7 +301,7 @@ def cmd_config(_: argparse.Namespace) -> int:
         fail(f"Core 已增长到 {core_lines} 行，应重新分层")
         failed = True
 
-    for skill in ("ask-matt", "devspace-orchestration"):
+    for skill in ("ask-matt", "devspace-orchestration", "akira-guard"):
         path = HUB / "skills" / skill / "SKILL.md"
         if path.is_file():
             ok(f"运行时 Skill: {skill}")

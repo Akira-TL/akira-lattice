@@ -141,9 +141,14 @@ def ensure_skill_submodules() -> None:
     if result.returncode != 0:
         raise RuntimeError("无法初始化 skills/akira 或 skills/matt Git submodule")
 
-    required_akira_skill = AKIRA_SKILLS_ROOT / "engineering" / "devspace-orchestration" / "SKILL.md"
-    if not required_akira_skill.is_file():
-        raise RuntimeError("skills/akira 已初始化，但缺少 devspace-orchestration")
+    required_akira_skills = (
+        "devspace-orchestration",
+        "akira-guard",
+    )
+    for skill in required_akira_skills:
+        path = AKIRA_SKILLS_ROOT / "engineering" / skill / "SKILL.md"
+        if not path.is_file():
+            raise RuntimeError(f"skills/akira 已初始化，但缺少 {skill}")
 
     required_matt_skill = MATT_SKILLS_ROOT / "skills" / "engineering" / "ask-matt" / "SKILL.md"
     if not required_matt_skill.is_file():
@@ -205,6 +210,7 @@ def install_runtime_skills() -> None:
 
     installs = (
         (str(AKIRA_SKILLS_ROOT), "devspace-orchestration", "devspace-orchestration"),
+        (str(AKIRA_SKILLS_ROOT), "akira-guard", "akira-guard"),
         (str(MATT_SKILLS_ROOT), "*", "ask-matt"),
     )
     for source, selector, required_skill in installs:
