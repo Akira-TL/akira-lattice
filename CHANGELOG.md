@@ -20,6 +20,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 收紧独立 Agent 验收流程：需要黑盒验收、独立复核或最终 Agent 验收时，当前 Agent 不再自行启动验收 Agent，而是先向用户提供完整可复制的验收提示词，由用户新开独立会话执行；当前 Agent 仅在用户回传结果后负责审计、归因和修复。
 - 扩展 Core 的本地上下文读取边界：仅在确需本机系统、服务部署、端口、反向代理或开发环境信息时，允许按既有路由读取 `~/.config/akira/`，无关任务仍禁止读取。
 - 收紧 Core 的专业与学术表述规范：专业术语首次出现默认采用“规范中文名（English Full Term, ACRONYM）”格式，术语与缩写须能由严谨专业来源核验；禁止自造术语、缩写、分类名或概念名，新的概念与命名须先经用户明确同意。
 - Made `ask-akira-research` legacy Analysis provenance reads schema-aware: `research-db analyses` now reads v13/v14 projects without touching later-only fields and reports unavailable provenance dimensions through `schema_capabilities` instead of leaking low-level SQLite row errors.

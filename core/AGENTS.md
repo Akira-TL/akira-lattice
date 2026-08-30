@@ -41,6 +41,8 @@
 
 DevSpace 子 Agent 默认使用 `sonnet`；确需独立高层判断时使用 `opus`，简单机械任务使用 `haiku`。底层模型 ID 和路由由本机配置解析，Agent 不负责替换。需要并行 Agent、tmux 或隔离 worktree 编排时，使用 `devspace-orchestration` Skill；涉及 DevSpace/worktree 的事实与路径边界时可读取 `~/.agents/references/devspace.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。不要为了使用多 Agent 而拆分本可由单 Agent 清晰完成的任务。
 
+需要独立 Agent 进行黑盒验收、独立复核或最终 Agent 验收时，当前 Agent 不得自行启动或代替用户运行该验收 Agent。应先向用户提供一份完整、可直接复制到新会话执行的验收提示词，明确项目路径、隔离边界、允许/禁止读取与修改的范围、验收目标、完成门槛和需要回传的结果；由用户自行开启独立验收 Agent。用户回传验收输出后，当前 Agent 负责审计结果、区分 Skill 缺陷与验收环境/模型问题，并按证据决定是否修复。确定性测试、机械门禁和当前 Agent 自身审计不属于“独立 Agent 验收”，可直接执行。
+
 ## CodeGraph
 
 若仓库根目录存在 `.codegraph/`，每次需要理解或定位代码时，第一步先实际执行 CodeGraph 查询，再根据查询结果继续读取代码；不要把“存在 CodeGraph”仅当作可选提示而直接进入 grep/find 或逐文件阅读。MCP 可用时先调用 `codegraph_explore`：它通常可在一次查询中返回相关符号的原始源码及其调用路径，查询中可直接指定文件名或符号名以读取当前带行号源码；若结果列出但延后了某个符号，再按名称继续通过工具查询加载。MCP 不可用时执行 `codegraph explore "<symbol names or question>"`。不存在 `.codegraph/` 时直接跳过，不主动建立索引。
