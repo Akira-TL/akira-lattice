@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable
 
+from staged_syntax import staged_syntax_errors
 from upstream import sync_matt
 
 SCRIPT_ROOT = Path(__file__).resolve().parent
@@ -468,6 +469,13 @@ def guarded_commit(
         fail("没有暂存修改；先检查 diff ownership 并选择性暂存当前原子修改")
         return 1
 
+    syntax_errors = staged_syntax_errors(root)
+    if syntax_errors:
+        for error in syntax_errors:
+            fail(f"暂存语法检查失败：{error}")
+        return 2
+    ok("暂存语法检查通过")
+
     violations = architecture_scan_staged(root)
     if violations:
         report_architecture(violations)
@@ -566,7 +574,10 @@ def build_parser() -> argparse.ArgumentParser:
     skills_parser = subparsers.add_parser("skills", help="检查 skills/akira 的自研 Skill 结构")
     skills_parser.set_defaults(func=cmd_skills)
 
-    commit_parser = subparsers.add_parser("commit", help="验证提交信息和暂存架构后执行 Git commit")
+    commit_parser = subparsers.add_parser(
+        "commit",
+        help="验证提交信息、暂存语法与暂存架构后执行 Git commit",
+    )
     commit_parser.add_argument("-m", "--message", required=True)
     commit_parser.add_argument(
         "--allow-architecture-warnings",
