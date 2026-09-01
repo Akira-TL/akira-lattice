@@ -24,13 +24,21 @@ akira-lattice/
 
 ## Global static configuration
 
-`core/AGENTS.md` 是全局提示词唯一源码。运行：
+`core/AGENTS.md` 是全局提示词唯一源码。统一安装或更新入口：
 
 ```bash
-uv run scripts/install.py
+./install.sh
 ```
 
-会将 `~/.agents/AGENTS.md` 以及 Claude 的 `CLAUDE.md`、Codex/OpenCode 的 `AGENTS.md` 等原生入口**直接软链接**到该源码，不通过中间 Prompt 二次转发；需要替换的本机旧文件集中备份到 Git 忽略的 `backup/`，按 Home 相对路径镜像保存。`~/.agents/skills/`、`.skill-lock.json` 等仍由外部工具管理。Core 直接引用的仓库自有 Skill 会通过 `npx skills` 安装，不绕过 skills CLI。使用统一 Python Guard 检查配置：
+该入口只负责安装或更新本项目拥有的运行时内容：将 `~/.agents/AGENTS.md` 以及 Claude 的 `CLAUDE.md`、Codex/OpenCode 的 `AGENTS.md` 等原生入口**直接软链接**到当前源码，并通过 `npx skills` 安装或更新 `skills/akira` 与 `skills/matt` 当前提供的 Skill。安装过程中不会清理旧 Skill、迁移历史备份或修改 Matt remote；需要替换的同名非项目运行时文件会先备份到 Git 忽略的 `backup/`。`~/.agents/skills/` 与 `.skill-lock.json` 继续由 skills CLI 管理。
+
+统一卸载入口：
+
+```bash
+./uninstall.sh
+```
+
+它只移除仍明确指向本仓库的运行时软链接，以及最近一次 `./install.sh` 记录且运行时内容仍与该安装记录一致的 Skill；不会按当前仓库目录猜测卸载对象，也不会清理 `backup/`、Agent 配置目录或其他软件状态。使用统一 Python Guard 检查配置：
 
 ```bash
 uv run scripts/guard.py config
@@ -44,9 +52,9 @@ uv run scripts/guard.py config
 
 Matt 派生 Skill 则由 `skills/matt` 对应的 `Akira-TL/matt-skills` fork 独立维护。
 
-## Install with npx skills
+## 单独安装 Skill
 
-在 Lattice 根目录可以从 `skills/akira` 子模块安装自研 Skill。例如安装通用浏览器访问 Skill 到 Codex：
+正常情况下使用根目录 `./install.sh` 统一安装或更新全部项目运行时内容。只有需要单独安装某个 Skill 时，才直接使用 `npx skills`。例如安装通用浏览器访问 Skill 到 Codex：
 
 ```bash
 npx skills add ./skills/akira --skill browser-access --agent codex -g -y

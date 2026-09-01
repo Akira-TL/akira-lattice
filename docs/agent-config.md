@@ -12,7 +12,8 @@ akira-lattice/
 │   ├── AGENTS.md            # 短小、稳定、跨项目的默认规则与路由
 │   └── references/          # 少量低频工具事实与边界
 ├── scripts/
-│   ├── install.py           # 跨平台部署运行时入口
+│   ├── install.py           # 安装/更新运行时内容
+│   ├── uninstall.py         # 卸载本项目拥有的运行时内容
 │   ├── guard.py             # 统一机械检查与命令入口
 │   └── upstream.py          # fork/upstream Git 状态机实现
 ├── skills/
@@ -71,25 +72,28 @@ check         运行当前项目适用的组合检查，并输出所有本地分
 
 Guard 是全局入口，不要求每个项目安装全局 Git hook，因此不会与 Husky、pre-commit 或项目自有 Git hooks 抢占所有权。
 
-## 安装
+## 安装与卸载
 
-部署或修复运行时软链接：
-
-```bash
-uv run ~/Projects/akira-skills/scripts/install.py
-```
-
-迁移旧结构时，在确认新文件已经存在后可额外执行：
+根目录提供统一安装/更新入口：
 
 ```bash
-uv run ~/Projects/akira-skills/scripts/install.py --cleanup-legacy
+cd ~/Projects/akira-skills
+./install.sh
 ```
 
-该参数会在完成运行时部署后删除仓库中旧的 `context/` 迁移目录。
+该入口只执行当前项目运行时部署：建立或更新全局 Agent 提示词、references、scripts 与说明文档软链接，并通过 skills CLI 全量安装或更新当前 `skills/akira` 与 `skills/matt` 提供的 Skill。它不会清理旧 Skill、迁移历史备份、删除旧目录或修改 Matt remote；版本同步和上游维护继续由各自 Git/Guard 流程负责。
 
-安装器替换已有运行时文件或目录前，会把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`，`~/.agents/references` 的备份位于 `backup/.agents/references.backup.<timestamp>`。`backup/` 只保存本机恢复材料，整个目录由 Git 忽略；不在各 Agent 配置目录旁边散落备份。安装器也会收拢旧版本安装器在这些受管路径旁产生的 `.backup.*` / `.bak.*` 文件，但不会移动 Claude、Hermes 等软件自己维护的备份目录。
+安装器需要替换同名且不属于当前项目的运行时文件时，会先把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`。这是避免覆盖用户现有配置的安装安全措施，不会在后续安装中主动整理或清理已有备份。
 
-安装器不会直接写入 `~/.agents/skills/` 或 `.skill-lock.json`，而是统一调用 skills CLI，因此运行时状态所有权仍属于 skills CLI。Lattice 自有 Skill 从本地 `skills/akira` submodule 安装，其 GitHub `origin` 为 `Akira-TL/skills`，对应用户文档也随 Skill 保存在该子模块的 `docs/`；Matt 派生 Skill 从 `skills/matt` 全量安装，其 GitHub `origin` 为我们的 fork `Akira-TL/matt-skills`，Matt 原仓库只作为内部 `upstream`。这样两类 Skill 都由独立 Git 历史维护，而 Lattice 只锁定各自 submodule commit。Matt submodule 的同步边界记录在 `core/references/matt-skills.md`。
+统一卸载入口：
+
+```bash
+./uninstall.sh
+```
+
+卸载器只移除两类明确属于本项目的运行时内容：仍直接指向本仓库源码的 Agent 配置软链接，以及最近一次 `./install.sh` 写入安装清单且当前 `SKILL.md` 哈希仍一致的 Skill。没有安装清单时不会猜测 Skill 名称；同名 Skill 在安装后被其他内容替换时也会保留。它不会恢复或清理 `backup/`，不会删除 Agent 配置目录，也不会清理其他 Skill、插件、MCP、缓存或会话状态。
+
+安装和卸载均不会直接维护 `.skill-lock.json`；Skill 的实际安装/移除统一通过 skills CLI 完成，因此该状态继续由 skills CLI 所有。Lattice 自有 Skill 来自本地 `skills/akira` submodule；Matt 派生 Skill 来自 `skills/matt`。Matt submodule 的 fork/upstream 维护边界记录在 `core/references/matt-skills.md`，不属于安装流程。
 
 ## 维护原则
 

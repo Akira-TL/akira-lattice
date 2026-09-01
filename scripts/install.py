@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-import argparse
 import filecmp
+import hashlib
+import json
 import os
+import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 SCRIPT_ROOT = Path(__file__).resolve().parent
@@ -16,12 +18,10 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
-LEGACY_ROOT = REPO_ROOT / "context"
-LEGACY_DOC = REPO_ROOT / "docs" / "context-management.md"
-LEGACY_ADR = REPO_ROOT / ".agents" / "adr" / "0001-agent-context-source-and-runtime.md"
 AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
-MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
+INSTALL_MANIFEST = HUB / ".akira-skills-install.json"
+NAME_PATTERN = re.compile(r"^name:\s*([^\s#]+)\s*$")
 
 
 def remove_path(path: Path) -> None:
@@ -50,35 +50,6 @@ def backup_path(path: Path, stamp: str) -> Path:
     return backup
 
 
-def move_legacy_backup(path: Path) -> None:
-    try:
-        relative = path.absolute().relative_to(HOME.absolute())
-    except ValueError:
-        return
-    target = BACKUP_ROOT / relative
-    target.parent.mkdir(parents=True, exist_ok=True)
-    if target.exists() or target.is_symlink():
-        print(f"WARN   旧备份目标已存在，保留原文件：{path}", file=sys.stderr)
-        return
-    shutil.move(str(path), str(target))
-    print(f"MOVE   {path} -> {target}")
-
-
-def migrate_legacy_backups() -> None:
-    candidates = list(HUB.glob("*.backup.*"))
-    candidates.extend(HUB.glob("*.bak.*"))
-    for prompt in (
-        HOME / ".codex" / "AGENTS.md",
-        HOME / ".claude" / "CLAUDE.md",
-        HOME / ".config" / "opencode" / "AGENTS.md",
-    ):
-        candidates.extend(prompt.parent.glob(f"{prompt.name}.backup.*"))
-        candidates.extend(prompt.parent.glob(f"{prompt.name}.bak.*"))
-
-    for path in sorted(set(candidates)):
-        move_legacy_backup(path)
-
-
 def same_file_content(source: Path, target: Path) -> bool:
     return source.is_file() and target.is_file() and filecmp.cmp(source, target, shallow=False)
 
@@ -96,12 +67,10 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
 
     if target.is_symlink():
-        try:
-            if direct_link_target(target) == link_source:
-                return
-        except OSError:
-            pass
-        target.unlink()
+        if direct_link_target(target) == link_source:
+            return
+        backup = backup_path(target, stamp)
+        print(f"BACKUP {target} -> {backup}")
     elif target.exists():
         if same_file_content(resolved_source, target):
             remove_path(target)
@@ -120,8 +89,11 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     print(f"LINK   {target} -> {link_source}")
 
 
-def find_npx() -> str | None:
-    return shutil.which("npx") or shutil.which("npx.cmd")
+def find_npx() -> str:
+    npx = shutil.which("npx") or shutil.which("npx.cmd")
+    if npx is None:
+        raise RuntimeError("npx 不可用，无法安装运行时 Skill")
+    return npx
 
 
 def ensure_skill_submodules() -> None:
@@ -141,156 +113,127 @@ def ensure_skill_submodules() -> None:
     if result.returncode != 0:
         raise RuntimeError("无法初始化 skills/akira 或 skills/matt Git submodule")
 
-    required_akira_skills = (
-        "devspace-orchestration",
-        "akira-guard",
-    )
-    for skill in required_akira_skills:
-        path = AKIRA_SKILLS_ROOT / "engineering" / skill / "SKILL.md"
-        if not path.is_file():
-            raise RuntimeError(f"skills/akira 已初始化，但缺少 {skill}")
+    if not (AKIRA_SKILLS_ROOT / "AGENTS.md").is_file():
+        raise RuntimeError("skills/akira 未正确初始化")
+    if not MATT_SKILLS_ROOT.is_dir():
+        raise RuntimeError("skills/matt 未正确初始化")
 
-    required_matt_skill = MATT_SKILLS_ROOT / "skills" / "engineering" / "ask-matt" / "SKILL.md"
-    if not required_matt_skill.is_file():
-        raise RuntimeError("skills/matt 已初始化，但缺少 ask-matt")
 
-    upstream = subprocess.run(
-        ["git", "-C", str(MATT_SKILLS_ROOT), "remote", "get-url", "upstream"],
-        capture_output=True,
-        text=True,
-    )
-    if upstream.returncode != 0:
-        subprocess.run(
-            [
-                "git",
-                "-C",
-                str(MATT_SKILLS_ROOT),
-                "remote",
-                "add",
-                "upstream",
-                MATT_SKILLS_UPSTREAM,
-            ],
-            check=True,
+def skill_name(skill_file: Path) -> str | None:
+    try:
+        lines = skill_file.read_text(encoding="utf-8").splitlines()[:40]
+    except OSError:
+        return None
+    if not lines or lines[0].strip() != "---":
+        return None
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        match = NAME_PATTERN.match(line.strip())
+        if match:
+            return match.group(1)
+    return None
+
+
+def discover_skill_names(root: Path) -> list[str]:
+    names: set[str] = set()
+    for skill_file in root.rglob("SKILL.md"):
+        relative = skill_file.relative_to(root)
+        if "deprecated" in relative.parts:
+            continue
+        name = skill_name(skill_file)
+        if name:
+            names.add(name)
+    return sorted(names)
+
+
+def install_skill_source(npx: str, source: Path, label: str) -> None:
+    command = [
+        npx,
+        "skills",
+        "add",
+        str(source),
+        "--skill",
+        "*",
+        "--agent",
+        "*",
+        "-g",
+        "-y",
+    ]
+    result = subprocess.run(command, cwd=REPO_ROOT)
+    if result.returncode != 0:
+        print(
+            f"WARN   {label} 安装时部分 Agent 可能不支持全局 Skill；请检查上方 skills CLI 输出。",
+            file=sys.stderr,
         )
-    else:
-        subprocess.run(
-            [
-                "git",
-                "-C",
-                str(MATT_SKILLS_ROOT),
-                "remote",
-                "set-url",
-                "upstream",
-                MATT_SKILLS_UPSTREAM,
-            ],
-            check=True,
-        )
-    subprocess.run(
-        [
-            "git",
-            "-C",
-            str(MATT_SKILLS_ROOT),
-            "remote",
-            "set-url",
-            "--push",
-            "upstream",
-            "DISABLED",
-        ],
-        check=True,
-    )
 
 
-def install_runtime_skills() -> None:
-    npx = find_npx()
-    if npx is None:
-        print("WARN   npx 不可用，跳过运行时 Skill 安装", file=sys.stderr)
-        return
-
+def install_runtime_skills() -> list[str]:
     ensure_skill_submodules()
+    npx = find_npx()
+    install_skill_source(npx, AKIRA_SKILLS_ROOT, "Akira Skills")
+    install_skill_source(npx, MATT_SKILLS_ROOT, "Matt Skills")
 
-    installs = (
-        (str(AKIRA_SKILLS_ROOT), "devspace-orchestration", "devspace-orchestration"),
-        (str(AKIRA_SKILLS_ROOT), "akira-guard", "akira-guard"),
-        (str(MATT_SKILLS_ROOT), "*", "ask-matt"),
+    expected = set(discover_skill_names(AKIRA_SKILLS_ROOT))
+    expected.update(discover_skill_names(MATT_SKILLS_ROOT))
+    installed = sorted(
+        name
+        for name in expected
+        if (HUB / "skills" / name).exists() or (HUB / "skills" / name).is_symlink()
     )
-    for source, selector, required_skill in installs:
-        command = [
-            npx,
-            "skills",
-            "add",
-            source,
-            "--skill",
-            selector,
-            "--agent",
-            "*",
-            "-g",
-            "-y",
-        ]
-        result = subprocess.run(command, cwd=REPO_ROOT)
-        runtime_skill = HUB / "skills" / required_skill / "SKILL.md"
-        if not runtime_skill.is_file():
-            raise RuntimeError(
-                f"{required_skill} 未安装到 ~/.agents/skills；请检查上方 npx skills 输出"
-            )
-        if result.returncode != 0:
-            print(
-                f"WARN   {source} 安装时部分 Agent 不支持全局 Skill；"
-                f"运行时 {required_skill} 已存在，继续部署。",
-                file=sys.stderr,
-            )
+    missing = sorted(expected.difference(installed))
+    if missing:
+        raise RuntimeError("以下项目 Skill 未出现在全局运行时：" + ", ".join(missing))
+    return installed
 
 
-def cleanup_runtime_hub() -> None:
-    git_dir = HUB / ".git"
-    gitignore = HUB / ".gitignore"
-    if git_dir.exists():
-        shutil.rmtree(git_dir)
-    if gitignore.exists() or gitignore.is_symlink():
-        remove_path(gitignore)
+def skill_runtime_hash(name: str) -> str:
+    skill_file = HUB / "skills" / name / "SKILL.md"
+    if not skill_file.is_file():
+        raise RuntimeError(f"运行时 Skill 缺少 SKILL.md：{name}")
+    return hashlib.sha256(skill_file.read_bytes()).hexdigest()
 
 
-def cleanup_legacy_source() -> None:
-    if LEGACY_ROOT.exists():
-        shutil.rmtree(LEGACY_ROOT)
-        print(f"REMOVE {LEGACY_ROOT}")
-    if LEGACY_DOC.exists():
-        LEGACY_DOC.unlink()
-        print(f"REMOVE {LEGACY_DOC}")
-    if LEGACY_ADR.exists():
-        LEGACY_ADR.unlink()
-        print(f"REMOVE {LEGACY_ADR}")
+def write_install_manifest(skill_names: list[str]) -> None:
+    payload = {
+        "version": 1,
+        "repo_root": str(REPO_ROOT),
+        "skills": {
+            name: {"skill_md_sha256": skill_runtime_hash(name)} for name in skill_names
+        },
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    INSTALL_MANIFEST.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(f"STATE  {INSTALL_MANIFEST}")
 
 
-def deploy(*, cleanup_legacy: bool) -> None:
+def deploy() -> None:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     for path in (
         HUB,
-        Path.home() / ".codex",
-        Path.home() / ".claude",
-        Path.home() / ".config" / "opencode",
+        HOME / ".codex",
+        HOME / ".claude",
+        HOME / ".config" / "opencode",
     ):
         path.mkdir(parents=True, exist_ok=True)
-
-    migrate_legacy_backups()
-    cleanup_runtime_hub()
 
     ensure_link(CORE_ROOT / "AGENTS.md", HUB / "AGENTS.md", stamp)
     ensure_link(CORE_ROOT / "references", HUB / "references", stamp)
     ensure_link(SCRIPT_ROOT, HUB / "scripts", stamp)
     ensure_link(DOC_PATH, HUB / "README.md", stamp)
-
-    ensure_link(CORE_ROOT / "AGENTS.md", Path.home() / ".codex" / "AGENTS.md", stamp)
-    ensure_link(CORE_ROOT / "AGENTS.md", Path.home() / ".claude" / "CLAUDE.md", stamp)
+    ensure_link(CORE_ROOT / "AGENTS.md", HOME / ".codex" / "AGENTS.md", stamp)
+    ensure_link(CORE_ROOT / "AGENTS.md", HOME / ".claude" / "CLAUDE.md", stamp)
     ensure_link(
         CORE_ROOT / "AGENTS.md",
-        Path.home() / ".config" / "opencode" / "AGENTS.md",
+        HOME / ".config" / "opencode" / "AGENTS.md",
         stamp,
     )
 
-    install_runtime_skills()
-
-    if cleanup_legacy:
-        cleanup_legacy_source()
+    installed_skills = install_runtime_skills()
+    write_install_manifest(installed_skills)
 
     print(f"Core source:    {CORE_ROOT}")
     print(f"Scripts source: {SCRIPT_ROOT}")
@@ -299,21 +242,8 @@ def deploy(*, cleanup_legacy: bool) -> None:
     print(f"Skill lock:     {HUB / '.skill-lock.json'} (skills CLI owned)")
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="部署 Akira 的静态 Agent 配置与仓库自有运行时 Skill。"
-    )
-    parser.add_argument(
-        "--cleanup-legacy",
-        action="store_true",
-        help="部署成功后删除旧的仓库 context/ 迁移目录",
-    )
-    return parser
-
-
 def main() -> int:
-    args = build_parser().parse_args()
-    deploy(cleanup_legacy=args.cleanup_legacy)
+    deploy()
     return 0
 
 
