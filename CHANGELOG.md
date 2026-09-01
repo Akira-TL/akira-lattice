@@ -25,7 +25,7 @@ All user-visible changes to stable skills will be documented in this file.
 - 细化 Core 的 Git 提交节奏与回退语义：以“一次明确修改目的”作为默认原子提交单位，每个完成阶段立即提交而不等待用户确认；有先后依赖的状态变化必须通过独立提交保留真实顺序；用户明确否定当前 Agent 最近实现时，在 ownership 与工作树安全前提下先 reset 被否定提交，再重新实现，避免在已否定历史上继续叠加修正。
 - 收紧独立 Agent 验收流程：需要黑盒验收、独立复核或最终 Agent 验收时，当前 Agent 不再自行启动验收 Agent，而是先向用户提供完整可复制的验收提示词，由用户新开独立会话执行；当前 Agent 仅在用户回传结果后负责审计、归因和修复。
 - 扩展 Core 的本地上下文读取边界：仅在确需本机系统、服务部署、端口、反向代理或开发环境信息时，允许按既有路由读取 `~/.config/akira/`，无关任务仍禁止读取。
-- 收紧 Core 的专业与学术表述规范：专业术语首次出现默认采用“规范中文名（English Full Term, ACRONYM）”格式，术语与缩写须能由严谨专业来源核验；禁止自造术语、缩写、分类名或概念名，新的概念与命名须先经用户明确同意。
+- 收紧 Core 的中英文与专业学术表述规范：面向用户的自然语言以中文为主体，专业术语首次出现默认采用“规范中文名（English Full Term, ACRONYM）”格式，后续仅使用规范中文名或公认缩写并保持权威来源规定的拼写与大小写；专有名词、程序、命令、工具、库、框架、产品、项目及技术字面量按官方原名保留，禁止为中文化强行直译；同时继续禁止自造术语、缩写、分类名或概念名。
 - Made `ask-akira-research` legacy Analysis provenance reads schema-aware: `research-db analyses` now reads v13/v14 projects without touching later-only fields and reports unavailable provenance dimensions through `schema_capabilities` instead of leaking low-level SQLite row errors.
 - Renamed `visible-browser-form-automation` to `browser-access` and generalized it into a harness-first browser access layer with one-time user-browser authorization, persistent Profile reuse, authenticated page access, network resource resolution, and the existing dynamic-form safety behavior.
 - Clarified the color boundary in `general-word-document-generation`: inserted images may retain color, while tables, text, shapes, borders, and other Word-native non-image content remain limited to black, white, and necessary grayscale unless the user explicitly requests color.
