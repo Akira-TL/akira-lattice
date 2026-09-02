@@ -30,6 +30,12 @@ Keep one source of truth for each rule. Remove duplication, stale sediment, gene
 
 Skill directory names and frontmatter `name` values use lowercase kebab-case and should match.
 
+## Agent 间交接
+
+凡是主要用于让用户复制给另一个 Agent、另一个会话或其他 Agent harness 的完整内容，例如 handoff、黑盒验收提示词、独立复核说明、Worker briefing 或长篇执行指令，统一先写入操作系统 `/tmp/` 下的描述性 Markdown 文件。用户回复中不再内联整段正文，只提供文件路径和一条最短可执行提示词，例如：`请读取 /tmp/<file>.md，并严格按照其中要求执行。` 这样把长上下文交给文件传递，用户只需复制短提示词。
+
+普通面向用户阅读的解释、结论和讨论不适用这条规则。只有目标内容本身是给另一个 Agent 消费时才写入 `/tmp/`；完整内容必须先成功落盘后，才能把短提示词交给用户。
+
 ## Changes
 
 When an Akira Skill changes behavior, update its documentation inside `skills/akira` and commit that child repository before updating the Lattice submodule pointer. Record Lattice-visible infrastructure changes in `CHANGELOG.md`. After changing Core rules, Guard rules, or submodule integration, run `uv run scripts/guard.py check .` before considering the repository change complete.
