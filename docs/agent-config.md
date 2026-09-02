@@ -26,7 +26,7 @@ akira-lattice/
 遵循以下边界：
 
 - **Core** 保留短小、稳定、跨项目且频繁使用的个人默认，例如 Git 语义、Python/前端默认、Documentation、Run & Debug、模型选择和工具路由。Git 交互节奏也在 Core 中明确：按修改目的逐阶段实现并立即提交，用户明确否定最近实现时先安全回退再重做；每次正式提交由 Guard 自动执行 staged 最低语法检查，只有大型、关键或高风险修改才按实际失败模式追加更重的验证。不要为了追求极短而把几行规则拆成额外读取。
-- **Reference** 只放低频且有独立阅读价值的事实、边界或长说明。当前典型例子是 DevSpace/worktree 语义，以及 Matt skills fork/upstream 的维护边界。
+- **Reference** 只放低频且有独立阅读价值的事实、边界或长说明。当前典型例子是 Agent harness / Git worktree 语义，以及 Matt skills fork/upstream 的维护边界。
 - **Skill** 保存大型规则、检查清单和多步骤过程；代码项目先通过 `ask-matt` 决定应进入的 Matt flow。
 - **Guard** 承担确定性、可机械判断的约束。Prompt 不重复维护可以由程序可靠验证的细节。
 - **Project context** 由 Matt flow 的 `CONTEXT.md`、ADR 和相关项目文档维护，不由本仓库复制。
@@ -68,7 +68,7 @@ upstream matt 同步 Matt fork 的 upstream；显式 --push 时发布 fork 并�
 check         运行当前项目适用的组合检查，并输出所有本地分支与 worktree 概览
 ```
 
-`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。Guard 的最低语法检查读取 Git index 中真正准备提交的版本，目前直接覆盖 Python、JSON、TOML，并在本机相应解释器可用时检查 Shell、`.mjs` 与 `.cjs`；它不会把普通提交扩张成全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改仍根据实际失败模式追加 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。`config` 还会检查 `akira-guard`、`ask-matt` 与 `devspace-orchestration` 等 Core 依赖的运行时 Skill，并核验 `skills/matt` 的 fork/upstream 边界。`upstream matt` 的具体安全流程记录在 `core/references/matt-skills.md`。DevSpace 对 Git/MCP 宿主能力的边界记录在 `core/references/devspace.md`。
+`commit` 不判断 diff ownership。Agent 必须先检查 diff，再用 `git add -- <paths...>` 只暂存当前原子修改；正式提交统一交给 Guard，日常不直接执行 `git commit`。Guard 的最低语法检查读取 Git index 中真正准备提交的版本，目前直接覆盖 Python、JSON、TOML，并在本机相应解释器可用时检查 Shell、`.mjs` 与 `.cjs`；它不会把普通提交扩张成全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改仍根据实际失败模式追加 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。架构阈值默认阻止新引入或加重的规模问题；确有合理理由时可在语义审查后显式使用 `--allow-architecture-warnings`。`config` 检查 `akira-guard`、`ask-matt` 等 Core 真正依赖的运行时 Skill，并核验 `skills/matt` 的 fork/upstream 边界；可选的 Agent 编排能力不作为 Core 运行前提。`upstream matt` 的具体安全流程记录在 `core/references/matt-skills.md`。当前 Agent harness 与标准 Git worktree 的边界记录在 `core/references/agent-harness.md`。
 
 Guard 是全局入口，不要求每个项目安装全局 Git hook，因此不会与 Husky、pre-commit 或项目自有 Git hooks 抢占所有权。
 

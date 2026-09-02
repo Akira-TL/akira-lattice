@@ -34,14 +34,11 @@
 
 ## 模型与多 Agent
 
-调用 Claude 或子 Agent 时必须显式指定 `--model` 或 Agent 的 `model`，禁止省略、继承父会话模型或自行降级。
+多 Agent 协作不得绑定某个固定执行产品。Codex、Claude Code 或其他 Agent harness 都只是执行载体；先依据当前会话真实暴露的工具契约判断是否支持子 Agent、后台进程、终端会话、worktree 或其他隔离能力。当前 harness 不具备某项能力时保持串行或使用其他已确认可用的原语，不通过 Prompt 假造执行器。
 
-- `fable`：极少数超长上下文、重型规划任务
-- `opus`：主会话、复杂决策、架构推理、关键审查、最终验收
-- `sonnet`：默认子 Agent；代码实现、修复、重构、调查、测试分析和常规模块任务
-- `haiku`：简单查找、信息摘取、机械核对、格式整理等低风险任务
+模型名称与启动参数属于 harness 实现细节。当前 harness 或项目规则要求显式指定模型时必须显式指定，但不得假设不同 harness 共享模型名称、别名或参数，也不得自行跨产品映射或降级。使用 Claude Code 且项目没有另行覆盖时，可继续使用本机既有 `fable` / `opus` / `sonnet` / `haiku` 路由；其他 harness 使用各自已经配置的模型策略。
 
-DevSpace 子 Agent 默认使用 `sonnet`；确需独立高层判断时使用 `opus`，简单机械任务使用 `haiku`。底层模型 ID 和路由由本机配置解析，Agent 不负责替换。需要并行 Agent、tmux 或隔离 worktree 编排时，使用 `devspace-orchestration` Skill；涉及 DevSpace/worktree 的事实与路径边界时可读取 `~/.agents/references/devspace.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。不要为了使用多 Agent 而拆分本可由单 Agent 清晰完成的任务。
+需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。多 Agent 的 Task、claim、Ownership、frontier 与验收由实际协作协议决定，不由底层 Agent 启动方式反向定义。不要为了使用多 Agent 而拆分本可由单 Agent 清晰完成的任务。
 
 需要独立 Agent 进行黑盒验收、独立复核或最终 Agent 验收时，当前 Agent 不得自行启动或代替用户运行该验收 Agent。应先向用户提供一份完整、可直接复制到新会话执行的验收提示词，明确项目路径、隔离边界、允许/禁止读取与修改的范围、验收目标、完成门槛和需要回传的结果；由用户自行开启独立验收 Agent。用户回传验收输出后，当前 Agent 负责审计结果、区分 Skill 缺陷与验收环境/模型问题，并按证据决定是否修复。确定性测试、机械门禁和当前 Agent 自身审计不属于“独立 Agent 验收”，可直接执行。
 

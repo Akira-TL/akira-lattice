@@ -12,7 +12,7 @@ All user-visible changes to stable skills will be documented in this file.
 - Added separate runtime source, user documentation, lifecycle directories, repository instructions, and shared terminology.
 - Documented local installation through `npx skills` for Codex, Claude Code, OpenCode, Hermes Agent, and other supported agents.
 - Added canonical global static Agent configuration under `core/`, with on-demand references and runtime links.
-- Added `devspace-orchestration` for choosing Claude native Agent, tmux, and Git worktree isolation in multi-Agent DevSpace tasks.
+- Added the harness-agnostic `agent-orchestration` Skill for mapping already-defined work units onto execution primitives actually provided by the current Agent harness, without making it a Parallel protocol dependency.
 - Added `scientific-presentation-authoring` for structuring scientific presentations, writing evidence-bounded result slides, adapting reference-deck design rules without copying template content, and applying `humanizer-zh` to Chinese slide text.
 - Added cross-platform `scripts/guard.py` and `scripts/install.py` entry points for static configuration deployment, architecture thresholds, Skill structure validation, and guarded Git commits.
 - Added `core/references/matt-skills.md` to record ownership and upstream-merge rules for the maintained `Akira-TL/matt-skills` fork.
@@ -21,6 +21,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 将多 Agent 执行边界改为 harness-agnostic：Parallel / Ask-Akira 不再依赖固定执行产品或执行器 Skill；Codex、Claude Code 或其他 harness 都只作为实现载体，具体子 Agent、进程、模型与 worktree 能力以当前工具契约为准。
+- 将原环境绑定的多 Agent 执行 Skill 迁移为可选的 `agent-orchestration`，移除固定 CLI 与模型名称假设，并从 Core 必需运行时 Skill 检查中删除该执行层依赖。
 - 收窄运行时安装职责：安装只建立或更新本项目的全局 Agent 配置软链接并安装当前 Akira/Matt Skills，不再自动清理旧 Skill、迁移历史备份、删除旧目录或修改 Matt remote；卸载由独立入口按项目所有权执行。
 - 明确 Core 的发布 tag 可变性边界：仅推送 tag、尚未产生 GitHub Release、包仓库版本或其他不可撤回正式发布产物时，允许修复后删除并重建同名 tag、继续使用原版本号；正式发布后 tag 与版本内容才进入不可变状态。
 - 将 Akira Guard 明确分成 Core 路由、`akira-guard` Skill 与 `scripts/guard.py` 执行层；`guard.py commit` 现在自动检查 staged Python/JSON/TOML 及可用解释器支持的 Shell/Node 语法，普通提交不再默认扩张为全量 lint/typecheck/build/test，重型验证仅用于大型、关键或高风险修改。
@@ -35,7 +37,7 @@ All user-visible changes to stable skills will be documented in this file.
 - 为 Akira 的本地长期上下文增加按资料域路由：基础资料、学术履历、项目经历和系统配置分别按需加载，不再继续堆叠到单一用户资料中。
 - Renamed the static configuration source from `context/` to `core/` so project context remains exclusively owned by the Matt flow and future dynamic context/Memory remains reserved for `contextd`.
 - Changed Claude, Codex, OpenCode, and the generic Agent prompt entry points to direct symlinks from their native prompt filenames to `core/AGENTS.md`, eliminating intermediate prompt forwarding.
-- Standardized Git submission on `guard.py commit`: agents may selectively stage with `git add -- <paths...>`, but normal commits go through the Guard; documented that GPT/MCP hosts may impose stricter shell constraints than DevSpace itself.
+- Standardized Git submission on `guard.py commit`: agents may selectively stage with `git add -- <paths...>`, but normal commits go through the Guard; documented that an Agent harness or tool contract may impose stricter shell constraints than the repository itself.
 - Made the per-turn Git development cadence explicit in Core: decide whether the previous atomic change should be committed, plan the next change, implement, run minimum syntax checks, show all local branches/worktrees, then optionally surface broader build or check commands.
 - Centralized installer-created Agent configuration backups under the Git-ignored `backup/` mirror tree and migrate legacy adjacent backups from managed prompt paths.
 - Changed Matt-derived runtime Skills to install from the `skills/matt` Git submodule, whose `origin` is the maintained `Akira-TL/matt-skills` fork while Matt's repository remains fetch-only `upstream`; Guard now verifies this ownership boundary.
