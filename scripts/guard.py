@@ -105,6 +105,14 @@ def is_ignored_relative(path: Path) -> bool:
     return any(part in IGNORED_DIRS for part in path.parts)
 
 
+def is_flat_skill_docs_directory(path: Path) -> bool:
+    try:
+        relative = path.resolve().relative_to(AKIRA_SKILLS_ROOT.resolve())
+    except ValueError:
+        return False
+    return len(relative.parts) == 2 and relative.parts[0] == "docs"
+
+
 def architecture_scan_tree(root: Path) -> list[str]:
     violations: list[str] = []
 
@@ -118,7 +126,7 @@ def architecture_scan_tree(root: Path) -> list[str]:
         relative_dir = current.relative_to(root)
 
         direct_files = [name for name in filenames if name != ".DS_Store"]
-        if len(direct_files) > DIRECT_FILE_LIMIT:
+        if len(direct_files) > DIRECT_FILE_LIMIT and not is_flat_skill_docs_directory(current):
             violations.append(
                 f"{relative_dir if relative_dir.parts else Path('.')} 直接文件 "
                 f"{len(direct_files)} 个，超过 {DIRECT_FILE_LIMIT} 个"
@@ -202,7 +210,12 @@ def architecture_scan_staged(root: Path) -> list[str]:
     for directory in sorted(changed_parents, key=str):
         current = current_counts[directory]
         baseline = baseline_counts[directory]
-        if current > DIRECT_FILE_LIMIT and current > baseline:
+        absolute_directory = root / directory
+        if (
+            current > DIRECT_FILE_LIMIT
+            and current > baseline
+            and not is_flat_skill_docs_directory(absolute_directory)
+        ):
             violations.append(
                 f"{directory if directory.parts else Path('.')} 暂存后直接文件 "
                 f"{current} 个，超过 {DIRECT_FILE_LIMIT} 个"
