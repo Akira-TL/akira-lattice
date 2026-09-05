@@ -48,7 +48,7 @@ uv run scripts/guard.py config
 
 ## Current skills
 
-自研 Skill 的正文、README 与详细用户文档都由 `skills/akira` 子模块中的 `Akira-TL/skills` 独立维护；Lattice 只锁定其 commit，不保留第二份 Skill 文档。当前主要能力包括可选的 `agent-orchestration`、`general-word-document-generation` 和 `browser-access`；多 Agent 协作协议本身不依赖某个固定执行 harness。
+自研 Skill 的正文、README 与详细用户文档都由 `skills/akira` 子模块中的 `Akira-TL/skills` 独立维护；Lattice 只锁定其 commit，不保留第二份 Skill 文档。当前稳定能力包括 `akira-research` 科研总 Router 及其科研工作流族、`akira-guard`、可选的 `agent-orchestration`、`general-word-document-generation`、`scientific-presentation-authoring` 和 `browser-access`；多 Agent 协作协议仍处于 in-progress，且不依赖某个固定执行 harness。
 
 Matt 派生 Skill 则由 `skills/matt` 对应的 `Akira-TL/matt-skills` fork 独立维护。
 

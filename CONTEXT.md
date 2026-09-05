@@ -34,7 +34,7 @@
 
 ## Current boundary
 
-The maintained stable capabilities are the optional harness-agnostic `engineering/agent-orchestration`, `productivity/general-word-document-generation`, and `productivity/browser-access`. Multi-Agent collaboration protocols do not depend on any particular execution harness.
+The maintained stable capabilities now include the `research/akira-research` router and its research workflow family, plus the optional harness-agnostic `engineering/agent-orchestration`, `engineering/akira-guard`, `productivity/general-word-document-generation`, `productivity/scientific-presentation-authoring`, and `productivity/browser-access`. Multi-Agent collaboration protocols remain in progress and do not depend on any particular execution harness.
 
 The repository can be consumed locally by the `skills` CLI through `npx skills add <local-path>`. Static global configuration is deployed through `uv run scripts/install.py`, which links runtime entry points back to the canonical source without taking ownership of externally managed state. Deterministic checks are exposed through `uv run scripts/guard.py <command>`.
 
