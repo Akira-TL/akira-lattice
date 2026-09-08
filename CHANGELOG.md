@@ -18,6 +18,7 @@ All user-visible changes to stable skills will be documented in this file.
 - Added `core/references/matt-skills.md` to record ownership and upstream-merge rules for the maintained `Akira-TL/matt-skills` fork.
 - Added `guard.py upstream matt` to fetch, compare and merge Matt upstream safely; explicit `--push` publishes our fork and commits the updated Lattice submodule pointer.
 - Added root `install.sh` and `uninstall.sh` as the unified human-facing runtime installation/update and uninstall entry points.
+- Added the official OpenAI `plugins` repository as a read-only third-party submodule and exposed only `ngs-analysis` through `~/.agents/external/ngs-analysis`, while Akira's own `research/ngs` Skill retains scientific routing and method authority.
 
 ### Changed
 

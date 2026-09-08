@@ -12,8 +12,10 @@ SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
+OPENAI_NGS_ROOT = REPO_ROOT / "skills" / "openai-plugins" / "plugins" / "ngs-analysis"
 HOME = Path.home()
 HUB = HOME / ".agents"
+NGS_RUNTIME_VIEW = HUB / "external" / "ngs-analysis"
 INSTALL_MANIFEST = HUB / ".akira-skills-install.json"
 
 
@@ -105,6 +107,7 @@ def uninstall_runtime_links() -> None:
         (CORE_ROOT / "references", HUB / "references"),
         (SCRIPT_ROOT, HUB / "scripts"),
         (DOC_PATH, HUB / "README.md"),
+        (OPENAI_NGS_ROOT, NGS_RUNTIME_VIEW),
         (CORE_ROOT / "AGENTS.md", HOME / ".codex" / "AGENTS.md"),
         (CORE_ROOT / "AGENTS.md", HOME / ".claude" / "CLAUDE.md"),
         (CORE_ROOT / "AGENTS.md", HOME / ".config" / "opencode" / "AGENTS.md"),

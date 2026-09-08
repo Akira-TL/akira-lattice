@@ -18,7 +18,8 @@ akira-lattice/
 │   └── upstream.py          # fork/upstream Git 状态机实现
 ├── skills/
 │   ├── akira/               # Git submodule：Akira-TL/skills，自研 Skills + 用户文档
-│   └── matt/                # Git submodule：Akira-TL/matt-skills，Matt fork
+│   ├── matt/                # Git submodule：Akira-TL/matt-skills，Matt fork
+│   └── openai-plugins/      # Git submodule：OpenAI 官方 plugins；第三方源码只读固定
 ├── docs/                    # 仅保存 Lattice 基础设施与配置说明
 └── .agents/adr/             # 本仓库的长期架构决策
 ```
@@ -27,7 +28,7 @@ akira-lattice/
 
 - **Core** 保留短小、稳定、跨项目且频繁使用的个人默认，例如 Git 语义、Python/前端默认、Documentation、Run & Debug、模型选择和工具路由。Git 交互节奏也在 Core 中明确：按修改目的逐阶段实现并立即提交，用户明确否定最近实现时先安全回退再重做；每次正式提交由 Guard 自动执行 staged 最低语法检查，只有大型、关键或高风险修改才按实际失败模式追加更重的验证。不要为了追求极短而把几行规则拆成额外读取。
 - **Reference** 只放低频且有独立阅读价值的事实、边界或长说明。当前典型例子是 Agent harness / Git worktree 语义，以及 Matt skills fork/upstream 的维护边界。
-- **Skill** 保存大型规则、检查清单和多步骤过程；代码项目先通过 `ask-matt` 决定应进入的 Matt flow。
+- **Skill** 保存大型规则、检查清单和多步骤过程；代码项目先通过 `ask-matt` 决定应进入的 Matt flow。Akira 自研 Skill 正文只放在 `skills/akira`；第三方 Skill/Plugin 源码以独立 submodule 固定，不复制进自研仓库。
 - **Guard** 承担确定性、可机械判断的约束。Prompt 不重复维护可以由程序可靠验证的细节。
 - **Project context** 由 Matt flow 的 `CONTEXT.md`、ADR 和相关项目文档维护，不由本仓库复制。
 - **Dynamic context / Memory** 不属于本仓库，未来由 `contextd` 管理。
@@ -47,7 +48,7 @@ akira-lattice/
 
 所有入口都使用对应 Agent 原生识别的系统提示词文件名，并**直接软链接**到 `core/AGENTS.md`，不再通过 `~/.agents/AGENTS.md` 二次转发，也不使用只负责提示“继续读取另一个文件”的跳板 Prompt。这样既保持单一 canonical source，也避免 Agent 为加载同一份全局规则再执行额外文件读取。
 
-`~/.agents/AGENTS.md` 仍作为通用运行时入口；`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向仓库根 `scripts/`。`~/.agents/skills/` 与 `.skill-lock.json` 始终由 skills CLI 管理。
+`~/.agents/AGENTS.md` 仍作为通用运行时入口；`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向仓库根 `scripts/`。`~/.agents/skills/` 与 `.skill-lock.json` 始终由 skills CLI 管理。OpenAI `ngs-analysis` 不作为一组独立全局 Skill 安装，而由 `~/.agents/external/ngs-analysis` 直接链接到固定的第三方 submodule source，供 Akira `ngs` 适配层按需读取 runner、registry 与 assay-specific 原始规则。
 
 ## Guard
 
@@ -60,7 +61,7 @@ uv run ~/.agents/scripts/guard.py <command>
 当前命令：
 
 ```text
-config        检查静态配置部署、链接和 Core 依赖的运行时 Skill
+config        检查静态配置部署、链接、Core 依赖的运行时 Skill 与受管第三方 source
 architecture  检查代码文件与目录规模
 skills        检查 skills/akira 子模块中的 Skill 结构和文档映射
 commit        验证提交格式、staged 最低语法与暂存架构后执行 git commit
@@ -81,7 +82,7 @@ cd ~/Projects/akira-skills
 ./install.sh
 ```
 
-该入口只执行当前项目运行时部署：建立或更新全局 Agent 提示词、references、scripts 与说明文档软链接，并通过 skills CLI 全量安装或更新当前 `skills/akira` 与 `skills/matt` 提供的 Skill。它不会清理旧 Skill、迁移历史备份、删除旧目录或修改 Matt remote；版本同步和上游维护继续由各自 Git/Guard 流程负责。
+该入口只执行当前项目运行时部署：建立或更新全局 Agent 提示词、references、scripts 与说明文档软链接，通过 skills CLI 全量安装或更新当前 `skills/akira` 与 `skills/matt` 提供的 Skill，并初始化 `skills/openai-plugins`、把其中 `plugins/ngs-analysis` 暴露为 `~/.agents/external/ngs-analysis` source view。OpenAI upstream Skills 不直接加入全局 Skill 列表，因此 Akira Research 的科研路由与方法决定仍由自研适配层控制。安装器不会清理旧 Skill、迁移历史备份、删除旧目录或修改 Matt remote；版本同步和上游维护继续由各自 Git/Guard 流程负责。
 
 安装器需要替换同名且不属于当前项目的运行时文件时，会先把原内容集中移动到仓库的 `backup/`。该目录按用户 Home 的相对路径镜像，例如 `~/.claude/CLAUDE.md` 的备份位于 `backup/.claude/CLAUDE.md.backup.<timestamp>`。这是避免覆盖用户现有配置的安装安全措施，不会在后续安装中主动整理或清理已有备份。
 
@@ -93,7 +94,7 @@ cd ~/Projects/akira-skills
 
 卸载器只移除两类明确属于本项目的运行时内容：仍直接指向本仓库源码的 Agent 配置软链接，以及最近一次 `./install.sh` 写入安装清单且当前 `SKILL.md` 哈希仍一致的 Skill。没有安装清单时不会猜测 Skill 名称；同名 Skill 在安装后被其他内容替换时也会保留。它不会恢复或清理 `backup/`，不会删除 Agent 配置目录，也不会清理其他 Skill、插件、MCP、缓存或会话状态。
 
-安装和卸载均不会直接维护 `.skill-lock.json`；Skill 的实际安装/移除统一通过 skills CLI 完成，因此该状态继续由 skills CLI 所有。Lattice 自有 Skill 来自本地 `skills/akira` submodule；Matt 派生 Skill 来自 `skills/matt`。Matt submodule 的 fork/upstream 维护边界记录在 `core/references/matt-skills.md`，不属于安装流程。
+安装和卸载均不会直接维护 `.skill-lock.json`；Skill 的实际安装/移除统一通过 skills CLI 完成，因此该状态继续由 skills CLI 所有。Lattice 自有 Skill 来自本地 `skills/akira` submodule；Matt 派生 Skill 来自 `skills/matt`。OpenAI NGS 仅提供第三方 execution source，不由 skills CLI 安装。Matt submodule 的 fork/upstream 维护边界记录在 `core/references/matt-skills.md`；第三方来源记录见 `docs/third-party-sources.md`。
 
 ## 维护原则
 

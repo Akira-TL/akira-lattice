@@ -22,6 +22,10 @@ AKIRA_SKILLS_ORIGIN = "git@github.com:Akira-TL/skills.git"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 MATT_SKILLS_ORIGIN = "git@github.com:Akira-TL/matt-skills.git"
 MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
+OPENAI_PLUGINS_ROOT = REPO_ROOT / "skills" / "openai-plugins"
+OPENAI_PLUGINS_ORIGIN = "https://github.com/openai/plugins.git"
+OPENAI_NGS_ROOT = OPENAI_PLUGINS_ROOT / "plugins" / "ngs-analysis"
+NGS_RUNTIME_VIEW = HUB / "external" / "ngs-analysis"
 
 DYNAMIC_LIMIT = 800
 STATIC_LIMIT = 1000
@@ -289,6 +293,7 @@ def cmd_config(_: argparse.Namespace) -> int:
         (HUB / "references", CORE_ROOT / "references"),
         (HUB / "scripts", SCRIPT_ROOT),
         (HUB / "README.md", REPO_ROOT / "docs" / "agent-config.md"),
+        (NGS_RUNTIME_VIEW, OPENAI_NGS_ROOT),
         (Path.home() / ".codex" / "AGENTS.md", CORE_ROOT / "AGENTS.md"),
         (Path.home() / ".claude" / "CLAUDE.md", CORE_ROOT / "AGENTS.md"),
         (Path.home() / ".config" / "opencode" / "AGENTS.md", CORE_ROOT / "AGENTS.md"),
@@ -324,12 +329,13 @@ def cmd_config(_: argparse.Namespace) -> int:
 
     gitmodules = REPO_ROOT / ".gitmodules"
     if not gitmodules.is_file():
-        fail("缺少 .gitmodules，Akira 与 Matt skills 必须作为 Git submodule 管理")
+        fail("缺少 .gitmodules，Akira、Matt 与受管第三方 source 必须作为 Git submodule 管理")
         failed = True
     else:
         for name, expected in (
             ("skills/akira", AKIRA_SKILLS_ORIGIN),
             ("skills/matt", MATT_SKILLS_ORIGIN),
+            ("skills/openai-plugins", OPENAI_PLUGINS_ORIGIN),
         ):
             configured = run_git(
                 ["config", "-f", str(gitmodules), "--get", f"submodule.{name}.url"],
@@ -342,7 +348,7 @@ def cmd_config(_: argparse.Namespace) -> int:
                 fail(f"{name} submodule URL={configured_url!r}，预期 {expected}")
                 failed = True
 
-    for name in ("skills/akira", "skills/matt"):
+    for name in ("skills/akira", "skills/matt", "skills/openai-plugins"):
         submodule = run_git(["submodule", "status", "--", name], REPO_ROOT)
         submodule_status = str(submodule.stdout).strip()
         if submodule.returncode != 0 or not submodule_status or submodule_status.startswith("-"):
@@ -364,6 +370,28 @@ def cmd_config(_: argparse.Namespace) -> int:
             ok(f"Akira skills origin: {AKIRA_SKILLS_ORIGIN}")
         else:
             fail(f"Akira skills origin={origin_url!r}，预期 {AKIRA_SKILLS_ORIGIN}")
+            failed = True
+
+    if OPENAI_PLUGINS_ROOT.is_dir():
+        origin = run_git(["remote", "get-url", "origin"], OPENAI_PLUGINS_ROOT)
+        origin_url = str(origin.stdout).strip()
+        if origin.returncode == 0 and origin_url == OPENAI_PLUGINS_ORIGIN:
+            ok(f"OpenAI plugins origin: {OPENAI_PLUGINS_ORIGIN}")
+        else:
+            fail(f"OpenAI plugins origin={origin_url!r}，预期 {OPENAI_PLUGINS_ORIGIN}")
+            failed = True
+
+        push = run_git(["remote", "get-url", "--push", "origin"], OPENAI_PLUGINS_ROOT)
+        if push.returncode == 0 and str(push.stdout).strip() == "DISABLED":
+            ok("OpenAI plugins push 已禁用")
+        else:
+            fail("OpenAI plugins origin push 必须设置为 DISABLED")
+            failed = True
+
+        if (OPENAI_NGS_ROOT / ".codex-plugin" / "plugin.json").is_file():
+            ok("OpenAI ngs-analysis plugin source")
+        else:
+            fail("缺少 OpenAI ngs-analysis plugin source")
             failed = True
 
     if MATT_SKILLS_ROOT.is_dir():

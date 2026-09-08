@@ -4,3 +4,6 @@
 [submodule "skills/akira"]
 	path = skills/akira
 	url = git@github.com:Akira-TL/skills.git
+[submodule "skills/openai-plugins"]
+	path = skills/openai-plugins
+	url = https://github.com/openai/plugins.git
