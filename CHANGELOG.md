@@ -9,6 +9,7 @@ All user-visible changes to stable skills will be documented in this file.
 - Initialized the `akira-skills` repository structure.
 - Added the first productivity skill, `general-word-document-generation`.
 - Added `visible-browser-form-automation` for WSL-to-Windows Chrome CDP automation, dynamic form inspection, human-visible review, upload handoff, and explicit pre-submit safety boundaries.
+- 为 `browser-access` 增加可复用的 Chrome DevTools Protocol 控制 CLI，统一 Agent Chrome 生命周期、target 选择、DOM 操作、文件上传与网络观察，并要求优先复用该执行层而不是临时编写 WebSocket/CDP 包装脚本。
 - Added separate runtime source, user documentation, lifecycle directories, repository instructions, and shared terminology.
 - Documented local installation through `npx skills` for Codex, Claude Code, OpenCode, Hermes Agent, and other supported agents.
 - Added canonical global static Agent configuration under `core/`, with on-demand references and runtime links.
