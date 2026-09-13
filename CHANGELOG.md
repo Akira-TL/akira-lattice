@@ -22,6 +22,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
 - 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork，作为 Matt 工程流程的 in-progress 扩展。Lattice 以后区分“submodule pin”与“全局安装”，默认全局只安装 `akira` 与 `browser-access`，Matt / Research / 其他通用 Skill 由 Router 按项目真实需求并经用户同意后项目级安装。
 - 移除 Lattice 对 OpenAI `plugins` 仓库与固定 `ngs-analysis` source view 的 submodule 管理；OpenAI Plugins 改由 `akira` Router 作为外部能力来源按当前清单发现，只有具体任务需要且用户同意时才项目级安装对应 Skill。
 
