@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import filecmp
-import hashlib
-import json
 import os
-import re
 import shutil
-import subprocess
-import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
+
+from skill_manager import SkillInstallError, install_from_source
 
 SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
@@ -18,15 +15,9 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 FORGERELAY_HOME = HOME / ".forgerelay"
-FORGERELAY_CANONICAL_SKILLS = FORGERELAY_HOME / ".agents" / "skills"
-FORGERELAY_SKILLS = FORGERELAY_HOME / "skills"
 BACKUP_ROOT = REPO_ROOT / "backup"
-AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
-RESEARCH_SKILLS_ROOT = REPO_ROOT / "skills" / "research"
-MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 DEFAULT_RUNTIME_SKILLS = ("akira", "browser-access")
-INSTALL_MANIFEST = FORGERELAY_HOME / ".akira-skills-install.json"
-NAME_PATTERN = re.compile(r"^name:\s*([^\s#]+)\s*$")
+AKIRA_SKILLS_SOURCE = "https://github.com/Akira-TL/skills.git"
 
 
 def remove_path(path: Path) -> None:
@@ -94,163 +85,20 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     print(f"LINK   {target} -> {link_source}")
 
 
-def find_npx() -> str:
-    npx = shutil.which("npx") or shutil.which("npx.cmd")
-    if npx is None:
-        raise RuntimeError("npx 不可用，无法安装运行时 Skill")
-    return npx
-
-
-def ensure_source_submodules() -> None:
-    result = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(REPO_ROOT),
-            "submodule",
-            "update",
-            "--init",
-            "--recursive",
-            "skills/akira",
-            "skills/research",
-            "skills/matt",
-        ]
-    )
-    if result.returncode != 0:
-        raise RuntimeError("无法初始化 Akira、Research 或 Matt Git submodule")
-
-    if not (AKIRA_SKILLS_ROOT / "AGENTS.md").is_file():
-        raise RuntimeError("skills/akira 未正确初始化")
-    if not (RESEARCH_SKILLS_ROOT / "README.md").is_file():
-        raise RuntimeError("skills/research 未正确初始化")
-    if not MATT_SKILLS_ROOT.is_dir():
-        raise RuntimeError("skills/matt 未正确初始化")
-
-
-def skill_name(skill_file: Path) -> str | None:
-    try:
-        lines = skill_file.read_text(encoding="utf-8").splitlines()[:40]
-    except OSError:
-        return None
-    if not lines or lines[0].strip() != "---":
-        return None
-    for line in lines[1:]:
-        if line.strip() == "---":
-            break
-        match = NAME_PATTERN.match(line.strip())
-        if match:
-            return match.group(1)
-    return None
-
-
-def discover_skill_names(root: Path) -> list[str]:
-    names: set[str] = set()
-    for skill_file in root.rglob("SKILL.md"):
-        relative = skill_file.relative_to(root)
-        if "deprecated" in relative.parts:
-            continue
-        name = skill_name(skill_file)
-        if name:
-            names.add(name)
-    return sorted(names)
-
-
-def install_skill_source(
-    npx: str,
-    source: Path,
-    label: str,
-    skill_names: tuple[str, ...],
-) -> None:
-    # npx skills currently has no arbitrary target-directory flag. Use its project-level
-    # universal canonical store plus the openclaw "skills/" profile while cwd is
-    # ~/.forgerelay. In symlink mode this gives:
-    #   ~/.forgerelay/.agents/skills/<name>  canonical store
-    #   ~/.forgerelay/skills/<name>          symlink view consumed by ForgeRelay
-    # Do not add --copy: our runtime contract requires npx skills symlink mode.
-    command = [
-        npx,
-        "skills",
-        "add",
-        str(source),
-        "--skill",
-        *skill_names,
-        "--agent",
-        "universal",
-        "openclaw",
-        "-y",
-    ]
-    FORGERELAY_HOME.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(command, cwd=FORGERELAY_HOME)
-    if result.returncode != 0:
-        print(
-            f"WARN   {label} 安装失败；请检查上方 skills CLI 输出。",
-            file=sys.stderr,
-        )
-
-
 def install_runtime_skills() -> list[str]:
-    npx = find_npx()
-    available = set(discover_skill_names(AKIRA_SKILLS_ROOT))
-    missing_source = sorted(set(DEFAULT_RUNTIME_SKILLS).difference(available))
-    if missing_source:
-        raise RuntimeError(
-            "默认 ForgeRelay 运行时 Skill 未出现在 Akira 通用仓："
-            + ", ".join(missing_source)
+    try:
+        return install_from_source(
+            AKIRA_SKILLS_SOURCE,
+            skill_names=DEFAULT_RUNTIME_SKILLS,
+            global_scope=True,
+            forgerelay=True,
         )
-
-    install_skill_source(
-        npx,
-        AKIRA_SKILLS_ROOT,
-        "Akira baseline Skills",
-        DEFAULT_RUNTIME_SKILLS,
-    )
-
-    expected = set(DEFAULT_RUNTIME_SKILLS)
-    installed: list[str] = []
-    for name in sorted(expected):
-        runtime_path = FORGERELAY_SKILLS / name
-        canonical_path = FORGERELAY_CANONICAL_SKILLS / name
-        if not runtime_path.is_symlink():
-            raise RuntimeError(
-                f"ForgeRelay Skill 必须由 npx skills 以软链接安装：{runtime_path}"
-            )
-        if direct_link_target(runtime_path) != canonical_path.absolute():
-            raise RuntimeError(
-                f"ForgeRelay Skill 软链接目标异常：{runtime_path} -> "
-                f"{direct_link_target(runtime_path)}；预期 {canonical_path.absolute()}"
-            )
-        if not (canonical_path / "SKILL.md").is_file():
-            raise RuntimeError(f"npx skills canonical store 缺少 Skill：{canonical_path}")
-        installed.append(name)
-    return installed
-
-
-def skill_runtime_hash(name: str) -> str:
-    skill_file = FORGERELAY_SKILLS / name / "SKILL.md"
-    if not skill_file.is_file():
-        raise RuntimeError(f"运行时 Skill 缺少 SKILL.md：{name}")
-    return hashlib.sha256(skill_file.read_bytes()).hexdigest()
-
-
-def write_install_manifest(skill_names: list[str]) -> None:
-    payload = {
-        "version": 1,
-        "repo_root": str(REPO_ROOT),
-        "skills": {
-            name: {"skill_md_sha256": skill_runtime_hash(name)} for name in skill_names
-        },
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-    }
-    INSTALL_MANIFEST.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(f"STATE  {INSTALL_MANIFEST}")
+    except SkillInstallError as exc:
+        raise RuntimeError(str(exc)) from exc
 
 
 def deploy() -> None:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    ensure_source_submodules()
     for path in (
         HUB,
         FORGERELAY_HOME,
@@ -272,15 +120,16 @@ def deploy() -> None:
         stamp,
     )
 
-    installed_skills = install_runtime_skills()
-    write_install_manifest(installed_skills)
+    installed = install_runtime_skills()
 
-    print(f"Core source:    {CORE_ROOT}")
-    print(f"Scripts source: {SCRIPT_ROOT}")
-    print(f"Runtime hub:    {HUB}")
-    print(f"ForgeRelay:     {FORGERELAY_HOME}")
-    print(f"Skills state:   {FORGERELAY_SKILLS} (skills CLI owned)")
-    print(f"Skill lock:     {FORGERELAY_HOME / 'skills-lock.json'} (skills CLI owned)")
+    print(f"Core source:       {CORE_ROOT}")
+    print(f"Scripts source:    {SCRIPT_ROOT}")
+    print(f"Runtime hub:       {HUB}")
+    print(f"ForgeRelay:        {FORGERELAY_HOME}")
+    print(f"Baseline Skills:   {', '.join(installed)}")
+    print(f"Skill source cache:{HUB / 'sources'}")
+    print(f"Global Skill view: {HUB / 'skills'}")
+    print(f"ForgeRelay view:   {FORGERELAY_HOME / 'skills'}")
 
 
 def main() -> int:

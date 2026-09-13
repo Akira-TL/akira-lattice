@@ -11,7 +11,7 @@ All user-visible changes to stable skills will be documented in this file.
 - Added `visible-browser-form-automation` for WSL-to-Windows Chrome CDP automation, dynamic form inspection, human-visible review, upload handoff, and explicit pre-submit safety boundaries.
 - 为 `browser-access` 增加可复用的 Chrome DevTools Protocol 控制 CLI，统一 Agent Chrome 生命周期、target 选择、DOM 操作、文件上传与网络观察，并要求优先复用该执行层而不是临时编写 WebSocket/CDP 包装脚本。
 - Added separate runtime source, user documentation, lifecycle directories, repository instructions, and shared terminology.
-- Documented local installation through `npx skills` for Codex, Claude Code, OpenCode, Hermes Agent, and other supported agents.
+- Added Akira's own Git + symlink Skill installer for shared source checkout, project/global views, update, remove, inspect and doctor workflows.
 - Added canonical global static Agent configuration under `core/`, with on-demand references and runtime links.
 - Added the harness-agnostic `agent-orchestration` Skill for mapping already-defined work units onto execution primitives actually provided by the current Agent harness, without making it a Parallel protocol dependency.
 - Added `scientific-presentation-authoring` for structuring scientific presentations, writing evidence-bounded result slides, adapting reference-deck design rules without copying template content, and applying `humanizer-zh` to Chinese slide text.
@@ -23,8 +23,8 @@ All user-visible changes to stable skills will be documented in this file.
 ### Changed
 
 - 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
-- 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork，作为 Matt 工程流程的 in-progress 扩展。Lattice 以后区分“submodule pin”与“运行时安装”：ForgeRelay 只常驻 `akira` 与 `browser-access`，由 `npx skills` 管理在 `~/.forgerelay/skills/`；Matt / Research / 其他通用 Skill 由 Router 按项目真实需求并经用户同意后项目级安装。
-- 将 `akira` 的 first-party 能力发现集中到按需读取的 `CATALOG.md`：统一维护 Akira 通用 Skill、Research suite、Matt 产品族的准确名称、用途、GitHub source、发布状态、安装粒度和 `npx skills` 命令；Router 本体不再复制不完整的能力清单或凭记忆拼安装命令。
+- 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。运行时只常驻 `akira` 与 `browser-access`；Matt / Research / 其他通用 Skill 由 Router 按真实任务并经用户同意后项目级安装。
+- 将 `akira` 的 first-party 能力发现集中到按需读取的 `CATALOG.md`：统一维护 Akira 通用 Skill、Research suite、Matt 产品族的准确名称、用途、GitHub source、发布状态、安装粒度和项目安装命令；详细 Git + symlink 机制下沉到 `INSTALLATION.md`。
 - 移除 Lattice 对 OpenAI `plugins` 仓库与固定 `ngs-analysis` source view 的 submodule 管理；OpenAI Plugins 改由 `akira` Router 作为外部能力来源按当前清单发现，只有具体任务需要且用户同意时才项目级安装对应 Skill。
 
 - 重构 Akira Research 的 Git-native 科研工作流：`main` 固定为已接受的 canonical research state，真实科研路线使用 `research/<kind>/<slug>` 分支并以保留拓扑 merge 或 annotated archival tag 收口；Analysis 新增由 Git commit 固定的独立 Attempt、`src/` 公共实现与 `scripts/analyses/` 执行入口隔离，默认采用 Python 完成统计/数据处理并由 R 独立消费结果表绘图；项目初始化写入针对机器 artifact、可重建输出和人类 convenience PDF 的 `.gitignore`。同时将人类文献区稳定为 `literature/papers/` + `collections/`，不再用 `to-read/read` 文件移动表达状态，并为阅读 Markdown 增加顶部/结尾同一状态的“我已阅读并确认当前版本”复选框及 Git content OID 版本确认 provenance。
@@ -53,7 +53,7 @@ All user-visible changes to stable skills will be documented in this file.
 - 调整 Core 的用户可见回复规则：复杂任务允许先完整展开，但必须在末尾以独立“结论”收束当前最重要的新发现、状态变化、关键证据、需查看的产物路径与真正下一步；过程性记录和常规校验不再默认进入结论。
 - 将多 Agent 执行边界改为 harness-agnostic：Parallel / Ask-Akira 不再依赖固定执行产品或执行器 Skill；Codex、Claude Code 或其他 harness 都只作为实现载体，具体子 Agent、进程、模型与 worktree 能力以当前工具契约为准。
 - 将原环境绑定的多 Agent 执行 Skill 迁移为可选的 `agent-orchestration`，移除固定 CLI 与模型名称假设，并从 Core 必需运行时 Skill 检查中删除该执行层依赖。
-- 收窄运行时安装职责：安装只建立或更新本项目的静态 Agent 配置软链接，并通过 `npx skills` 的默认 symlink mode 维护 `akira` + `browser-access` 两个 ForgeRelay 常驻基线；`~/.forgerelay/.agents/skills/` 作为 canonical store，`~/.forgerelay/skills/` 只保留软链接消费视图，安装命令不得使用 `--copy`。Lattice 不再管理全局 `~/.agents/skills/`，也不常驻安装 Matt、Research、Word、PPT 或 Agent 编排；卸载由独立入口按 manifest 与内容哈希判断所有权。
+- 重写 Skill 安装职责：不再依赖第三方 Skill package manager；`scripts/skills.py` 只从远端 GitHub clone/fetch 到 `~/.agents/sources/`，全局与项目 `.agents/skills/` 均使用软链接，ForgeRelay 常驻 view 再链接全局 `.agents/skills`。更新只推进 Git checkout，卸载只删除 manifest 登记且仍指向预期 source 的软链接。
 - 明确 Core 的发布 tag 可变性边界：仅推送 tag、尚未产生 GitHub Release、包仓库版本或其他不可撤回正式发布产物时，允许修复后删除并重建同名 tag、继续使用原版本号；正式发布后 tag 与版本内容才进入不可变状态。
 - 将 Akira Guard 明确分成 Core 路由、`akira-guard` Skill 与 `scripts/guard.py` 执行层；`guard.py commit` 现在自动检查 staged Python/JSON/TOML 及可用解释器支持的 Shell/Node 语法，普通提交不再默认扩张为全量 lint/typecheck/build/test，重型验证仅用于大型、关键或高风险修改。
 - 细化 Core 的 Git 提交节奏与回退语义：以“一次明确修改目的”作为默认原子提交单位，每个完成阶段立即提交而不等待用户确认；有先后依赖的状态变化必须通过独立提交保留真实顺序；用户明确否定当前 Agent 最近实现时，在 ownership 与工作树安全前提下先 reset 被否定提交，再重新实现，避免在已否定历史上继续叠加修正。

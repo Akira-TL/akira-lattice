@@ -42,17 +42,17 @@ akira
 browser-access
 ```
 
-Skill 由 `npx skills` 以 `~/.forgerelay` 为项目目录管理，并统一采用默认 symlink mode。`~/.forgerelay/.agents/skills/` 是 `npx skills` canonical store，`~/.forgerelay/skills/` 是 ForgeRelay 消费的软链接视图，安装状态由 `~/.forgerelay/skills-lock.json` 记录。安装命令不得使用 `--copy`；Lattice 不再把全局 `~/.agents/skills/` 作为正式 Skill 安装目标。
+Skill source 由 Lattice 自带安装器直接从 GitHub clone/fetch 到 `~/.agents/sources/`；`~/.agents/skills/` 是全局软链接视图，`~/.forgerelay/skills/` 再链接到其中的 ForgeRelay 常驻基线。Skill 内容不复制，安装器只依赖 Python 标准库与 Git，不依赖第三方 Skill package manager。
 
 同时部署 Core、references 与 Guard scripts。Matt、Research、Word、PPT、Agent 编排以及第三方专业能力都不常驻；当前项目真实需要时，由 `akira` Router 说明来源和用途、取得用户明确同意后项目级安装。
 
-例如软件工程项目由 Router 推荐：
+例如软件工程项目由 Router 按 Catalog 推荐 `Akira-TL/matt-skills` 的 promoted suite；科研项目则项目级安装完整 Research suite。二者都使用：
 
 ```bash
-npx skills add Akira-TL/matt-skills --skill '*' --agent '*' -y
+python3 ~/.agents/scripts/skills.py install <github-source> ... --project .
 ```
 
-科研项目由 Router 推荐项目级安装完整 `Akira-TL/akira-research-skills` suite。
+精确 source、目录范围和额外 Skill 以 `akira` 的 `CATALOG.md` 为准。
 
 ## Guard
 

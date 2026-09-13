@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable
 
+from skill_manager import SkillInstallError, doctor as doctor_skills
 from staged_syntax import staged_syntax_errors
 from upstream import sync_matt
 
@@ -393,11 +394,40 @@ def cmd_config(_: argparse.Namespace) -> int:
             fail("Matt upstream push 必须设置为 DISABLED")
             failed = True
 
-    if (HUB / ".skill-lock.json").is_file():
-        print("INFO  .skill-lock.json 继续由 skills CLI 管理")
-    else:
-        fail(f"缺少 skills CLI 状态文件：{HUB / '.skill-lock.json'}")
+    expected_runtime_skills = {"akira", "browser-access"}
+    try:
+        managed_skills = set(doctor_skills(global_scope=True))
+    except SkillInstallError as exc:
+        fail(f"Akira Skill 运行时检查失败：{exc}")
         failed = True
+    else:
+        if managed_skills == expected_runtime_skills:
+            ok("Akira 全局 Skill manifest 仅包含 akira + browser-access")
+        else:
+            fail(
+                "Akira 全局 Skill manifest 应仅包含 akira + browser-access，当前："
+                + ", ".join(sorted(managed_skills))
+            )
+            failed = True
+
+    global_skill_names = {
+        path.name for path in (HUB / "skills").iterdir()
+    } if (HUB / "skills").is_dir() else set()
+    if global_skill_names == expected_runtime_skills:
+        ok("~/.agents/skills 仅包含 ForgeRelay 常驻基线")
+    else:
+        fail(
+            "~/.agents/skills 应仅包含 akira + browser-access，当前："
+            + ", ".join(sorted(global_skill_names))
+        )
+        failed = True
+
+    legacy_forgerelay_store = Path.home() / ".forgerelay" / ".agents"
+    if legacy_forgerelay_store.exists():
+        fail(f"旧 ForgeRelay Skill store 不应存在：{legacy_forgerelay_store}")
+        failed = True
+    else:
+        ok("旧 ~/.forgerelay/.agents 已移除")
     return 1 if failed else 0
 
 
