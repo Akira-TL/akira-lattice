@@ -3,4 +3,4 @@ set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
-exec python3 scripts/uninstall.py
+exec uv run python scripts/uninstall.py

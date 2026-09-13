@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted；其中 Skill 安装 ownership 已由 ADR 0003 取代。
 
 ## Context
 

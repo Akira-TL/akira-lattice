@@ -6,8 +6,6 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-from skill_manager import SkillInstallError, install_from_source
-
 SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
@@ -15,9 +13,6 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
-DEFAULT_MACHINE_SKILLS = ("akira", "browser-access")
-AKIRA_SKILLS_SOURCE = "https://github.com/Akira-TL/skills.git"
-
 
 def remove_path(path: Path) -> None:
     if path.is_symlink() or path.is_file():
@@ -84,16 +79,6 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     print(f"LINK   {target} -> {link_source}")
 
 
-def install_machine_skills() -> list[str]:
-    try:
-        return install_from_source(
-            AKIRA_SKILLS_SOURCE,
-            skill_names=DEFAULT_MACHINE_SKILLS,
-        )
-    except SkillInstallError as exc:
-        raise RuntimeError(str(exc)) from exc
-
-
 def deploy() -> None:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     for path in (
@@ -116,14 +101,9 @@ def deploy() -> None:
         stamp,
     )
 
-    installed = install_machine_skills()
-
-    print(f"Core source:       {CORE_ROOT}")
-    print(f"Scripts source:    {SCRIPT_ROOT}")
-    print(f"Runtime hub:       {HUB}")
-    print(f"Machine baseline:  {', '.join(installed)}")
-    print(f"Skill source cache:{HUB / 'sources'}")
-    print(f"Machine Skill registry: {HUB / 'skills'}")
+    print(f"Core source:    {CORE_ROOT}")
+    print(f"Scripts source: {SCRIPT_ROOT}")
+    print(f"Runtime hub:    {HUB}")
 
 
 def main() -> int:

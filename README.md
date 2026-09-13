@@ -27,32 +27,25 @@ akira-lattice/
 
 Lattice pin 某个 source 不等于把它全局安装。
 
-## 机器级 Skill 安装
+## 静态配置部署与 Skill 安装边界
 
-统一入口：
+根目录入口：
 
 ```bash
 ./install.sh
 ```
 
-Lattice 默认保证以下机器级基础 Skill 已注册：
+该入口只部署 Lattice 的 Core、references、Guard 与其他静态运行时链接，不发现、不安装、不更新、不删除任何 Skill，也不维护 `~/.agents/akira-skills.json`。
 
-```text
-akira
-browser-access
-```
-
-Skill source 由 Lattice 自带安装器直接从 GitHub clone/fetch 到 `~/.agents/sources/`；`~/.agents/skills/` 是机器级已安装 Skill 注册表，只保存指向 Git checkout 的软链接。Skill 内容不复制，安装器只依赖 Python 标准库与 Git，不依赖第三方 Skill package manager。
-
-同时部署 Core、references 与 Guard scripts。Matt、Research、Word、PPT、Agent 编排以及第三方专业能力只在真实任务需要时由 `akira` Router 先检查机器级注册表；机器级缺失时再说明来源和用途、取得用户明确同意后从远端安装。
-
-例如软件工程任务由 Router 按 Catalog 推荐 `Akira-TL/matt-skills` 的 promoted suite；科研任务则安装完整 Research suite：
+Skill 生命周期由 `akira` Router 自己拥有。Router 已经可用后，Agent 先复用当前会话能力，再检查机器级 `~/.agents/skills/`；确有缺口时读取 Catalog，向用户说明来源、用途和最小安装范围，取得明确同意后调用：
 
 ```bash
-python3 ~/.agents/scripts/skills.py install <github-source> ...
+uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
 ```
 
-具体执行器如何暴露 Skill，由各执行器自己的机制负责，不属于 Akira Skill 安装器。执行器需要自己的 Skill 目录时，应由执行器自行建立指向 `~/.agents/skills/<name>` 的软链接；不得复制 Skill 内容或维护第二份 source checkout。精确 source、目录范围和额外 Skill 以 `akira` 的 `CATALOG.md` 为准。
+该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt` 只用于开发、review 与固定 revision，不是运行时安装源，也不会因为执行 `./install.sh` 自动进入机器级注册表。
+
+`akira` Router 本体的首次 bootstrap 不由 Lattice 根安装器或其自身安装器处理；一旦 Router 可用，后续通用 Skill、Matt、Research 与外部能力都由它按真实任务主动安装。
 
 ## Guard
 

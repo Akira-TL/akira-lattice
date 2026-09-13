@@ -1,6 +1,6 @@
 # Agent 静态配置管理
 
-本仓库维护 Akira 的全局静态 Agent 规则、机械 Guard、运行时部署和受管 Skill source。`~/.agents` 只是运行时入口，不是第二份源码仓库。
+本仓库维护 Akira 的全局静态 Agent 规则、机械 Guard、运行时部署和各 Skill 仓的固定开发 revision。`~/.agents` 只是运行时入口，不是第二份源码仓库。
 
 ## 分层
 
@@ -29,7 +29,7 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Guard**：机械可判断的约束；不复制业务/科研语义。
-- **Runtime state**：远端 Skill source 统一 clone/fetch 到 `~/.agents/sources/`；机器级 `~/.agents/skills/` 保存指向 source checkout 的受管软链接。这两层是 Akira 管理的唯一 Skill source 与机器级注册层。具体执行器自己的 Skill 目录、缓存、profile 与项目级引用由对应执行器管理；需要持久暴露 Skill 时，由执行器自行建立指向 `~/.agents/skills/<name>` 的软链接，不维护第二份 source checkout。
+- **Runtime state**：Skill 运行时状态由 `akira` Router 自带安装器管理：远端 source 位于 `~/.agents/sources/`，机器级注册表位于 `~/.agents/skills/`，manifest 位于 `~/.agents/akira-skills.json`。Lattice 根安装器和 Guard 不管理这些状态；具体执行器自己的 Skill 目录、缓存、profile 与项目级引用仍由对应执行器管理。
 
 ## 运行时拓扑
 
@@ -41,9 +41,9 @@ akira-lattice/
           └──→ ~/.config/opencode/AGENTS.md
 ```
 
-`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。第三方 Skill 仓不再由 Lattice 固定为 submodule 或运行时 source view；需要时由 `akira` Router 从登记来源发现并安装到机器级 `~/.agents/skills/`。
+`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供静态配置部署、Guard 与上游维护；Skill 安装脚本跟随 `akira` Skill 自身发布。第三方 Skill 仓不作为 Lattice submodule 或运行时 source view，需要时由 `akira` Router 从登记来源发现并安装。
 
-## 默认安装策略
+## Skill 安装边界
 
 根目录：
 
@@ -51,20 +51,17 @@ akira-lattice/
 ./install.sh
 ```
 
-Lattice pin 住多个 Skill 仓是为了开发、版本与 provenance，不代表全部进入机器级注册表。根安装器默认保证以下基础 Skill 已注册：
+该命令只部署 Core、references、Guard 与其他静态配置链接，不安装任何 Skill。Lattice pin 住多个 Skill 仓仅用于开发、review、provenance 与固定 source revision，不代表它们进入机器级注册表。
 
-```text
-akira
-browser-access
+Skill 生命周期由 `akira` Router 自己负责。Router 已经可用后，按“当前会话 → 机器级注册表 → 远端 source”判断能力缺口；需要新增能力时先说明来源、用途与最小集合并取得用户明确同意，再调用：
+
+```bash
+uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
 ```
 
-`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。根安装器保证这两个 Skill 注册到 `~/.agents/skills/`。机器上后续真实使用过的 Matt、Research 或其他通用 Skill 也可以继续保留在该机器级注册表。
+该脚本独立管理 `~/.agents/akira-skills.json`、`~/.agents/sources/` 与 `~/.agents/skills/`。Matt、Research、Word、科研/学术 PPT、Guard Skill、`agent-orchestration` 与外部专业能力都遵循同一机制。Lattice 根安装器、根卸载器与 Guard 不读取或修改这些 Skill 生命周期状态。
 
-软件工程任务缺少 `ask-matt` 时，Core 会先交给 `akira` Router。Router 先检查 `~/.agents/skills/`；已有 Matt suite 时不重复安装，缺失时在用户同意后从 `Akira-TL/matt-skills` 远端安装到机器级注册表。`ask-akira` 和 Parallel 系列随 Matt fork 提供，不存在独立 Engineering 产品仓。
-
-科研任务同样先复用机器级已有 Research suite；缺失时才从已发布的 `Akira-TL/akira-research-skills` 安装。Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 也遵循相同的“当前会话 → 机器级注册表 → 远端 source”发现顺序。
-
-安装器只管理机器级 manifest `~/.agents/akira-skills.json`、`~/.agents/sources/` checkout 与 `~/.agents/skills/` 软链接。更新只更新共享 Git checkout；卸载只删除受管机器级注册项；未知普通目录和其他来源的软链接 fail closed。具体执行器只管理自己的 Skill 视图，需要时自行软链接到 `~/.agents/skills/<name>`；Akira 安装器不写这些执行器目录。
+`akira` Router 本体的首次 bootstrap 是 Skill 运行环境的前置条件，不由 Lattice 根安装器或 `akira` 自身安装器自举。
 
 ## Guard
 
@@ -77,7 +74,7 @@ uv run ~/.agents/scripts/guard.py <command>
 主要命令：
 
 ```text
-config        检查静态配置、默认运行时基线与受管 submodule
+config        检查静态配置与受管 submodule
 architecture  检查代码与目录规模
 skills PATH   检查指定 Akira Skill 仓的结构与稳定 Skill 文档映射
 commit        检查提交信息、staged 语法和架构门禁后正式提交
@@ -108,4 +105,4 @@ skills/matt      → git@github.com:Akira-TL/matt-skills.git
 
 ## 卸载
 
-`./uninstall.sh` 只移除机器级 manifest 中登记的 `akira` / `browser-access` 基线软链接，以及直接指向本仓库的静态配置软链接。机器级注册的其他 Matt / Research / 通用 Skill、各执行器自己的引用和 `~/.agents/sources/` Git checkout 都不会被猜测性清理。
+`./uninstall.sh` 只移除直接指向本仓库的静态配置软链接。所有 Skill 注册项、manifest、Git source checkout 与执行器自己的 Skill 引用都保持不变。

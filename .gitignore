@@ -37,7 +37,6 @@ tmp/
 
 # Local runtime state
 .agents/skills/
-.agents/akira-skills.json
 
 # Local runtime backups
 backup/

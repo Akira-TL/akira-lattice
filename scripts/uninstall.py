@@ -3,16 +3,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from skill_manager import SkillInstallError, remove_installed
-
 SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
 CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
-DEFAULT_MACHINE_SKILLS = ("akira", "browser-access")
-
 
 def direct_link_target(path: Path) -> Path:
     raw_target = Path(os.readlink(path))
@@ -36,15 +32,6 @@ def remove_owned_link(source: Path, target: Path) -> None:
     print(f"REMOVE {target}")
 
 
-def uninstall_machine_skills() -> None:
-    try:
-        removed = remove_installed(DEFAULT_MACHINE_SKILLS)
-    except SkillInstallError as exc:
-        raise RuntimeError(str(exc)) from exc
-    if not removed:
-        print("SKILLS 当前没有检测到 Akira Lattice 机器级基线")
-
-
 def uninstall_runtime_links() -> None:
     owned_links = (
         (CORE_ROOT / "AGENTS.md", HUB / "AGENTS.md"),
@@ -60,9 +47,8 @@ def uninstall_runtime_links() -> None:
 
 
 def main() -> int:
-    uninstall_machine_skills()
     uninstall_runtime_links()
-    print("卸载完成；Git source cache 与其他软件状态均未清理。")
+    print("卸载完成；仅移除本仓静态配置软链接，Skill 状态未修改。")
     return 0
 
 

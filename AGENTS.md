@@ -20,9 +20,9 @@ Global static Agent configuration lives under `core/`. Deterministic checks and 
 
 ## Installation boundary
 
-Akira's installer owns only the machine-level Skill registry at `~/.agents/skills`, backed by Git checkouts under `~/.agents/sources`. Matt, Research and non-baseline common Skills enter that registry only when a real task needs them and the user explicitly agrees. Specific harnesses own their own Skill discovery, linking, project views, caches and profiles; do not encode any harness-specific layout into the shared installer.
+Lattice root installation owns only global static Agent configuration and its runtime links. Skill discovery, installation, update, removal, manifest state and machine-level registration are owned by the `akira` Router in `skills/akira/routing/akira/`; the root installer and Guard do not manage Skill lifecycle.
 
-Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry.
+Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry. Specific harnesses continue to own their own Skill discovery views, links, caches and profiles.
 
 ## Authoring discipline
 
@@ -40,6 +40,6 @@ Stable Skill behaviour changes require the owning repository's docs to change in
 
 修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`。
 
-Core、Guard、安装器、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`，并在提交后运行适用的 Guard / targeted tests。
+Core、Guard、根静态配置部署、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`，并在提交后运行适用的 Guard / targeted tests。
 
 Do not add release tooling, package metadata, CI, marketplace manifests, or a license by assumption. Treat each as a separate repository decision.

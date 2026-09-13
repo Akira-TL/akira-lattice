@@ -11,21 +11,21 @@ All user-visible changes to stable skills will be documented in this file.
 - Added `visible-browser-form-automation` for WSL-to-Windows Chrome CDP automation, dynamic form inspection, human-visible review, upload handoff, and explicit pre-submit safety boundaries.
 - 为 `browser-access` 增加可复用的 Chrome DevTools Protocol 控制 CLI，统一 Agent Chrome 生命周期、target 选择、DOM 操作、文件上传与网络观察，并要求优先复用该执行层而不是临时编写 WebSocket/CDP 包装脚本。
 - Added separate runtime source, user documentation, lifecycle directories, repository instructions, and shared terminology.
-- Added Akira's own Git + symlink Skill installer for shared source checkout, project/global views, update, remove, inspect and doctor workflows.
+- Added the `akira` Router-owned Git + symlink Skill installer for shared source checkout, machine registration, update, remove, inspect and doctor workflows.
 - Added canonical global static Agent configuration under `core/`, with on-demand references and runtime links.
 - Added the harness-agnostic `agent-orchestration` Skill for mapping already-defined work units onto execution primitives actually provided by the current Agent harness, without making it a Parallel protocol dependency.
 - Added `scientific-presentation-authoring` for structuring scientific presentations, writing evidence-bounded result slides, adapting reference-deck design rules without copying template content, and applying `humanizer-zh` to Chinese slide text.
 - Added cross-platform `scripts/guard.py` and `scripts/install.py` entry points for static configuration deployment, architecture thresholds, Skill structure validation, and guarded Git commits.
 - Added `core/references/matt-skills.md` to record ownership and upstream-merge rules for the maintained `Akira-TL/matt-skills` fork.
 - Added `guard.py upstream matt` to fetch, compare and merge Matt upstream safely; explicit `--push` publishes our fork and commits the updated Lattice submodule pointer.
-- Added root `install.sh` and `uninstall.sh` as the unified human-facing runtime installation/update and uninstall entry points.
+- Added root `install.sh` and `uninstall.sh` as the human-facing static Agent configuration deploy and uninstall entry points.
 
 ### Changed
 
-- 重构 Skill 发现与安装拓扑：`~/.agents/sources/` 作为唯一受管 Skill source checkout，`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表；共享安装器不再管理项目级或执行器专用 Skill view，也不认识具体执行器。具体执行器需要 Skill 时自行在其 Skill 目录建立指向机器级注册项的软链接，不复制 Skill 内容或维护第二份 source checkout；同名不同 repository 冲突继续 fail closed。
-- 更新 Core 的 Skill 发现规则：当前会话缺少能力时先检查 `~/.agents/skills/<skill>`；机器级已有则不重复安装，由当前执行器自行建立所需软链接并加载，机器级缺失时才由 `akira` Router 确认来源、用途与最小集合后安装。共享安装器始终只负责 `~/.agents`，不替具体执行器创建适配链接。
+- 重构 Skill 发现与安装拓扑：`~/.agents/sources/` 作为唯一受管 Skill source checkout，`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表；安装实现归属 `akira` Router，不管理项目级或执行器专用 Skill view。具体执行器按自身机制引用机器级注册项，不复制 Skill 内容或维护第二份 source checkout；同名不同 repository 冲突继续 fail closed。
+- 更新 Core 的 Skill 发现规则：当前会话缺少能力时先检查 `~/.agents/skills/<skill>`；机器级已有则不重复安装，机器级缺失时才由 `akira` Router 确认来源、用途与最小集合，并在用户授权后调用自身安装脚本。Lattice 根安装器不参与 Skill 生命周期。
 - 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
-- 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。根安装器只保证 `akira` 与 `browser-access` 机器级基础注册；Matt / Research / 其他通用 Skill 由 Router 按真实任务并经用户同意后安装到机器级注册表。
+- 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。Lattice 只固定这些 source 的开发 revision；所有机器级 Skill 安装由 Router 按真实任务并经用户同意后执行。
 - 将 `akira` 的 first-party 能力发现集中到按需读取的 `CATALOG.md`：统一维护 Akira 通用 Skill、Research suite、Matt 产品族的准确名称、用途、GitHub source、发布状态、安装粒度和项目安装命令；详细 Git + symlink 机制下沉到 `INSTALLATION.md`。
 - 移除 Lattice 对 OpenAI `plugins` 仓库与固定 `ngs-analysis` source view 的 submodule 管理；OpenAI Plugins 改由 `akira` Router 作为外部能力来源按当前清单发现，只有具体任务需要且用户同意时才把对应 Skill 安装到机器级注册表。
 
@@ -55,7 +55,7 @@ All user-visible changes to stable skills will be documented in this file.
 - 调整 Core 的用户可见回复规则：复杂任务允许先完整展开，但必须在末尾以独立“结论”收束当前最重要的新发现、状态变化、关键证据、需查看的产物路径与真正下一步；过程性记录和常规校验不再默认进入结论。
 - 将多 Agent 执行边界改为 harness-agnostic：Parallel / Ask-Akira 不再依赖固定执行产品或执行器 Skill；Codex、Claude Code 或其他 harness 都只作为实现载体，具体子 Agent、进程、模型与 worktree 能力以当前工具契约为准。
 - 将原环境绑定的多 Agent 执行 Skill 迁移为可选的 `agent-orchestration`，移除固定 CLI 与模型名称假设，并从 Core 必需运行时 Skill 检查中删除该执行层依赖。
-- 重写 Skill 安装职责：不再依赖第三方 Skill package manager；`scripts/skills.py` 只从远端 GitHub clone/fetch 到 `~/.agents/sources/`，并在 `~/.agents/skills/` 建立机器级受管软链接。更新只推进 Git checkout，卸载只删除 manifest 登记且仍指向预期 source 的机器级软链接；项目级和执行器专用 Skill view 不属于共享安装器。
+- 重写 Skill 安装职责：不再依赖第三方 Skill package manager；安装 CLI 与实现迁入 `skills/akira/routing/akira/scripts/`，由 `akira` Router 在发现真实能力缺口并取得用户授权后主动调用。Lattice 根 `install` / `uninstall` / Guard 不再读取或修改机器级 Skill source、manifest 与注册表。
 - 明确 Core 的发布 tag 可变性边界：仅推送 tag、尚未产生 GitHub Release、包仓库版本或其他不可撤回正式发布产物时，允许修复后删除并重建同名 tag、继续使用原版本号；正式发布后 tag 与版本内容才进入不可变状态。
 - 将 Akira Guard 明确分成 Core 路由、`akira-guard` Skill 与 `scripts/guard.py` 执行层；`guard.py commit` 现在自动检查 staged Python/JSON/TOML 及可用解释器支持的 Shell/Node 语法，普通提交不再默认扩张为全量 lint/typecheck/build/test，重型验证仅用于大型、关键或高风险修改。
 - 细化 Core 的 Git 提交节奏与回退语义：以“一次明确修改目的”作为默认原子提交单位，每个完成阶段立即提交而不等待用户确认；有先后依赖的状态变化必须通过独立提交保留真实顺序；用户明确否定当前 Agent 最近实现时，在 ownership 与工作树安全前提下先 reset 被否定提交，再重新实现，避免在已否定历史上继续叠加修正。

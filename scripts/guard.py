@@ -9,7 +9,6 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable
 
-from skill_manager import SkillInstallError, doctor as doctor_skills
 from staged_syntax import staged_syntax_errors
 from upstream import sync_matt
 
@@ -394,21 +393,6 @@ def cmd_config(_: argparse.Namespace) -> int:
             fail("Matt upstream push 必须设置为 DISABLED")
             failed = True
 
-    expected_runtime_skills = {"akira", "browser-access"}
-    try:
-        managed_skills = set(doctor_skills())
-    except SkillInstallError as exc:
-        fail(f"Akira Skill 机器级注册表检查失败：{exc}")
-        failed = True
-    else:
-        if expected_runtime_skills.issubset(managed_skills):
-            ok("机器级 Skill 注册表包含 Akira 基线")
-        else:
-            fail(
-                "机器级 Skill 注册表缺少 Akira 基线："
-                + ", ".join(sorted(expected_runtime_skills.difference(managed_skills)))
-            )
-            failed = True
     return 1 if failed else 0
 
 
