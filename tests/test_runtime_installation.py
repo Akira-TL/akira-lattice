@@ -23,6 +23,10 @@ class RootInstallBoundaryTests(unittest.TestCase):
             self.assertNotIn("~/.agents/sources", source)
             self.assertNotIn("~/.agents/skills", source)
 
+        guard_source = (SCRIPTS_ROOT / "guard.py").read_text(encoding="utf-8")
+        self.assertNotIn('HUB / "skills"', guard_source)
+        self.assertNotIn("运行时 Skill", guard_source)
+
     def test_shell_entrypoints_use_uv(self) -> None:
         install_entry = (REPO_ROOT / "install.sh").read_text(encoding="utf-8")
         uninstall_entry = (REPO_ROOT / "uninstall.sh").read_text(encoding="utf-8")

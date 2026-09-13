@@ -312,14 +312,6 @@ def cmd_config(_: argparse.Namespace) -> int:
         fail(f"Core 已增长到 {core_lines} 行，应重新分层")
         failed = True
 
-    for skill in ("akira", "browser-access"):
-        path = HUB / "skills" / skill / "SKILL.md"
-        if path.is_file():
-            ok(f"运行时 Skill: {skill}")
-        else:
-            fail(f"缺少运行时 Skill: {skill}")
-            failed = True
-
     gitmodules = REPO_ROOT / ".gitmodules"
     if not gitmodules.is_file():
         fail("缺少 .gitmodules，Akira、Research 与 Matt 必须作为 Git submodule 管理")
