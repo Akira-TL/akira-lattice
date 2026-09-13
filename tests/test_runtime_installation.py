@@ -38,11 +38,21 @@ class InstallBoundaryTests(unittest.TestCase):
             source = Path(tempdir)
             with mock.patch.object(install.subprocess, "run") as run:
                 run.return_value.returncode = 0
-                install.install_skill_source("npx", source, "fixture")
+                install.install_skill_source(
+                    "npx", source, "fixture", ("akira", "browser-access")
+                )
 
             command = run.call_args.args[0]
             self.assertEqual(command[:3], ["npx", "skills", "add"])
+            skill_index = command.index("--skill")
+            self.assertEqual(command[skill_index + 1 : skill_index + 3], ["akira", "browser-access"])
             self.assertNotIn("remove", command)
+
+    def test_default_global_skills_are_minimal_common_baseline(self) -> None:
+        self.assertEqual(install.DEFAULT_GLOBAL_SKILLS, ("akira", "browser-access"))
+        source = (SCRIPTS_ROOT / "install.py").read_text(encoding="utf-8")
+        self.assertNotIn("install_skill_source(npx, MATT_SKILLS_ROOT", source)
+        self.assertNotIn("install_skill_source(npx, RESEARCH_SKILLS_ROOT", source)
 
     def test_installer_contains_no_cleanup_or_uninstall_route(self) -> None:
         source = (SCRIPTS_ROOT / "install.py").read_text(encoding="utf-8")

@@ -1,45 +1,44 @@
 # Repository instructions
 
-This repository is the source of truth for Akira's agent skills and maintained global static Agent configuration.
+This repository is the source of truth for Akira's maintained global static Agent configuration, Guard, deployment, cross-repository routing, and pinned Skill repositories.
 
-## Source and documentation
+## Source and ownership
 
-Akira-maintained Skill runtime source lives in the `skills/akira` Git submodule under `<category>/<skill-name>/`. Each stable skill has one canonical `SKILL.md`; optional sibling reference files are loaded through explicit context pointers. `skills/matt` is a separate submodule for the maintained Matt skills fork and is not part of Akira-authored Skill source.
+Akira Skill source is intentionally split by cohesion rather than stored in one monorepo:
 
-Akira-maintained Skill user documentation lives with its source under `skills/akira/docs/<category>/<skill-name>.md`. Lattice `docs/` is reserved for this repository's infrastructure and configuration documentation; it must not keep a second copy of Skill-specific docs.
+- `skills/akira` → `Akira-TL/skills`：通用 Akira Skills 与 `akira` 能力 Router。保留 Productivity、Akira Guard 和通用 Agent 编排。
+- `skills/research` → `Akira-TL/akira-research-skills`：完整 Research 产品族，拥有自己的 `skills/`、`docs/`、scripts、tests 与 research.sqlite 契约。
+- `skills/matt` → `Akira-TL/matt-skills`：Matt fork。Matt 工程方法以及 Akira 的 `ask-akira` / Parallel 系列工程扩展都在这里维护。
+- `skills/openai-plugins`：只读第三方源码 pin，不属于 Akira 自研 Skill 正文。
 
-Global static Agent configuration lives under `core/`. `core/AGENTS.md` contains short stable cross-project defaults and routing; `core/references/` contains low-frequency facts and boundaries. Deterministic checks and deployment live under `scripts/`. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
+不要为了路由方便复制产品正文。未来只有当 Knowledge 等能力形成独立、高内聚产品族时才新增子仓。
 
-Keep large procedures in skills, small stable defaults in the core, and mechanically decidable rules in the Guard. Project knowledge stays with the Matt flow's project context; dynamic context and Memory are outside this repository. Keep software-managed state such as skill installation locks, MCP configuration, plugin state, caches, and sessions outside this repository unless ownership is explicitly changed.
+Lattice `docs/` 只保存基础设施、部署、仓库拓扑和第三方 source 说明；Skill 的人类文档跟随其 owning repository。
 
-## Lifecycle
+Global static Agent configuration lives under `core/`. Deterministic checks and deployment live under `scripts/`. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
 
-Stable skills live in a named category such as `productivity` or `engineering`.
+## Installation boundary
 
-Unsettled Akira skills live under `skills/akira/in-progress/` and must not be advertised as stable.
+Global installation is deliberately small. Lattice installs only `akira` Router and the explicitly declared cross-domain baseline from `skills/akira`; Matt, Research and non-baseline common Skills are installed project-locally when the Router identifies a real need and the user explicitly agrees.
 
-Retired Akira skills move to `skills/akira/deprecated/` with a migration note. Do not silently delete a published skill name.
+Being pinned as a Lattice submodule does not mean a Skill repository is globally installed.
 
 ## Authoring discipline
 
-Choose whether a skill is user-invoked or model-invoked before writing its body. A user-invoked skill sets `disable-model-invocation: true`; a model-invoked skill uses a concise description containing only distinct invocation branches.
+Choose user-invoked vs model-invoked before writing a Skill. Keep ordered work checkable, disclose branch-specific material through explicit references, and keep one source of truth for each rule.
 
-Write ordered work as checkable steps. Keep durable rules near the behavior they govern. Push branch-specific or long reference material into clearly named sibling files and link it with an explicit context pointer.
-
-Keep one source of truth for each rule. Remove duplication, stale sediment, generic no-op advice, and accidental prompt sprawl. Prefer positive target behavior; retain prohibitions only for hard guardrails.
-
-Skill directory names and frontmatter `name` values use lowercase kebab-case and should match.
+Stable Skill behaviour changes require the owning repository's docs to change in the same semantic stage. Do not copy third-party Skill text without checking licence and attribution.
 
 ## Agent 间交接
 
-凡是主要用于让用户复制给另一个 Agent、另一个会话或其他 Agent harness 的完整内容，例如 handoff、黑盒验收提示词、独立复核说明、Worker briefing 或长篇执行指令，统一先写入操作系统 `/tmp/` 下的描述性 Markdown 文件。用户回复中不再内联整段正文，只提供文件路径和一条最短可执行提示词，例如：`请读取 /tmp/<file>.md，并严格按照其中要求执行。` 这样把长上下文交给文件传递，用户只需复制短提示词。
+凡是主要用于让用户复制给另一个 Agent、另一个会话或其他 Agent harness 的完整内容，例如 handoff、黑盒验收提示词、独立复核说明、Worker briefing 或长篇执行指令，统一先写入操作系统 `/tmp/` 下的描述性 Markdown 文件。用户回复中只提供文件路径和最短可执行提示词。
 
-普通面向用户阅读的解释、结论和讨论不适用这条规则。只有目标内容本身是给另一个 Agent 消费时才写入 `/tmp/`；完整内容必须先成功落盘后，才能把短提示词交给用户。
+普通面向用户阅读的解释、结论和讨论不适用这条规则。
 
 ## Changes
 
-When an Akira Skill changes behavior, update its documentation inside `skills/akira` and commit that child repository before updating the Lattice submodule pointer. Record Lattice-visible infrastructure changes in `CHANGELOG.md`. After changing Core rules, Guard rules, or submodule integration, run `uv run scripts/guard.py check .` before considering the repository change complete.
+修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`。
+
+Core、Guard、安装器、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`，并在提交后运行适用的 Guard / targeted tests。
 
 Do not add release tooling, package metadata, CI, marketplace manifests, or a license by assumption. Treat each as a separate repository decision.
-
-Do not copy third-party skill text into this repository without checking its license and recording attribution where required.

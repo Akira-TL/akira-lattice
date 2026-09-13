@@ -19,8 +19,10 @@ HOME = Path.home()
 HUB = HOME / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
 AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
+RESEARCH_SKILLS_ROOT = REPO_ROOT / "skills" / "research"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 OPENAI_PLUGINS_ROOT = REPO_ROOT / "skills" / "openai-plugins"
+DEFAULT_GLOBAL_SKILLS = ("akira", "browser-access")
 OPENAI_NGS_ROOT = OPENAI_PLUGINS_ROOT / "plugins" / "ngs-analysis"
 NGS_RUNTIME_VIEW = HUB / "external" / "ngs-analysis"
 INSTALL_MANIFEST = HUB / ".akira-skills-install.json"
@@ -110,15 +112,18 @@ def ensure_source_submodules() -> None:
             "--init",
             "--recursive",
             "skills/akira",
+            "skills/research",
             "skills/matt",
             "skills/openai-plugins",
         ]
     )
     if result.returncode != 0:
-        raise RuntimeError("无法初始化 Akira、Matt 或 OpenAI plugins Git submodule")
+        raise RuntimeError("无法初始化 Akira、Research、Matt 或 OpenAI plugins Git submodule")
 
     if not (AKIRA_SKILLS_ROOT / "AGENTS.md").is_file():
         raise RuntimeError("skills/akira 未正确初始化")
+    if not (RESEARCH_SKILLS_ROOT / "README.md").is_file():
+        raise RuntimeError("skills/research 未正确初始化")
     if not MATT_SKILLS_ROOT.is_dir():
         raise RuntimeError("skills/matt 未正确初始化")
     if not (OPENAI_NGS_ROOT / ".codex-plugin" / "plugin.json").is_file():
@@ -167,14 +172,19 @@ def discover_skill_names(root: Path) -> list[str]:
     return sorted(names)
 
 
-def install_skill_source(npx: str, source: Path, label: str) -> None:
+def install_skill_source(
+    npx: str,
+    source: Path,
+    label: str,
+    skill_names: tuple[str, ...],
+) -> None:
     command = [
         npx,
         "skills",
         "add",
         str(source),
         "--skill",
-        "*",
+        *skill_names,
         "--agent",
         "*",
         "-g",
@@ -190,11 +200,21 @@ def install_skill_source(npx: str, source: Path, label: str) -> None:
 
 def install_runtime_skills() -> list[str]:
     npx = find_npx()
-    install_skill_source(npx, AKIRA_SKILLS_ROOT, "Akira Skills")
-    install_skill_source(npx, MATT_SKILLS_ROOT, "Matt Skills")
+    available = set(discover_skill_names(AKIRA_SKILLS_ROOT))
+    missing_source = sorted(set(DEFAULT_GLOBAL_SKILLS).difference(available))
+    if missing_source:
+        raise RuntimeError(
+            "默认全局 Skill 未出现在 Akira 通用仓：" + ", ".join(missing_source)
+        )
 
-    expected = set(discover_skill_names(AKIRA_SKILLS_ROOT))
-    expected.update(discover_skill_names(MATT_SKILLS_ROOT))
+    install_skill_source(
+        npx,
+        AKIRA_SKILLS_ROOT,
+        "Akira baseline Skills",
+        DEFAULT_GLOBAL_SKILLS,
+    )
+
+    expected = set(DEFAULT_GLOBAL_SKILLS)
     installed = sorted(
         name
         for name in expected

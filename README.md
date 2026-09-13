@@ -1,100 +1,79 @@
 # Akira Lattice
 
-Akira 的个人 Agent 基础设施仓库。这里维护跨项目长期生效的 Core、Guard、部署与运行时边界，并通过独立 Git submodule 管理自研 Skills 与 Matt skills fork；本地 Agent 目录只作为运行时入口，不再维护第二份正文。
-
-仓库保持单一 canonical source：短小稳定规则常驻 Core，大型流程进入 Skill，低频事实进入 Reference，可机械判断的约束进入 Python Guard。项目知识由 Matt flow 管理，动态上下文与 Memory 不在本仓库处理。
+Akira 的个人 Agent 基础设施与 Skill source control 仓库。这里维护跨项目 Core、Guard、部署、能力 Router，以及各独立 Skill 仓库的固定版本；`~/.agents` 只作为运行时视图。
 
 ## Repository layout
 
 ```text
 akira-lattice/
-├── core/                   # 个人全局静态 Agent 配置 canonical source
-│   ├── AGENTS.md           # 每次会话加载的 Core
-│   └── references/         # 低频事实与工具边界
-├── scripts/                # Python Guard 与运行时安装
+├── core/                    # 全局静态 Agent 配置
+├── scripts/                 # Guard / install / uninstall / upstream
 ├── skills/
-│   ├── akira/              # submodule → Akira-TL/skills.git，自研 Skills
-│   └── matt/               # submodule → Akira-TL/matt-skills.git
-├── docs/                   # Lattice 基础设施与配置说明
-├── .agents/adr/            # 影响仓库长期维护的架构决策
-├── AGENTS.md               # Agent 在本仓库中的维护规则
-├── CONTEXT.md              # 仓库术语与边界
-└── CHANGELOG.md            # 面向使用者的变更记录
+│   ├── akira/               # Akira-TL/skills：通用 Skills + akira Router
+│   ├── research/            # Akira-TL/akira-research-skills
+│   ├── matt/                # Akira-TL/matt-skills：Matt + Akira engineering extensions
+│   └── openai-plugins/      # 受管第三方 source
+├── docs/                    # Lattice 基础设施说明
+└── .agents/adr/             # 长期架构决定
 ```
 
-## Global static configuration
+## Capability model
 
-`core/AGENTS.md` 是全局提示词唯一源码。统一安装或更新入口：
+仓库边界按高内聚能力域划分：
+
+- **Akira common**：Router、浏览器、Word、科研/学术 PPT、Guard 语义和通用 Agent 编排。
+- **Matt Engineering**：Matt 工程工作流；`ask-akira`、`parallel-coordinator`、`parallel-execution` 作为本 fork 的工程扩展与 Matt 同仓。
+- **Akira Research**：完整科研生命周期与 `research.sqlite` provenance，单独成仓。
+- **Akira Knowledge**：待形成真实知识工作流后再单独建仓，不维护空产品。
+
+Lattice pin 某个 source 不等于把它全局安装。
+
+## Global installation
+
+统一入口：
 
 ```bash
 ./install.sh
 ```
 
-该入口只负责安装或更新本项目拥有的运行时内容：将 `~/.agents/AGENTS.md` 以及 Claude 的 `CLAUDE.md`、Codex/OpenCode 的 `AGENTS.md` 等原生入口**直接软链接**到当前源码，并通过 `npx skills` 安装或更新 `skills/akira` 与 `skills/matt` 当前提供的 Skill。安装过程中不会清理旧 Skill、迁移历史备份或修改 Matt remote；需要替换的同名非项目运行时文件会先备份到 Git 忽略的 `backup/`。`~/.agents/skills/` 与 `.skill-lock.json` 继续由 skills CLI 管理。
+默认全局只安装极小基线：
 
-统一卸载入口：
-
-```bash
-./uninstall.sh
+```text
+akira
+browser-access
 ```
 
-它只移除仍明确指向本仓库的运行时软链接，以及最近一次 `./install.sh` 记录且运行时内容仍与该安装记录一致的 Skill；不会按当前仓库目录猜测卸载对象，也不会清理 `backup/`、Agent 配置目录或其他软件状态。使用统一 Python Guard 检查配置：
+同时部署 Core、references、Guard scripts，并保留 OpenAI NGS source view。Matt、Research、Word、PPT、Agent 编排等不再全局预装；当当前项目真实需要时，由 `akira` Router 说明来源和用途、取得用户明确同意后项目级安装。
+
+例如软件工程项目由 Router 推荐：
+
+```bash
+npx skills add Akira-TL/matt-skills --skill '*' --agent '*' -y
+```
+
+科研项目在 Research 远端正式发布后由 Router 推荐完整 Research suite。
+
+## Guard
 
 ```bash
 uv run scripts/guard.py config
+uv run scripts/guard.py skills ./skills/akira
+uv run scripts/guard.py skills ./skills/research
+uv run scripts/guard.py check .
 ```
 
-日常项目也可直接调用 `uv run ~/.agents/scripts/guard.py architecture`、`commit` 或 `check`，无需为每个项目单独安装 Git hook。完整设计见 `docs/agent-config.md`。
+`commit` 仍是正式 Git 提交入口；项目自身测试、schema validator 和高风险验证按实际修改追加。
 
-## Current skills
+## Source ownership
 
-自研 Skill 的正文、README 与详细用户文档都由 `skills/akira` 子模块中的 `Akira-TL/skills` 独立维护；Lattice 只锁定其 commit，不保留第二份 Skill 文档。当前稳定能力包括 `akira-research` 科研总 Router 及其科研工作流族、`akira-guard`、可选的 `agent-orchestration`、`general-word-document-generation`、`scientific-presentation-authoring` 和 `browser-access`；多 Agent 协作协议仍处于 in-progress，且不依赖某个固定执行 harness。
+修改 Skill 时先在 owning submodule 提交，再更新 Lattice pointer：
 
-Matt 派生 Skill 则由 `skills/matt` 对应的 `Akira-TL/matt-skills` fork 独立维护。
+- 通用 / Router → `skills/akira`
+- Research → `skills/research`
+- Matt / Ask Akira / Parallel → `skills/matt`
 
-## 单独安装 Skill
-
-正常情况下使用根目录 `./install.sh` 统一安装或更新全部项目运行时内容。只有需要单独安装某个 Skill 时，才直接使用 `npx skills`。例如安装通用浏览器访问 Skill 到 Codex：
-
-```bash
-npx skills add ./skills/akira --skill browser-access --agent codex -g -y
-```
-
-同时安装到多个 Agent：
-
-```bash
-npx skills add ./skills/akira \
-  --skill browser-access \
-  -g \
-  -a codex \
-  -a claude-code \
-  -a opencode \
-  -a hermes-agent \
-  -y
-```
-
-安装到 CLI 检测到的所有 Agent：
-
-```bash
-npx skills add ./skills/akira --skill browser-access --agent '*' -g -y
-```
-
-查看自研仓库中可安装的 Skill：
-
-```bash
-npx skills add ./skills/akira --list
-```
-
-也可以直接从 GitHub 安装：`npx skills add Akira-TL/skills ...`。Matt 派生 Skills 则来自 `skills/matt`，其 GitHub origin 为 `Akira-TL/matt-skills`。
-
-同步 Matt 上游时使用受控入口：
+Matt upstream 同步继续使用：
 
 ```bash
 uv run scripts/guard.py upstream matt
-# 确认结果后，如需发布 fork 并提交新的 submodule pointer：
-uv run scripts/guard.py upstream matt --push
 ```
-
-## Status
-
-仓库当前处于初始化阶段。许可证、自动校验、Changesets 和正式远程发布仍将在需求明确后分别决策；本地 `npx skills` 安装已经可用。

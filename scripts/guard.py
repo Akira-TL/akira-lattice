@@ -19,6 +19,8 @@ HUB = Path.home() / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
 AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
 AKIRA_SKILLS_ORIGIN = "git@github.com:Akira-TL/skills.git"
+RESEARCH_SKILLS_ROOT = REPO_ROOT / "skills" / "research"
+RESEARCH_SKILLS_ORIGIN = "git@github.com:Akira-TL/akira-research-skills.git"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 MATT_SKILLS_ORIGIN = "git@github.com:Akira-TL/matt-skills.git"
 MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
@@ -110,11 +112,7 @@ def is_ignored_relative(path: Path) -> bool:
 
 
 def is_flat_skill_docs_directory(path: Path) -> bool:
-    try:
-        relative = path.resolve().relative_to(AKIRA_SKILLS_ROOT.resolve())
-    except ValueError:
-        return False
-    return len(relative.parts) == 2 and relative.parts[0] == "docs"
+    return path.name == "docs"
 
 
 def architecture_scan_tree(root: Path) -> list[str]:
@@ -319,7 +317,7 @@ def cmd_config(_: argparse.Namespace) -> int:
         fail(f"Core 已增长到 {core_lines} 行，应重新分层")
         failed = True
 
-    for skill in ("ask-matt", "akira-guard"):
+    for skill in ("akira", "browser-access"):
         path = HUB / "skills" / skill / "SKILL.md"
         if path.is_file():
             ok(f"运行时 Skill: {skill}")
@@ -334,6 +332,7 @@ def cmd_config(_: argparse.Namespace) -> int:
     else:
         for name, expected in (
             ("skills/akira", AKIRA_SKILLS_ORIGIN),
+            ("skills/research", RESEARCH_SKILLS_ORIGIN),
             ("skills/matt", MATT_SKILLS_ORIGIN),
             ("skills/openai-plugins", OPENAI_PLUGINS_ORIGIN),
         ):
@@ -348,7 +347,7 @@ def cmd_config(_: argparse.Namespace) -> int:
                 fail(f"{name} submodule URL={configured_url!r}，预期 {expected}")
                 failed = True
 
-    for name in ("skills/akira", "skills/matt", "skills/openai-plugins"):
+    for name in ("skills/akira", "skills/research", "skills/matt", "skills/openai-plugins"):
         submodule = run_git(["submodule", "status", "--", name], REPO_ROOT)
         submodule_status = str(submodule.stdout).strip()
         if submodule.returncode != 0 or not submodule_status or submodule_status.startswith("-"):
@@ -370,6 +369,15 @@ def cmd_config(_: argparse.Namespace) -> int:
             ok(f"Akira skills origin: {AKIRA_SKILLS_ORIGIN}")
         else:
             fail(f"Akira skills origin={origin_url!r}，预期 {AKIRA_SKILLS_ORIGIN}")
+            failed = True
+
+    if RESEARCH_SKILLS_ROOT.is_dir():
+        origin = run_git(["remote", "get-url", "origin"], RESEARCH_SKILLS_ROOT)
+        origin_url = str(origin.stdout).strip()
+        if origin.returncode == 0 and origin_url == RESEARCH_SKILLS_ORIGIN:
+            ok(f"Research skills origin: {RESEARCH_SKILLS_ORIGIN}")
+        else:
+            fail(f"Research skills origin={origin_url!r}，预期 {RESEARCH_SKILLS_ORIGIN}")
             failed = True
 
     if OPENAI_PLUGINS_ROOT.is_dir():
@@ -441,10 +449,24 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
 def check_skills_root(root: Path) -> int:
     failed = False
     names: Counter[str] = Counter()
+    suite_root = root / "skills"
 
-    for skill_file in sorted(root.glob("*/*/SKILL.md")):
-        relative = skill_file.relative_to(root)
-        category = relative.parts[0]
+    if suite_root.is_dir():
+        skill_files = sorted(suite_root.rglob("SKILL.md"))
+    else:
+        skill_files = sorted(root.glob("*/*/SKILL.md"))
+
+    for skill_file in skill_files:
+        if suite_root.is_dir():
+            relative_skill = skill_file.relative_to(suite_root)
+            if "deprecated" in relative_skill.parts:
+                continue
+            lifecycle = relative_skill.parts[0] if len(relative_skill.parts) > 2 else "stable"
+            relative = skill_file.relative_to(root)
+        else:
+            relative = skill_file.relative_to(root)
+            lifecycle = relative.parts[0]
+
         directory_name = skill_file.parent.name
         frontmatter = parse_frontmatter(skill_file)
         name = frontmatter.get("name", "")
@@ -462,8 +484,12 @@ def check_skills_root(root: Path) -> int:
         if name:
             names[name] += 1
 
-        if category not in {"in-progress", "deprecated"}:
-            doc = root / "docs" / category / f"{directory_name}.md"
+        if lifecycle not in {"in-progress", "deprecated"}:
+            if suite_root.is_dir():
+                doc = root / "docs" / f"{directory_name}.md"
+            else:
+                category = relative.parts[0]
+                doc = root / "docs" / category / f"{directory_name}.md"
             if not doc.is_file():
                 fail(f"{relative}: 稳定 Skill 缺少文档 {doc.relative_to(root)}")
                 failed = True
@@ -473,13 +499,17 @@ def check_skills_root(root: Path) -> int:
             fail(f"Skill name 重复：{name} × {count}")
             failed = True
 
-    if not failed:
+    if not skill_files:
+        fail(f"未找到 Skill：{root}")
+        failed = True
+    elif not failed:
         ok(f"Skill 结构与文档映射正常：{root}")
     return 1 if failed else 0
 
 
-def cmd_skills(_: argparse.Namespace) -> int:
-    return check_skills_root(AKIRA_SKILLS_ROOT)
+def cmd_skills(args: argparse.Namespace) -> int:
+    target = Path(args.path).expanduser().resolve()
+    return check_skills_root(target)
 
 
 def cmd_architecture(args: argparse.Namespace) -> int:
@@ -588,7 +618,8 @@ def cmd_check(args: argparse.Namespace) -> int:
     if target == REPO_ROOT.resolve():
         results.append(cmd_config(argparse.Namespace()))
         results.append(check_skills_root(AKIRA_SKILLS_ROOT))
-    elif target == AKIRA_SKILLS_ROOT.resolve():
+        results.append(check_skills_root(RESEARCH_SKILLS_ROOT))
+    elif target in {AKIRA_SKILLS_ROOT.resolve(), RESEARCH_SKILLS_ROOT.resolve()}:
         results.append(check_skills_root(target))
 
     return 1 if any(results) else 0
@@ -612,7 +643,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     architecture_parser.set_defaults(func=cmd_architecture)
 
-    skills_parser = subparsers.add_parser("skills", help="检查 skills/akira 的自研 Skill 结构")
+    skills_parser = subparsers.add_parser("skills", help="检查指定 Akira Skill 仓的结构与文档映射")
+    skills_parser.add_argument("path", nargs="?", default=str(AKIRA_SKILLS_ROOT))
     skills_parser.set_defaults(func=cmd_skills)
 
     commit_parser = subparsers.add_parser(

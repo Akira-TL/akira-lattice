@@ -7,3 +7,6 @@
 [submodule "skills/openai-plugins"]
 	path = skills/openai-plugins
 	url = https://github.com/openai/plugins.git
+[submodule "skills/research"]
+	path = skills/research
+	url = git@github.com:Akira-TL/akira-research-skills.git
