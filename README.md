@@ -52,7 +52,7 @@ Skill source 由 Lattice 自带安装器直接从 GitHub clone/fetch 到 `~/.age
 python3 ~/.agents/scripts/skills.py install <github-source> ...
 ```
 
-具体执行器是否采用 `~/.agents/skills`，以及如何发现、链接或加载 Skill，由各执行器自己的机制负责，不属于 Akira Skill 安装器。执行器可以维护完全独立的 Skill store；这种情况下不得为了兼容自动建立到 `~/.agents/skills` 的跨 store 软链接。精确 source、目录范围和额外 Skill 以 `akira` 的 `CATALOG.md` 为准。
+ForgeRelay、Claude Code、Codex 等执行器如何暴露 Skill，由各执行器自己的机制负责，不属于 Akira Skill 安装器。执行器需要自己的 Skill 目录时，应由执行器自行建立指向 `~/.agents/skills/<name>` 的软链接；不得复制 Skill 内容或维护第二份 source checkout。精确 source、目录范围和额外 Skill 以 `akira` 的 `CATALOG.md` 为准。
 
 ## Guard
 
