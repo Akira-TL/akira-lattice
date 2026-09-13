@@ -19,11 +19,11 @@ All user-visible changes to stable skills will be documented in this file.
 - Added `core/references/matt-skills.md` to record ownership and upstream-merge rules for the maintained `Akira-TL/matt-skills` fork.
 - Added `guard.py upstream matt` to fetch, compare and merge Matt upstream safely; explicit `--push` publishes our fork and commits the updated Lattice submodule pointer.
 - Added root `install.sh` and `uninstall.sh` as the unified human-facing runtime installation/update and uninstall entry points.
-- Added the official OpenAI `plugins` repository as a read-only third-party submodule and exposed only `ngs-analysis` through `~/.agents/external/ngs-analysis`, while Akira's own `research/ngs` Skill retains scientific routing and method authority.
 
 ### Changed
 
 - 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork，作为 Matt 工程流程的 in-progress 扩展。Lattice 以后区分“submodule pin”与“全局安装”，默认全局只安装 `akira` 与 `browser-access`，Matt / Research / 其他通用 Skill 由 Router 按项目真实需求并经用户同意后项目级安装。
+- 移除 Lattice 对 OpenAI `plugins` 仓库与固定 `ngs-analysis` source view 的 submodule 管理；OpenAI Plugins 改由 `akira` Router 作为外部能力来源按当前清单发现，只有具体任务需要且用户同意时才项目级安装对应 Skill。
 
 - 重构 Akira Research 的 Git-native 科研工作流：`main` 固定为已接受的 canonical research state，真实科研路线使用 `research/<kind>/<slug>` 分支并以保留拓扑 merge 或 annotated archival tag 收口；Analysis 新增由 Git commit 固定的独立 Attempt、`src/` 公共实现与 `scripts/analyses/` 执行入口隔离，默认采用 Python 完成统计/数据处理并由 R 独立消费结果表绘图；项目初始化写入针对机器 artifact、可重建输出和人类 convenience PDF 的 `.gitignore`。同时将人类文献区稳定为 `literature/papers/` + `collections/`，不再用 `to-read/read` 文件移动表达状态，并为阅读 Markdown 增加顶部/结尾同一状态的“我已阅读并确认当前版本”复选框及 Git content OID 版本确认 provenance。
 - 扩展 Akira Research 的论文阅读协议：先按背景知识构建、前沿跟踪、方法学习、研究设计学习、证据核验或写作结构学习选择章节顺序；研究设计与方法阅读主动追踪基础工作、代表实现、后续改进和边界条件，并把被引次数、发表时间与引文网络连接度降级为发现/排序信号。人类阅读 Markdown 新增“关键图表与定位”和 `akira:user-notes` 用户专属区；Agent 不修改该区内容，用户补写自己的笔记也不会改变阅读确认的 content OID。

@@ -11,8 +11,7 @@ akira-lattice/
 ├── skills/
 │   ├── akira/               # Akira-TL/skills：通用 Skills + akira Router
 │   ├── research/            # Akira-TL/akira-research-skills
-│   ├── matt/                # Akira-TL/matt-skills：Matt + Akira engineering extensions
-│   └── openai-plugins/      # 受管第三方 source
+│   └── matt/                # Akira-TL/matt-skills：Matt + Akira engineering extensions
 ├── docs/                    # Lattice 基础设施说明
 └── .agents/adr/             # 长期架构决定
 ```
@@ -43,7 +42,7 @@ akira
 browser-access
 ```
 
-同时部署 Core、references、Guard scripts，并保留 OpenAI NGS source view。Matt、Research、Word、PPT、Agent 编排等不再全局预装；当当前项目真实需要时，由 `akira` Router 说明来源和用途、取得用户明确同意后项目级安装。
+同时部署 Core、references 与 Guard scripts。Matt、Research、Word、PPT、Agent 编排以及第三方专业能力都不再全局预装；当前项目真实需要时，由 `akira` Router 说明来源和用途、取得用户明确同意后项目级安装。
 
 例如软件工程项目由 Router 推荐：
 
@@ -51,7 +50,7 @@ browser-access
 npx skills add Akira-TL/matt-skills --skill '*' --agent '*' -y
 ```
 
-科研项目在 Research 远端正式发布后由 Router 推荐完整 Research suite。
+科研项目由 Router 推荐项目级安装完整 `Akira-TL/akira-research-skills` suite。
 
 ## Guard
 

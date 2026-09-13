@@ -33,4 +33,5 @@ Accepted
 - 通用仓仍有实际能力价值；Router 可以优先补一个单一通用 Skill，而不是任何缺口都升级成整仓安装。
 - 全局运行时保持较小，降低 Skill trigger 噪声；项目级 `skills-lock.json` 更接近项目真实用途。
 - 旧运行时中历史上全局安装的 Matt / Research / 其他 Skill 不由新版安装器静默清理；一次性迁移必须显式执行并遵守现有安装 ownership manifest。
-- Lattice Guard 需要同时理解通用仓的分类目录结构与 Research suite 的 `skills/` + 平铺 `docs/` 结构。
+- Lattice Guard 需要同时理解通用仓的分类目录结构，以及 Research suite 的 `skills/<category>/<skill>/` + `docs/<category>/<skill>.md` 镜像结构。
+- 第三方 Skill 仓库不作为 Lattice submodule 固定；Router 只维护可信来源、发现方式与项目级最小安装边界。

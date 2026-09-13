@@ -17,8 +17,7 @@ akira-lattice/
 ├── skills/
 │   ├── akira/               # 通用 Akira Skills + akira Router
 │   ├── research/            # 独立 Research suite
-│   ├── matt/                # Matt fork + Akira engineering extensions
-│   └── openai-plugins/      # 第三方只读 source pin
+│   └── matt/                # Matt fork + Akira engineering extensions
 ├── docs/
 └── .agents/adr/
 ```
@@ -42,7 +41,7 @@ akira-lattice/
           └──→ ~/.config/opencode/AGENTS.md
 ```
 
-`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。OpenAI `ngs-analysis` 继续通过 `~/.agents/external/ngs-analysis` 暴露固定 source view；它不是默认全局 Skill 集。
+`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。第三方 Skill 仓不再由 Lattice 固定为 submodule 或运行时 source view；需要时由 `akira` Router 从登记来源发现并项目级安装具体能力。
 
 ## 默认安装策略
 
@@ -63,7 +62,7 @@ browser-access
 
 软件工程项目若尚未安装 `ask-matt`，Core 会先交给 `akira` Router；Router 说明需要 `Akira-TL/matt-skills` 的原因并获得用户明确同意后，再在当前项目安装 Matt suite。`ask-akira` 和 Parallel 系列随 Matt fork 提供，不存在独立 Engineering 产品仓。
 
-科研项目由 Router 指向 `Akira-TL/akira-research-skills`。在新远端尚未正式发布前，Catalog 必须保持 `local-ready / remote-pending`，不能伪造可执行的远端安装来源。
+科研项目由 Router 指向已发布的 `Akira-TL/akira-research-skills`，并在用户同意后按项目级范围安装完整 Research suite。
 
 Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 只在任务真正需要时从 `Akira-TL/skills` 安装对应单一 Skill。
 
@@ -91,7 +90,7 @@ check PATH    组合运行当前路径适用检查并显示 Git/worktree 状态
 `skills` 同时支持两种自研仓布局：
 
 - 通用仓的 `<category>/<skill>/SKILL.md` + `docs/<category>/<skill>.md`；
-- 产品仓的 `skills/<skill>/SKILL.md` + `docs/<skill>.md`。
+- 产品仓的 `skills/<category>/<skill>/SKILL.md` + `docs/<category>/<skill>.md`，并兼容旧的 `skills/<skill>/SKILL.md` + `docs/<skill>.md`。
 
 普通提交不默认运行全项目 lint/typecheck/build/test；大型、关键或高风险修改按失败模式追加 targeted tests、schema/migration validation 等。
 
@@ -105,11 +104,7 @@ skills/research  → git@github.com:Akira-TL/akira-research-skills.git
 skills/matt      → git@github.com:Akira-TL/matt-skills.git
 ```
 
-第三方：
-
-```text
-skills/openai-plugins → https://github.com/openai/plugins.git
-```
+第三方 Skill 来源不作为 Lattice submodule。当前可信外部来源及发现方式由 `skills/akira` 中的 `akira` Router 维护；需要时只安装当前任务对应的具体 Skill。
 
 修改 Skill 时先在 child repository 提交，再更新 Lattice pointer。Research、Matt 与通用 Akira 仓之间不通过相对路径偷读彼此正文；共享能力通过安装后的 Skill/capability 契约协作。
 

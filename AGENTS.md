@@ -9,7 +9,8 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 - `skills/akira` → `Akira-TL/skills`：通用 Akira Skills 与 `akira` 能力 Router。保留 Productivity、Akira Guard 和通用 Agent 编排。
 - `skills/research` → `Akira-TL/akira-research-skills`：完整 Research 产品族，拥有自己的 `skills/`、`docs/`、scripts、tests 与 research.sqlite 契约。
 - `skills/matt` → `Akira-TL/matt-skills`：Matt fork。Matt 工程方法以及 Akira 的 `ask-akira` / Parallel 系列工程扩展都在这里维护。
-- `skills/openai-plugins`：只读第三方源码 pin，不属于 Akira 自研 Skill 正文。
+
+第三方 Skill 仓库不作为 Lattice submodule 固定；由 `skills/akira` 中的 Router 维护可信来源和按需安装边界。
 
 不要为了路由方便复制产品正文。未来只有当 Knowledge 等能力形成独立、高内聚产品族时才新增子仓。
 

@@ -21,10 +21,7 @@ BACKUP_ROOT = REPO_ROOT / "backup"
 AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
 RESEARCH_SKILLS_ROOT = REPO_ROOT / "skills" / "research"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
-OPENAI_PLUGINS_ROOT = REPO_ROOT / "skills" / "openai-plugins"
 DEFAULT_GLOBAL_SKILLS = ("akira", "browser-access")
-OPENAI_NGS_ROOT = OPENAI_PLUGINS_ROOT / "plugins" / "ngs-analysis"
-NGS_RUNTIME_VIEW = HUB / "external" / "ngs-analysis"
 INSTALL_MANIFEST = HUB / ".akira-skills-install.json"
 NAME_PATTERN = re.compile(r"^name:\s*([^\s#]+)\s*$")
 
@@ -114,11 +111,10 @@ def ensure_source_submodules() -> None:
             "skills/akira",
             "skills/research",
             "skills/matt",
-            "skills/openai-plugins",
         ]
     )
     if result.returncode != 0:
-        raise RuntimeError("无法初始化 Akira、Research、Matt 或 OpenAI plugins Git submodule")
+        raise RuntimeError("无法初始化 Akira、Research 或 Matt Git submodule")
 
     if not (AKIRA_SKILLS_ROOT / "AGENTS.md").is_file():
         raise RuntimeError("skills/akira 未正确初始化")
@@ -126,22 +122,6 @@ def ensure_source_submodules() -> None:
         raise RuntimeError("skills/research 未正确初始化")
     if not MATT_SKILLS_ROOT.is_dir():
         raise RuntimeError("skills/matt 未正确初始化")
-    if not (OPENAI_NGS_ROOT / ".codex-plugin" / "plugin.json").is_file():
-        raise RuntimeError("OpenAI ngs-analysis plugin source 未正确初始化")
-
-    subprocess.run(
-        [
-            "git",
-            "-C",
-            str(OPENAI_PLUGINS_ROOT),
-            "remote",
-            "set-url",
-            "--push",
-            "origin",
-            "DISABLED",
-        ],
-        check=True,
-    )
 
 
 def skill_name(skill_file: Path) -> str | None:
@@ -264,7 +244,6 @@ def deploy() -> None:
     ensure_link(CORE_ROOT / "references", HUB / "references", stamp)
     ensure_link(SCRIPT_ROOT, HUB / "scripts", stamp)
     ensure_link(DOC_PATH, HUB / "README.md", stamp)
-    ensure_link(OPENAI_NGS_ROOT, NGS_RUNTIME_VIEW, stamp)
     ensure_link(CORE_ROOT / "AGENTS.md", HOME / ".codex" / "AGENTS.md", stamp)
     ensure_link(CORE_ROOT / "AGENTS.md", HOME / ".claude" / "CLAUDE.md", stamp)
     ensure_link(

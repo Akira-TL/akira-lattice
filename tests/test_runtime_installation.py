@@ -62,6 +62,8 @@ class InstallBoundaryTests(unittest.TestCase):
             "cleanup_legacy",
             "migrate_legacy_backups",
             "remote\", \"set-url",
+            "openai-plugins",
+            "external/ngs-analysis",
         ):
             self.assertNotIn(forbidden, source)
 
