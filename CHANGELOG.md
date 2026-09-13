@@ -23,6 +23,7 @@ All user-visible changes to stable skills will be documented in this file.
 ### Changed
 
 - 重构 Skill 发现与安装拓扑：`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表，Agent 先复用机器级 Skill，缺失时才从远端 GitHub source 安装；共享安装器不再管理项目级 Skill view，也不认识 ForgeRelay、Claude Code、Codex 等具体执行器。各执行器按自身机制发现、链接或加载机器级 Skill，同名不同 repository 冲突继续 fail closed。
+- 更新 Core 的 Skill 发现规则：当前会话缺少能力时必须先检查 `~/.agents/skills/<skill>`，机器级已存在则由当前执行器自行加载，不重复安装；只有机器级也缺失时才通过 `akira` Router 请求用户确认并安装到机器级注册表。代码任务同样先从机器级注册表发现 `ask-matt`。
 - 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
 - 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。根安装器只保证 `akira` 与 `browser-access` 机器级基础注册；Matt / Research / 其他通用 Skill 由 Router 按真实任务并经用户同意后安装到机器级注册表。
 - 将 `akira` 的 first-party 能力发现集中到按需读取的 `CATALOG.md`：统一维护 Akira 通用 Skill、Research suite、Matt 产品族的准确名称、用途、GitHub source、发布状态、安装粒度和项目安装命令；详细 Git + symlink 机制下沉到 `INSTALLATION.md`。

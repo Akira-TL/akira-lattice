@@ -9,7 +9,8 @@
 - 专有名词以及程序、命令、工具、库、框架、产品、项目等名称，以官方名称和原始拼写为准；没有规范且通行的中文名称，或翻译会造成失真时，直接保留原名，不得为了中文化强行直译。例如 `ssh` 作为命令名直接写作 `ssh`，不翻译成“安全壳”。文件名、路径、代码标识符、参数和其他必须逐字准确的技术字面量同样保留原文。
 - 不得自行创造、拼接、直译或以近义词改写出缺乏专业严谨来源的术语、缩写、分类名或概念名。使用一个疑似专业表述前先确认是否已有学术或行业通行名称；无法确认时使用普通描述性语言并明确其不是既有术语。确需提出新的概念或命名时，必须先与用户讨论并取得明确同意，再给出清晰定义并与既有术语区分。
 - 仅当任务确实需要用户个人资料、联系方式、报名、简历、自我介绍、项目经历，或本机系统、服务部署、端口、反向代理与开发环境信息时，才读取 `~/.config/akira/`；无关任务不得读取。
-- 处理代码相关项目需求时，先检查当前项目是否已有 `ask-matt` Skill；已有则读取并按其路由确定项目管理与开发流程。若未安装 Matt 系列，则先使用 `akira` Skill Router 说明需要 `Akira-TL/matt-skills` 的原因并取得用户明确同意，再在当前项目安装后进入 `ask-matt`；不要把完整 Matt 工程套件作为全局默认预装。
+- 任务需要某个 Skill 而当前会话不可用时，先检查机器级注册表 `~/.agents/skills/<skill>`。若已存在，由当前执行器按照自己的 Skill 发现、链接或加载机制使用，不重复安装；只有机器级也不存在时，才使用 `akira` Skill Router 确认来源、用途与最小安装集合，取得用户明确同意后安装到 `~/.agents/skills/`。ForgeRelay、Claude Code、Codex 或其他执行器自己的 Skill 目录与项目链接由各执行器管理，不属于 Akira 共享安装器。
+- 处理代码相关项目需求时优先使用 `ask-matt`。当前会话没有 `ask-matt` 时先按上一条检查 `~/.agents/skills/ask-matt` 并由当前执行器加载；机器级也缺失时再通过 `akira` Router 安装 Matt 所需能力，然后进入 `ask-matt` 路由。
 - 多步骤、可复用的大型规则或执行流程优先使用 Skill；短小、稳定、跨项目的个人工程默认直接保留在本文件。
 
 ## 用户可见回复
@@ -50,7 +51,7 @@ Agent 可以根据任务需要充分展开分析、设计、证据和细节，�
 
 当前 harness 或项目规则要求显式指定模型时必须显式指定，但不得假设不同 harness 共享模型名称、别名或参数，也不得自行跨产品映射或降级。
 
-需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。多 Agent 的任务拆分、Task、claim、Ownership、frontier、Gate、Worker / Coordinator 生命周期与验收不由 Core 定义；这些属于实际安装并启用的协作 Skill 或项目协议。
+需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。多 Agent 的任务拆分、Task、claim、Ownership、frontier、Gate、Worker / Coordinator 生命周期与验收不由 Core 定义；这些属于当前执行器实际加载的协作 Skill 或项目协议。
 
 ## 独立 Agent 验收
 
