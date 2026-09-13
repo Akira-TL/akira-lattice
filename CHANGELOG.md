@@ -22,7 +22,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
-- 重构 Skill 发现与安装拓扑：`~/.agents/sources/` 作为唯一受管 Skill source checkout，`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表；共享安装器不再管理项目级或执行器专用 Skill view，也不认识具体执行器。ForgeRelay、Claude Code、Codex 等执行器需要 Skill 时自行在其 Skill 目录建立指向机器级注册项的软链接，不复制 Skill 内容或维护第二份 source checkout；同名不同 repository 冲突继续 fail closed。
+- 重构 Skill 发现与安装拓扑：`~/.agents/sources/` 作为唯一受管 Skill source checkout，`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表；共享安装器不再管理项目级或执行器专用 Skill view，也不认识具体执行器。具体执行器需要 Skill 时自行在其 Skill 目录建立指向机器级注册项的软链接，不复制 Skill 内容或维护第二份 source checkout；同名不同 repository 冲突继续 fail closed。
 - 更新 Core 的 Skill 发现规则：当前会话缺少能力时先检查 `~/.agents/skills/<skill>`；机器级已有则不重复安装，由当前执行器自行建立所需软链接并加载，机器级缺失时才由 `akira` Router 确认来源、用途与最小集合后安装。共享安装器始终只负责 `~/.agents`，不替具体执行器创建适配链接。
 - 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
 - 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。根安装器只保证 `akira` 与 `browser-access` 机器级基础注册；Matt / Research / 其他通用 Skill 由 Router 按真实任务并经用户同意后安装到机器级注册表。

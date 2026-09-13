@@ -64,7 +64,7 @@ browser-access
 
 科研任务同样先复用机器级已有 Research suite；缺失时才从已发布的 `Akira-TL/akira-research-skills` 安装。Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 也遵循相同的“当前会话 → 机器级注册表 → 远端 source”发现顺序。
 
-安装器只管理机器级 manifest `~/.agents/akira-skills.json`、`~/.agents/sources/` checkout 与 `~/.agents/skills/` 软链接。更新只更新共享 Git checkout；卸载只删除受管机器级注册项；未知普通目录和其他来源的软链接 fail closed。ForgeRelay、Claude Code、Codex 等执行器只管理自己的 Skill 视图，需要时自行软链接到 `~/.agents/skills/<name>`；Akira 安装器不写这些执行器目录。
+安装器只管理机器级 manifest `~/.agents/akira-skills.json`、`~/.agents/sources/` checkout 与 `~/.agents/skills/` 软链接。更新只更新共享 Git checkout；卸载只删除受管机器级注册项；未知普通目录和其他来源的软链接 fail closed。具体执行器只管理自己的 Skill 视图，需要时自行软链接到 `~/.agents/skills/<name>`；Akira 安装器不写这些执行器目录。
 
 ## Guard
 

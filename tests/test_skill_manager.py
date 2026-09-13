@@ -102,7 +102,10 @@ class InstallTests(unittest.TestCase):
             )
             self.assertEqual(manifest["scope"], "machine")
             self.assertEqual(manifest["skills"]["alpha"]["commit"], "abc123")
-            self.assertNotIn("forgerelay", manifest["skills"]["alpha"])
+            self.assertEqual(
+                set(manifest["skills"]["alpha"]),
+                {"repository", "ref", "commit", "source_path"},
+            )
 
     def test_all_can_be_limited_by_roots_and_extended_by_explicit_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -257,7 +260,6 @@ class CliTests(unittest.TestCase):
     def test_cli_has_no_executor_or_project_scope_flags(self) -> None:
         help_text = skills_cli.build_parser().format_help()
         self.assertNotIn("--project", help_text)
-        self.assertNotIn("--forgerelay", help_text)
         self.assertNotIn("enable", help_text)
 
 

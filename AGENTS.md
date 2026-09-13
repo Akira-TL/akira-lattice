@@ -20,7 +20,7 @@ Global static Agent configuration lives under `core/`. Deterministic checks and 
 
 ## Installation boundary
 
-Akira's installer owns only the machine-level Skill registry at `~/.agents/skills`, backed by Git checkouts under `~/.agents/sources`. Matt, Research and non-baseline common Skills enter that registry only when a real task needs them and the user explicitly agrees. ForgeRelay, Claude Code, Codex and other harnesses own their own Skill discovery, linking, project views, caches and profiles; do not encode any one harness's layout into the shared installer.
+Akira's installer owns only the machine-level Skill registry at `~/.agents/skills`, backed by Git checkouts under `~/.agents/sources`. Matt, Research and non-baseline common Skills enter that registry only when a real task needs them and the user explicitly agrees. Specific harnesses own their own Skill discovery, linking, project views, caches and profiles; do not encode any harness-specific layout into the shared installer.
 
 Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry.
 

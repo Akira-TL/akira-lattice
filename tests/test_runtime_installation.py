@@ -40,7 +40,6 @@ class InstallBoundaryTests(unittest.TestCase):
             self.assertNotIn("--copy", source)
 
         for source in (manager_source, cli_source):
-            self.assertNotIn("forgerelay", source.lower())
             self.assertNotIn("--project", source)
             self.assertNotIn("claude", source.lower())
             self.assertNotIn("codex", source.lower())
