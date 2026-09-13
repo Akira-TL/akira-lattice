@@ -29,7 +29,7 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Guard**：机械可判断的约束；不复制业务/科研语义。
-- **Runtime state**：远端 Skill source 统一 clone/fetch 到 `~/.agents/sources/`；机器级 `~/.agents/skills/` 保存指向 source checkout 的受管软链接。具体执行器自己的 Skill 目录、缓存、profile 与项目级引用由对应执行器管理，不属于 Akira 安装器状态。
+- **Runtime state**：远端 Skill source 统一 clone/fetch 到 `~/.agents/sources/`；机器级 `~/.agents/skills/` 保存指向 source checkout 的受管软链接。这套共享注册表只属于 Akira 安装模型；具体执行器是否采用它，以及自己的 Skill 目录、缓存、profile 与项目级引用，均由对应执行器管理。执行器使用独立 Skill store 时不得为了兼容自动建立跨 store 软链接。
 
 ## 运行时拓扑
 
@@ -64,7 +64,7 @@ browser-access
 
 科研任务同样先复用机器级已有 Research suite；缺失时才从已发布的 `Akira-TL/akira-research-skills` 安装。Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 也遵循相同的“当前会话 → 机器级注册表 → 远端 source”发现顺序。
 
-安装器只管理机器级 manifest `~/.agents/akira-skills.json` 与 `~/.agents/skills/` 软链接。更新只更新共享 Git checkout；卸载只删除受管机器级注册项；未知普通目录和其他来源的软链接 fail closed。ForgeRelay、Claude Code、Codex 或其他执行器如何加载机器级 Skill，由各自机制负责。
+安装器只管理机器级 manifest `~/.agents/akira-skills.json` 与 `~/.agents/skills/` 软链接。更新只更新共享 Git checkout；卸载只删除受管机器级注册项；未知普通目录和其他来源的软链接 fail closed。具体执行器可以选择采用共享注册表，也可以维护完全独立的 Skill store；是否加载机器级 Skill 由各自机制负责。
 
 ## Guard
 
