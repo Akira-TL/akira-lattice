@@ -11,7 +11,7 @@ CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
-DEFAULT_RUNTIME_SKILLS = ("akira", "browser-access")
+DEFAULT_MACHINE_SKILLS = ("akira", "browser-access")
 
 
 def direct_link_target(path: Path) -> Path:
@@ -36,13 +36,13 @@ def remove_owned_link(source: Path, target: Path) -> None:
     print(f"REMOVE {target}")
 
 
-def uninstall_runtime_skills() -> None:
+def uninstall_machine_skills() -> None:
     try:
-        removed = remove_installed(DEFAULT_RUNTIME_SKILLS, global_scope=True)
+        removed = remove_installed(DEFAULT_MACHINE_SKILLS)
     except SkillInstallError as exc:
         raise RuntimeError(str(exc)) from exc
     if not removed:
-        print("SKILLS 当前没有检测到 Akira Lattice 全局基线")
+        print("SKILLS 当前没有检测到 Akira Lattice 机器级基线")
 
 
 def uninstall_runtime_links() -> None:
@@ -60,7 +60,7 @@ def uninstall_runtime_links() -> None:
 
 
 def main() -> int:
-    uninstall_runtime_skills()
+    uninstall_machine_skills()
     uninstall_runtime_links()
     print("卸载完成；Git source cache 与其他软件状态均未清理。")
     return 0

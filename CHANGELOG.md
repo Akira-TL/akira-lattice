@@ -22,10 +22,11 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 重构 Skill 发现与安装拓扑：`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表，Agent 先复用机器级 Skill，缺失时才从远端 GitHub source 安装；共享安装器不再管理项目级 Skill view，也不认识 ForgeRelay、Claude Code、Codex 等具体执行器。各执行器按自身机制发现、链接或加载机器级 Skill，同名不同 repository 冲突继续 fail closed。
 - 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
-- 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。运行时只常驻 `akira` 与 `browser-access`；Matt / Research / 其他通用 Skill 由 Router 按真实任务并经用户同意后项目级安装。
+- 按能力内聚性重构 Akira Skill source：完整 Research 工作流独立到 `Akira-TL/akira-research-skills`；`Akira-TL/skills` 保留 `akira` Router、浏览器、Word、科研/学术 PPT、Guard 与通用 Agent 编排；`ask-akira`、`parallel-coordinator`、`parallel-execution` 回归 `Akira-TL/matt-skills` fork。根安装器只保证 `akira` 与 `browser-access` 机器级基础注册；Matt / Research / 其他通用 Skill 由 Router 按真实任务并经用户同意后安装到机器级注册表。
 - 将 `akira` 的 first-party 能力发现集中到按需读取的 `CATALOG.md`：统一维护 Akira 通用 Skill、Research suite、Matt 产品族的准确名称、用途、GitHub source、发布状态、安装粒度和项目安装命令；详细 Git + symlink 机制下沉到 `INSTALLATION.md`。
-- 移除 Lattice 对 OpenAI `plugins` 仓库与固定 `ngs-analysis` source view 的 submodule 管理；OpenAI Plugins 改由 `akira` Router 作为外部能力来源按当前清单发现，只有具体任务需要且用户同意时才项目级安装对应 Skill。
+- 移除 Lattice 对 OpenAI `plugins` 仓库与固定 `ngs-analysis` source view 的 submodule 管理；OpenAI Plugins 改由 `akira` Router 作为外部能力来源按当前清单发现，只有具体任务需要且用户同意时才把对应 Skill 安装到机器级注册表。
 
 - 重构 Akira Research 的 Git-native 科研工作流：`main` 固定为已接受的 canonical research state，真实科研路线使用 `research/<kind>/<slug>` 分支并以保留拓扑 merge 或 annotated archival tag 收口；Analysis 新增由 Git commit 固定的独立 Attempt、`src/` 公共实现与 `scripts/analyses/` 执行入口隔离，默认采用 Python 完成统计/数据处理并由 R 独立消费结果表绘图；项目初始化写入针对机器 artifact、可重建输出和人类 convenience PDF 的 `.gitignore`。同时将人类文献区稳定为 `literature/papers/` + `collections/`，不再用 `to-read/read` 文件移动表达状态，并为阅读 Markdown 增加顶部/结尾同一状态的“我已阅读并确认当前版本”复选框及 Git content OID 版本确认 provenance。
 - 扩展 Akira Research 的论文阅读协议：先按背景知识构建、前沿跟踪、方法学习、研究设计学习、证据核验或写作结构学习选择章节顺序；研究设计与方法阅读主动追踪基础工作、代表实现、后续改进和边界条件，并把被引次数、发表时间与引文网络连接度降级为发现/排序信号。人类阅读 Markdown 新增“关键图表与定位”和 `akira:user-notes` 用户专属区；Agent 不修改该区内容，用户补写自己的笔记也不会改变阅读确认的 content OID。
@@ -33,7 +34,7 @@ All user-visible changes to stable skills will be documented in this file.
 - 扩展 Akira Research 的原始研究论文写作流程：长篇 research manuscript / thesis 先完整盘点写作材料，再按“主要结论 → Results → Discussion → 反推 Introduction → Methods → Abstract / Title → Supplement / Appendix”起草；Results 先用小标题与 Figure / Table 搭骨架并要求层层递进，Introduction 与 Results / Discussion / Conclusion 做首尾闭环。材料可以分配到主文、Supplement、Appendix 或 canonical support，但不得因不利于预期故事而静默遗漏；同时新增科研逻辑连接词、结论强度与术语一致性的受控表达参考。
 - 为 Akira Research 的 Communication 增加写作类型路由：长篇正文开始前先区分原始研究论文、普通叙述性综述和系统综述/范围综述/荟萃分析；普通综述按 Review Question / Scope、材料盘点、问题导向组织、跨论文综合、真实研究缺口与 future direction 组织，不再套用原始研究论文的 Results / Discussion 流程，也不再默认要求新建 conceptual framework / taxonomy。正式证据综合研究若检索、筛选、质量评价、数据提取与综合 provenance 未完成，则返回科研流程而不是直接写稿。
 - 重构 Akira Research 的长篇科研写作生成纪律：正文前先明确贡献来自经验性发现、方法、resource、evidence synthesis 还是概念本身，建立稿件术语表，并按“读者问题 → evidence → 最窄结论”组织 section / paragraph；新命名必须先核验已有术语、证明命名本身有贡献必要性、给出可操作定义并获得用户明确批准。新增生物学与生物信息学的原始研究 / 普通综述叠加层，并把写作参考收敛为 `REFERENCE.md`：只维护已核验 DOI 与阅读入口，每次开始或重新开始长篇正文前实际打开 1 篇通用结构参考和 2 篇同类型已发表论文，直接从原论文观察 section / paragraph 用语与推进方式，不复制原句，也不把 writing reference 当科学证据。
-- 增加外部科研 Skill 按需使用协议：K-Dense Scientific Agent Skills 不作为 submodule 或全局默认依赖，只在当前科研任务确实需要具体专业工具、数据库或软件知识时审计单个 Skill 的来源、revision、license、脚本/网络/凭据和职责边界，再征得用户同意后用当前项目的 `.agents/skills/` 与 `skills-lock.json` 做项目级安装；第三方 Skill 只补执行知识，不接管 Akira 的科研决策与 provenance。
+- 增加外部科研 Skill 按需使用协议：K-Dense Scientific Agent Skills 不作为 submodule 或默认依赖，只在当前科研任务确实需要具体专业工具、数据库或软件知识时审计单个 Skill 的来源、revision、license、脚本/网络/凭据和职责边界，再征得用户同意后安装到机器级 Skill 注册表；具体执行器的加载方式由执行器自身负责，第三方 Skill 只补执行知识，不接管 Akira 的科研决策与 provenance。
 - 吸收可量化迭代实验的受控执行思想到 Analysis Attempt：存在稳定机械指标时，结果前固定 baseline、metric、方向、target 与 guard，每个 Attempt 只做一个主要可解释变化，并保留改善、未改善和 invalid 路线；机械 target 不替代 scientific validity，外部 controller 不接管科研 Git 历史。
 - 加强 Communication 的完整性与修订审计：长篇 draft 在 reviewer-style review 前检查高风险 Claim↔source、citation support、数字/统计与 scope，实质 revision 后再做最终 drift 审查；reviewer response 按意见—验收标准—真实修改 artifact 闭环，默认先独立核验 revised manuscript / analysis / figure，再读取 response letter，避免“作者说已完成”替代可检查证据，同时加入 reverse outlining 检查 section thesis、段落主信息与 evidence 的映射。
 - 继续收紧 Communication 的最终交付边界：最终 PDF / DOCX / PPTX 必须基于真实渲染页面做排版 QA；多视角 reviewer-style 自审只有在真实上下文隔离时才称独立审查，concern 同时区分最低诚实修复、更强补强方案与无可写作性补救；Title / Abstract / Highlights 等压缩表面不得删掉会改变 Claim 真值或 scope 的限定；显微图、gel/blot、医学影像等原始科研图像必须保留处理 provenance，并禁止 clone、healing、generative fill、选择性 erase 或未披露拼接改变 evidence。
@@ -53,7 +54,7 @@ All user-visible changes to stable skills will be documented in this file.
 - 调整 Core 的用户可见回复规则：复杂任务允许先完整展开，但必须在末尾以独立“结论”收束当前最重要的新发现、状态变化、关键证据、需查看的产物路径与真正下一步；过程性记录和常规校验不再默认进入结论。
 - 将多 Agent 执行边界改为 harness-agnostic：Parallel / Ask-Akira 不再依赖固定执行产品或执行器 Skill；Codex、Claude Code 或其他 harness 都只作为实现载体，具体子 Agent、进程、模型与 worktree 能力以当前工具契约为准。
 - 将原环境绑定的多 Agent 执行 Skill 迁移为可选的 `agent-orchestration`，移除固定 CLI 与模型名称假设，并从 Core 必需运行时 Skill 检查中删除该执行层依赖。
-- 重写 Skill 安装职责：不再依赖第三方 Skill package manager；`scripts/skills.py` 只从远端 GitHub clone/fetch 到 `~/.agents/sources/`，全局与项目 `.agents/skills/` 均使用软链接，ForgeRelay 常驻 view 再链接全局 `.agents/skills`。更新只推进 Git checkout，卸载只删除 manifest 登记且仍指向预期 source 的软链接。
+- 重写 Skill 安装职责：不再依赖第三方 Skill package manager；`scripts/skills.py` 只从远端 GitHub clone/fetch 到 `~/.agents/sources/`，并在 `~/.agents/skills/` 建立机器级受管软链接。更新只推进 Git checkout，卸载只删除 manifest 登记且仍指向预期 source 的机器级软链接；项目级和执行器专用 Skill view 不属于共享安装器。
 - 明确 Core 的发布 tag 可变性边界：仅推送 tag、尚未产生 GitHub Release、包仓库版本或其他不可撤回正式发布产物时，允许修复后删除并重建同名 tag、继续使用原版本号；正式发布后 tag 与版本内容才进入不可变状态。
 - 将 Akira Guard 明确分成 Core 路由、`akira-guard` Skill 与 `scripts/guard.py` 执行层；`guard.py commit` 现在自动检查 staged Python/JSON/TOML 及可用解释器支持的 Shell/Node 语法，普通提交不再默认扩张为全量 lint/typecheck/build/test，重型验证仅用于大型、关键或高风险修改。
 - 细化 Core 的 Git 提交节奏与回退语义：以“一次明确修改目的”作为默认原子提交单位，每个完成阶段立即提交而不等待用户确认；有先后依赖的状态变化必须通过独立提交保留真实顺序；用户明确否定当前 Agent 最近实现时，在 ownership 与工作树安全前提下先 reset 被否定提交，再重新实现，避免在已否定历史上继续叠加修正。

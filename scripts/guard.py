@@ -396,38 +396,19 @@ def cmd_config(_: argparse.Namespace) -> int:
 
     expected_runtime_skills = {"akira", "browser-access"}
     try:
-        managed_skills = set(doctor_skills(global_scope=True))
+        managed_skills = set(doctor_skills())
     except SkillInstallError as exc:
-        fail(f"Akira Skill 运行时检查失败：{exc}")
+        fail(f"Akira Skill 机器级注册表检查失败：{exc}")
         failed = True
     else:
-        if managed_skills == expected_runtime_skills:
-            ok("Akira 全局 Skill manifest 仅包含 akira + browser-access")
+        if expected_runtime_skills.issubset(managed_skills):
+            ok("机器级 Skill 注册表包含 Akira 基线")
         else:
             fail(
-                "Akira 全局 Skill manifest 应仅包含 akira + browser-access，当前："
-                + ", ".join(sorted(managed_skills))
+                "机器级 Skill 注册表缺少 Akira 基线："
+                + ", ".join(sorted(expected_runtime_skills.difference(managed_skills)))
             )
             failed = True
-
-    global_skill_names = {
-        path.name for path in (HUB / "skills").iterdir()
-    } if (HUB / "skills").is_dir() else set()
-    if global_skill_names == expected_runtime_skills:
-        ok("~/.agents/skills 仅包含 ForgeRelay 常驻基线")
-    else:
-        fail(
-            "~/.agents/skills 应仅包含 akira + browser-access，当前："
-            + ", ".join(sorted(global_skill_names))
-        )
-        failed = True
-
-    legacy_forgerelay_store = Path.home() / ".forgerelay" / ".agents"
-    if legacy_forgerelay_store.exists():
-        fail(f"旧 ForgeRelay Skill store 不应存在：{legacy_forgerelay_store}")
-        failed = True
-    else:
-        ok("旧 ~/.forgerelay/.agents 已移除")
     return 1 if failed else 0
 
 

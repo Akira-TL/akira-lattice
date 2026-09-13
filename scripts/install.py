@@ -14,9 +14,8 @@ CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
-FORGERELAY_HOME = HOME / ".forgerelay"
 BACKUP_ROOT = REPO_ROOT / "backup"
-DEFAULT_RUNTIME_SKILLS = ("akira", "browser-access")
+DEFAULT_MACHINE_SKILLS = ("akira", "browser-access")
 AKIRA_SKILLS_SOURCE = "https://github.com/Akira-TL/skills.git"
 
 
@@ -85,13 +84,11 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     print(f"LINK   {target} -> {link_source}")
 
 
-def install_runtime_skills() -> list[str]:
+def install_machine_skills() -> list[str]:
     try:
         return install_from_source(
             AKIRA_SKILLS_SOURCE,
-            skill_names=DEFAULT_RUNTIME_SKILLS,
-            global_scope=True,
-            forgerelay=True,
+            skill_names=DEFAULT_MACHINE_SKILLS,
         )
     except SkillInstallError as exc:
         raise RuntimeError(str(exc)) from exc
@@ -101,7 +98,6 @@ def deploy() -> None:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     for path in (
         HUB,
-        FORGERELAY_HOME,
         HOME / ".codex",
         HOME / ".claude",
         HOME / ".config" / "opencode",
@@ -120,16 +116,14 @@ def deploy() -> None:
         stamp,
     )
 
-    installed = install_runtime_skills()
+    installed = install_machine_skills()
 
     print(f"Core source:       {CORE_ROOT}")
     print(f"Scripts source:    {SCRIPT_ROOT}")
     print(f"Runtime hub:       {HUB}")
-    print(f"ForgeRelay:        {FORGERELAY_HOME}")
-    print(f"Baseline Skills:   {', '.join(installed)}")
+    print(f"Machine baseline:  {', '.join(installed)}")
     print(f"Skill source cache:{HUB / 'sources'}")
-    print(f"Global Skill view: {HUB / 'skills'}")
-    print(f"ForgeRelay view:   {FORGERELAY_HOME / 'skills'}")
+    print(f"Machine Skill registry: {HUB / 'skills'}")
 
 
 def main() -> int:

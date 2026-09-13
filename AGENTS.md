@@ -20,9 +20,9 @@ Global static Agent configuration lives under `core/`. Deterministic checks and 
 
 ## Installation boundary
 
-Global installation is deliberately small. Lattice installs only `akira` Router and the explicitly declared cross-domain baseline from `skills/akira`; Matt, Research and non-baseline common Skills are installed project-locally when the Router identifies a real need and the user explicitly agrees.
+Akira's installer owns only the machine-level Skill registry at `~/.agents/skills`, backed by Git checkouts under `~/.agents/sources`. Matt, Research and non-baseline common Skills enter that registry only when a real task needs them and the user explicitly agrees. ForgeRelay, Claude Code, Codex and other harnesses own their own Skill discovery, linking, project views, caches and profiles; do not encode any one harness's layout into the shared installer.
 
-Being pinned as a Lattice submodule does not mean a Skill repository is globally installed.
+Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry.
 
 ## Authoring discipline
 

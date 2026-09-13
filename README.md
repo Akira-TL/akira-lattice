@@ -27,7 +27,7 @@ akira-lattice/
 
 Lattice pin 某个 source 不等于把它全局安装。
 
-## ForgeRelay 运行时安装
+## 机器级 Skill 安装
 
 统一入口：
 
@@ -35,24 +35,24 @@ Lattice pin 某个 source 不等于把它全局安装。
 ./install.sh
 ```
 
-Lattice 只在 ForgeRelay 运行时常驻极小基线：
+Lattice 默认保证以下机器级基础 Skill 已注册：
 
 ```text
 akira
 browser-access
 ```
 
-Skill source 由 Lattice 自带安装器直接从 GitHub clone/fetch 到 `~/.agents/sources/`；`~/.agents/skills/` 是全局软链接视图，`~/.forgerelay/skills/` 再链接到其中的 ForgeRelay 常驻基线。Skill 内容不复制，安装器只依赖 Python 标准库与 Git，不依赖第三方 Skill package manager。
+Skill source 由 Lattice 自带安装器直接从 GitHub clone/fetch 到 `~/.agents/sources/`；`~/.agents/skills/` 是机器级已安装 Skill 注册表，只保存指向 Git checkout 的软链接。Skill 内容不复制，安装器只依赖 Python 标准库与 Git，不依赖第三方 Skill package manager。
 
-同时部署 Core、references 与 Guard scripts。Matt、Research、Word、PPT、Agent 编排以及第三方专业能力都不常驻；当前项目真实需要时，由 `akira` Router 说明来源和用途、取得用户明确同意后项目级安装。
+同时部署 Core、references 与 Guard scripts。Matt、Research、Word、PPT、Agent 编排以及第三方专业能力只在真实任务需要时由 `akira` Router 先检查机器级注册表；机器级缺失时再说明来源和用途、取得用户明确同意后从远端安装。
 
-例如软件工程项目由 Router 按 Catalog 推荐 `Akira-TL/matt-skills` 的 promoted suite；科研项目则项目级安装完整 Research suite。二者都使用：
+例如软件工程任务由 Router 按 Catalog 推荐 `Akira-TL/matt-skills` 的 promoted suite；科研任务则安装完整 Research suite：
 
 ```bash
-python3 ~/.agents/scripts/skills.py install <github-source> ... --project .
+python3 ~/.agents/scripts/skills.py install <github-source> ...
 ```
 
-精确 source、目录范围和额外 Skill 以 `akira` 的 `CATALOG.md` 为准。
+ForgeRelay、Claude Code、Codex 或其他执行器如何发现、链接或加载 `~/.agents/skills`，由各执行器自己的机制负责，不属于 Akira Skill 安装器。精确 source、目录范围和额外 Skill 以 `akira` 的 `CATALOG.md` 为准。
 
 ## Guard
 

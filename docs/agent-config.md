@@ -29,7 +29,7 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Guard**：机械可判断的约束；不复制业务/科研语义。
-- **Runtime state**：远端 Skill source 统一 clone/fetch 到 `~/.agents/sources/`；全局 `~/.agents/skills/` 与项目 `.agents/skills/` 都只保存指向 source checkout 的软链接，ForgeRelay 常驻视图再从 `~/.forgerelay/skills/` 链到全局 Skill view。MCP/plugin state、缓存与会话继续由对应软件管理。
+- **Runtime state**：远端 Skill source 统一 clone/fetch 到 `~/.agents/sources/`；机器级 `~/.agents/skills/` 保存指向 source checkout 的受管软链接。具体执行器自己的 Skill 目录、缓存、profile 与项目级引用由对应执行器管理，不属于 Akira 安装器状态。
 
 ## 运行时拓扑
 
@@ -41,7 +41,7 @@ akira-lattice/
           └──→ ~/.config/opencode/AGENTS.md
 ```
 
-`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。第三方 Skill 仓不再由 Lattice 固定为 submodule 或运行时 source view；需要时由 `akira` Router 从登记来源发现并项目级安装具体能力。
+`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。第三方 Skill 仓不再由 Lattice 固定为 submodule 或运行时 source view；需要时由 `akira` Router 从登记来源发现并安装到机器级 `~/.agents/skills/`。
 
 ## 默认安装策略
 
@@ -51,22 +51,20 @@ akira-lattice/
 ./install.sh
 ```
 
-Lattice pin 住多个 Skill 仓是为了开发、版本与 provenance，不代表全部进入运行时。ForgeRelay 默认常驻 Skill 基线只有：
+Lattice pin 住多个 Skill 仓是为了开发、版本与 provenance，不代表全部进入机器级注册表。根安装器默认保证以下基础 Skill 已注册：
 
 ```text
 akira
 browser-access
 ```
 
-`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。两者由 `scripts/skills.py` 从远端 GitHub source 更新到 `~/.agents/sources/`，再建立 `~/.agents/skills/<name>` 与 `~/.forgerelay/skills/<name>` 两级软链接。其余通用 Skill 以及 Matt / Research 按真实项目需求只在当前项目 `.agents/skills/` 安装。
+`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。根安装器保证这两个 Skill 注册到 `~/.agents/skills/`。机器上后续真实使用过的 Matt、Research 或其他通用 Skill 也可以继续保留在该机器级注册表。
 
-软件工程项目若尚未安装 `ask-matt`，Core 会先交给 `akira` Router；Router 说明需要 `Akira-TL/matt-skills` 的原因并获得用户明确同意后，再在当前项目安装 Matt suite。`ask-akira` 和 Parallel 系列随 Matt fork 提供，不存在独立 Engineering 产品仓。
+软件工程任务缺少 `ask-matt` 时，Core 会先交给 `akira` Router。Router 先检查 `~/.agents/skills/`；已有 Matt suite 时不重复安装，缺失时在用户同意后从 `Akira-TL/matt-skills` 远端安装到机器级注册表。`ask-akira` 和 Parallel 系列随 Matt fork 提供，不存在独立 Engineering 产品仓。
 
-科研项目由 Router 指向已发布的 `Akira-TL/akira-research-skills`，并在用户同意后按项目级范围安装完整 Research suite。
+科研任务同样先复用机器级已有 Research suite；缺失时才从已发布的 `Akira-TL/akira-research-skills` 安装。Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 也遵循相同的“当前会话 → 机器级注册表 → 远端 source”发现顺序。
 
-Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 只在任务真正需要时从 `Akira-TL/skills` 安装对应单一 Skill。
-
-安装器只管理自己 manifest 登记的软链接：全局记录位于 `~/.agents/akira-skills.json`，项目记录位于 `<project>/.agents/akira-skills.json`。更新只更新共享 Git checkout，卸载只删除仍指向预期 source 的受管软链接；未知普通目录和其他来源的软链接 fail closed。
+安装器只管理机器级 manifest `~/.agents/akira-skills.json` 与 `~/.agents/skills/` 软链接。更新只更新共享 Git checkout；卸载只删除受管机器级注册项；未知普通目录和其他来源的软链接 fail closed。ForgeRelay、Claude Code、Codex 或其他执行器如何加载机器级 Skill，由各自机制负责。
 
 ## Guard
 
@@ -110,4 +108,4 @@ skills/matt      → git@github.com:Akira-TL/matt-skills.git
 
 ## 卸载
 
-`./uninstall.sh` 只移除全局 manifest 中登记的 `akira` / `browser-access` 软链接与对应 ForgeRelay view，以及直接指向本仓库的静态配置软链接。它不会猜测或删除项目级 Matt / Research Skill，也不会删除 `~/.agents/sources/` Git checkout。
+`./uninstall.sh` 只移除机器级 manifest 中登记的 `akira` / `browser-access` 基线软链接，以及直接指向本仓库的静态配置软链接。机器级注册的其他 Matt / Research / 通用 Skill、各执行器自己的引用和 `~/.agents/sources/` Git checkout 都不会被猜测性清理。

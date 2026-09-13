@@ -14,7 +14,6 @@ AGENTS_HOME = HOME / ".agents"
 SOURCES_ROOT = AGENTS_HOME / "sources"
 GLOBAL_SKILLS = AGENTS_HOME / "skills"
 GLOBAL_MANIFEST = AGENTS_HOME / "akira-skills.json"
-FORGERELAY_SKILLS = HOME / ".forgerelay" / "skills"
 NAME_PATTERN = re.compile(r"^name:\s*([^\s#]+)\s*$")
 MANIFEST_VERSION = 1
 
@@ -179,25 +178,19 @@ def ensure_symlink(source: Path, target: Path) -> None:
     print(f"LINK   {target} -> {source}")
 
 
-def _scope_paths(global_scope: bool, project: Path | None) -> tuple[Path, Path]:
-    if global_scope:
-        return GLOBAL_SKILLS, GLOBAL_MANIFEST
-    project_root = (project or Path.cwd()).expanduser().resolve()
-    return project_root / ".agents" / "skills", project_root / ".agents" / "akira-skills.json"
-
-
-def _empty_manifest(scope: str) -> dict[str, object]:
+def _empty_manifest() -> dict[str, object]:
     return {
         "version": MANIFEST_VERSION,
-        "scope": scope,
+        "scope": "machine",
         "skills": {},
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
-def load_manifest(path: Path, scope: str) -> dict[str, object]:
+def load_manifest(path: Path | None = None) -> dict[str, object]:
+    path = path or GLOBAL_MANIFEST
     if not path.is_file():
-        return _empty_manifest(scope)
+        return _empty_manifest()
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -207,13 +200,33 @@ def load_manifest(path: Path, scope: str) -> dict[str, object]:
     return payload
 
 
-def write_manifest(path: Path, payload: dict[str, object]) -> None:
+def write_manifest(payload: dict[str, object], path: Path | None = None) -> None:
+    path = path or GLOBAL_MANIFEST
+    payload["scope"] = "machine"
     payload["updated_at"] = datetime.now(timezone.utc).isoformat()
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix(path.suffix + ".tmp")
     temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temp.replace(path)
     print(f"STATE  {path}")
+
+
+def _metadata_source(metadata: dict[str, object]) -> tuple[str, str]:
+    repository = metadata.get("repository")
+    source_path = metadata.get("source_path")
+    if not isinstance(repository, str) or not isinstance(source_path, str):
+        raise SkillInstallError("Manifest Skill source 无效")
+    return repository, source_path
+
+
+def _same_registered_source(
+    metadata: dict[str, object], canonical: str, source_path: str
+) -> bool:
+    repository, registered_path = _metadata_source(metadata)
+    return (
+        _normalize_remote_url(repository) == _normalize_remote_url(canonical)
+        and registered_path == source_path
+    )
 
 
 def install_from_source(
@@ -223,16 +236,11 @@ def install_from_source(
     install_all: bool = False,
     include_roots: list[str] | tuple[str, ...] | None = None,
     ref: str = "main",
-    global_scope: bool = False,
-    project: Path | None = None,
-    forgerelay: bool = False,
 ) -> list[str]:
     if not install_all and not skill_names:
         raise SkillInstallError("必须指定至少一个 `--skill`，或使用 `--all`")
     if include_roots and not install_all:
         raise SkillInstallError("`--root` 只与 `--all` 一起使用")
-    if forgerelay and not global_scope:
-        raise SkillInstallError("ForgeRelay 全局视图只能链接全局 ~/.agents/skills")
 
     checkout, commit, canonical = ensure_source_checkout(source, ref)
     available = discover_skills(checkout)
@@ -250,44 +258,39 @@ def install_from_source(
             f"Source 中不存在以下 Skill：{', '.join(missing)}\nSource: {canonical}"
         )
 
-    skill_root, manifest_path = _scope_paths(global_scope, project)
-    scope_name = "global" if global_scope else str((project or Path.cwd()).expanduser().resolve())
-    manifest = load_manifest(manifest_path, scope_name)
+    manifest = load_manifest()
     entries = manifest["skills"]
     assert isinstance(entries, dict)
 
     for name in selected:
         source_dir = available[name].absolute()
-        target = skill_root / name
-        ensure_symlink(source_dir, target)
-        if forgerelay:
-            ensure_symlink(target.absolute(), FORGERELAY_SKILLS / name)
+        source_path = source_dir.relative_to(checkout).as_posix()
+        existing = entries.get(name)
+        if existing is not None:
+            if not isinstance(existing, dict):
+                raise SkillInstallError(f"机器级 Skill metadata 无效：{name}")
+            if not _same_registered_source(existing, canonical, source_path):
+                old_repo, old_path = _metadata_source(existing)
+                raise SkillInstallError(
+                    f"机器级同名 Skill 冲突：{name}\n"
+                    f"当前：{old_repo}#{old_path}\n"
+                    f"请求：{canonical}#{source_path}"
+                )
+
+        ensure_symlink(source_dir, GLOBAL_SKILLS / name)
         entries[name] = {
             "repository": canonical,
             "ref": ref,
             "commit": commit,
-            "source_path": source_dir.relative_to(checkout).as_posix(),
-            "forgerelay": bool(forgerelay),
+            "source_path": source_path,
         }
 
-    write_manifest(manifest_path, manifest)
+    write_manifest(manifest)
     return selected
 
 
-def _selected_manifest_path(global_scope: bool, project: Path | None) -> tuple[Path, Path, str]:
-    skill_root, manifest_path = _scope_paths(global_scope, project)
-    scope_name = "global" if global_scope else str((project or Path.cwd()).expanduser().resolve())
-    return skill_root, manifest_path, scope_name
-
-
-def update_installed(
-    *,
-    global_scope: bool = False,
-    project: Path | None = None,
-    repository: str | None = None,
-) -> list[str]:
-    skill_root, manifest_path, scope_name = _selected_manifest_path(global_scope, project)
-    manifest = load_manifest(manifest_path, scope_name)
+def update_installed(repository: str | None = None) -> list[str]:
+    manifest = load_manifest()
     entries = manifest["skills"]
     assert isinstance(entries, dict)
     if not entries:
@@ -315,19 +318,21 @@ def update_installed(
             if name not in available:
                 raise SkillInstallError(f"更新后 source 已不存在 Skill `{name}`：{canonical}")
             source_dir = available[name].absolute()
-            target = skill_root / name
+            source_path = source_dir.relative_to(checkout).as_posix()
+            if not _same_registered_source(metadata, canonical, source_path):
+                raise SkillInstallError(f"更新后 Skill source path 漂移：{name}")
+            target = GLOBAL_SKILLS / name
             if not target.is_symlink() or direct_link_target(target) != source_dir:
-                raise SkillInstallError(f"已安装 Skill 软链接漂移：{target}")
-            if bool(metadata.get("forgerelay")):
-                relay = FORGERELAY_SKILLS / name
-                if not relay.is_symlink() or direct_link_target(relay) != target.absolute():
-                    raise SkillInstallError(f"ForgeRelay Skill 软链接漂移：{relay}")
-            metadata["repository"] = canonical
-            metadata["commit"] = commit
-            metadata["source_path"] = source_dir.relative_to(checkout).as_posix()
+                raise SkillInstallError(f"机器级 Skill 软链接漂移：{target}")
+            entries[name] = {
+                "repository": canonical,
+                "ref": ref,
+                "commit": commit,
+                "source_path": source_path,
+            }
             updated.append(name)
 
-    write_manifest(manifest_path, manifest)
+    write_manifest(manifest)
     return sorted(updated)
 
 
@@ -335,11 +340,8 @@ def remove_installed(
     names: list[str] | tuple[str, ...] | None = None,
     *,
     repository: str | None = None,
-    global_scope: bool = False,
-    project: Path | None = None,
 ) -> list[str]:
-    skill_root, manifest_path, scope_name = _selected_manifest_path(global_scope, project)
-    manifest = load_manifest(manifest_path, scope_name)
+    manifest = load_manifest()
     entries = manifest["skills"]
     assert isinstance(entries, dict)
 
@@ -364,12 +366,9 @@ def remove_installed(
     for name in selected:
         metadata = entries[name]
         assert isinstance(metadata, dict)
-        repo = metadata.get("repository")
-        source_path = metadata.get("source_path")
-        if not isinstance(repo, str) or not isinstance(source_path, str):
-            raise SkillInstallError(f"Manifest Skill metadata 无效：{name}")
+        repo, source_path = _metadata_source(metadata)
         expected_source = source_checkout_path(repo) / source_path
-        target = skill_root / name
+        target = GLOBAL_SKILLS / name
         if target.is_symlink():
             if direct_link_target(target) != expected_source.absolute():
                 raise SkillInstallError(f"拒绝删除指向其他来源的 Skill：{target}")
@@ -377,29 +376,14 @@ def remove_installed(
             print(f"REMOVE {target}")
         elif target.exists():
             raise SkillInstallError(f"拒绝删除非软链接 Skill：{target}")
-
-        if bool(metadata.get("forgerelay")):
-            relay = FORGERELAY_SKILLS / name
-            if relay.is_symlink():
-                if direct_link_target(relay) != target.absolute():
-                    raise SkillInstallError(f"拒绝删除指向其他来源的 ForgeRelay link：{relay}")
-                relay.unlink()
-                print(f"REMOVE {relay}")
-            elif relay.exists():
-                raise SkillInstallError(f"拒绝删除非软链接 ForgeRelay Skill：{relay}")
         del entries[name]
 
-    write_manifest(manifest_path, manifest)
+    write_manifest(manifest)
     return sorted(selected)
 
 
-def doctor(
-    *,
-    global_scope: bool = False,
-    project: Path | None = None,
-) -> list[str]:
-    skill_root, manifest_path, scope_name = _selected_manifest_path(global_scope, project)
-    manifest = load_manifest(manifest_path, scope_name)
+def doctor() -> list[str]:
+    manifest = load_manifest()
     entries = manifest["skills"]
     assert isinstance(entries, dict)
     checked: list[str] = []
@@ -407,41 +391,37 @@ def doctor(
     for name, metadata in sorted(entries.items()):
         if not isinstance(metadata, dict):
             raise SkillInstallError(f"Manifest Skill metadata 无效：{name}")
-        repo = metadata.get("repository")
-        source_path = metadata.get("source_path")
-        if not isinstance(repo, str) or not isinstance(source_path, str):
-            raise SkillInstallError(f"Manifest Skill source 无效：{name}")
-        checkout = source_checkout_path(repo)
-        source_dir = checkout / source_path
+        repo, source_path = _metadata_source(metadata)
+        source_dir = source_checkout_path(repo) / source_path
         if not (source_dir / "SKILL.md").is_file():
             raise SkillInstallError(f"Source Skill 缺失：{source_dir}")
-        link = skill_root / name
+        link = GLOBAL_SKILLS / name
         if not link.is_symlink() or direct_link_target(link) != source_dir.absolute():
-            raise SkillInstallError(f"Skill 软链接无效：{link}")
-        if bool(metadata.get("forgerelay")):
-            relay = FORGERELAY_SKILLS / name
-            if not relay.is_symlink() or direct_link_target(relay) != link.absolute():
-                raise SkillInstallError(f"ForgeRelay 软链接无效：{relay}")
+            raise SkillInstallError(f"机器级 Skill 软链接无效：{link}")
         checked.append(name)
 
+    actual_names = {path.name for path in GLOBAL_SKILLS.iterdir()} if GLOBAL_SKILLS.is_dir() else set()
+    managed_names = set(entries)
+    if actual_names != managed_names:
+        raise SkillInstallError(
+            "~/.agents/skills 与机器级 manifest 不一致；文件系统："
+            + ", ".join(sorted(actual_names))
+            + "；manifest："
+            + ", ".join(sorted(managed_names))
+        )
     return checked
 
 
 def inspect_source(source: str, ref: str = "main") -> list[tuple[str, str]]:
     checkout, _, _ = ensure_source_checkout(source, ref)
-    rows: list[tuple[str, str]] = []
-    for name, skill_dir in sorted(discover_skills(checkout).items()):
-        rows.append((name, skill_dir.relative_to(checkout).as_posix()))
-    return rows
+    return [
+        (name, skill_dir.relative_to(checkout).as_posix())
+        for name, skill_dir in sorted(discover_skills(checkout).items())
+    ]
 
 
-def list_installed(
-    *,
-    global_scope: bool = False,
-    project: Path | None = None,
-) -> list[tuple[str, str, str]]:
-    _, manifest_path, scope_name = _selected_manifest_path(global_scope, project)
-    manifest = load_manifest(manifest_path, scope_name)
+def list_installed() -> list[tuple[str, str, str]]:
+    manifest = load_manifest()
     entries = manifest["skills"]
     assert isinstance(entries, dict)
     rows: list[tuple[str, str, str]] = []

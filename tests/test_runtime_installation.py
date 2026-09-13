@@ -18,18 +18,16 @@ import uninstall
 class InstallBoundaryTests(unittest.TestCase):
     def test_runtime_baseline_uses_remote_github_source(self) -> None:
         with mock.patch.object(install, "install_from_source", return_value=["akira", "browser-access"]) as fn:
-            installed = install.install_runtime_skills()
+            installed = install.install_machine_skills()
 
         self.assertEqual(installed, ["akira", "browser-access"])
         fn.assert_called_once_with(
             "https://github.com/Akira-TL/skills.git",
             skill_names=("akira", "browser-access"),
-            global_scope=True,
-            forgerelay=True,
         )
 
     def test_default_runtime_skills_are_minimal_baseline(self) -> None:
-        self.assertEqual(install.DEFAULT_RUNTIME_SKILLS, ("akira", "browser-access"))
+        self.assertEqual(install.DEFAULT_MACHINE_SKILLS, ("akira", "browser-access"))
         self.assertEqual(install.AKIRA_SKILLS_SOURCE, "https://github.com/Akira-TL/skills.git")
 
     def test_installer_no_longer_depends_on_third_party_skill_manager(self) -> None:
@@ -40,6 +38,12 @@ class InstallBoundaryTests(unittest.TestCase):
             self.assertNotIn("npx skills", source)
             self.assertNotIn("openclaw", source)
             self.assertNotIn("--copy", source)
+
+        for source in (manager_source, cli_source):
+            self.assertNotIn("forgerelay", source.lower())
+            self.assertNotIn("--project", source)
+            self.assertNotIn("claude", source.lower())
+            self.assertNotIn("codex", source.lower())
 
 
 class StaticLinkOwnershipTests(unittest.TestCase):
@@ -60,9 +64,9 @@ class StaticLinkOwnershipTests(unittest.TestCase):
 
     def test_uninstall_requests_only_baseline_from_skill_manager(self) -> None:
         with mock.patch.object(uninstall, "remove_installed", return_value=["akira", "browser-access"]) as fn:
-            uninstall.uninstall_runtime_skills()
+            uninstall.uninstall_machine_skills()
 
-        fn.assert_called_once_with(("akira", "browser-access"), global_scope=True)
+        fn.assert_called_once_with(("akira", "browser-access"))
 
 
 if __name__ == "__main__":
