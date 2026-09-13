@@ -44,13 +44,15 @@ Agent 可以根据任务需要充分展开分析、设计、证据和细节，�
 - 提交前可使用 `git add -- <paths...>` 选择性暂存归属明确的当前原子修改；正式提交只能使用 `uv run ~/.agents/scripts/guard.py commit -m '<message>'`，不得直接以 `git commit` 作为正常提交入口。Guard 对每次提交自动执行 staged 最低语法检查、提交格式校验和暂存架构门禁；普通提交不默认额外运行全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改在对应阶段提交前，再根据实际失败模式执行 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。语义归属仍由 Agent 负责。
 - 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。涉及 GitHub push、云端 CI、tag、release 或包发布时，先读取 `~/.agents/references/github-release.md` 并遵守其中的本地验收与发布顺序。
 
-## 模型与多 Agent
+## 模型与执行环境
 
-多 Agent 协作不得绑定某个固定执行产品。Codex、Claude Code 或其他 Agent harness 都只是执行载体；先依据当前会话真实暴露的工具契约判断是否支持子 Agent、后台进程、终端会话、worktree 或其他隔离能力。当前 harness 不具备某项能力时保持串行或使用其他已确认可用的原语，不通过 Prompt 假造执行器。
+模型名称、启动参数和执行工具属于当前 Agent harness 的实现细节。只使用当前会话真实暴露、且工具契约明确支持的能力。
 
-模型名称与启动参数属于 harness 实现细节。当前 harness 或项目规则要求显式指定模型时必须显式指定，但不得假设不同 harness 共享模型名称、别名或参数，也不得自行跨产品映射或降级。使用 Claude Code 且项目没有另行覆盖时，可继续使用本机既有 `fable` / `opus` / `sonnet` / `haiku` 路由；其他 harness 使用各自已经配置的模型策略。
+当前 harness 或项目规则要求显式指定模型时必须显式指定，但不得假设不同 harness 共享模型名称、别名或参数，也不得自行跨产品映射或降级。
 
-需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。多 Agent 的 Task、claim、Ownership、frontier 与验收由实际协作协议决定，不由底层 Agent 启动方式反向定义。不要为了使用多 Agent 而拆分本可由单 Agent 清晰完成的任务。
+需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。多 Agent 的任务拆分、Task、claim、Ownership、frontier、Gate、Worker / Coordinator 生命周期与验收不由 Core 定义；这些属于实际安装并启用的协作 Skill 或项目协议。
+
+## 独立 Agent 验收
 
 需要独立 Agent 进行黑盒验收、独立复核或最终 Agent 验收时，当前 Agent 不得自行启动或代替用户运行该验收 Agent。应先向用户提供一份完整、可直接复制到新会话执行的验收提示词，明确项目路径、隔离边界、允许/禁止读取与修改的范围、验收目标、完成门槛和需要回传的结果；由用户自行开启独立验收 Agent。用户回传验收输出后，当前 Agent 负责审计结果、区分 Skill 缺陷与验收环境/模型问题，并按证据决定是否修复。确定性测试、机械门禁和当前 Agent 自身审计不属于“独立 Agent 验收”，可直接执行。
 
