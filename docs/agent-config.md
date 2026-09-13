@@ -29,7 +29,7 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Guard**：机械可判断的约束；不复制业务/科研语义。
-- **Runtime state**：ForgeRelay 的常驻 Skill 由 `~/.forgerelay/skills/` 与 `~/.forgerelay/skills-lock.json` 管理；`~/.agents/skills/` 不再作为 Lattice 正式安装目标。MCP/plugin state、缓存与会话继续由对应软件管理。
+- **Runtime state**：ForgeRelay 的常驻 Skill 由 `npx skills` 以软链接模式管理；`~/.forgerelay/.agents/skills/` 是 canonical store，`~/.forgerelay/skills/` 是软链接消费视图，`~/.forgerelay/skills-lock.json` 记录安装状态。全局 `~/.agents/skills/` 不再作为 Lattice 正式安装目标。MCP/plugin state、缓存与会话继续由对应软件管理。
 
 ## 运行时拓扑
 
@@ -58,7 +58,7 @@ akira
 browser-access
 ```
 
-`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。两者通过 `npx skills` 安装到 `~/.forgerelay/skills/`；其余通用 Skill 以及 Matt / Research 按真实项目需求项目级安装。
+`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。两者通过 `npx skills` 的默认 symlink mode 安装：canonical store 位于 `~/.forgerelay/.agents/skills/`，ForgeRelay 在 `~/.forgerelay/skills/` 读取软链接；命令不得使用 `--copy`。其余通用 Skill 以及 Matt / Research 按真实项目需求项目级安装，并遵守相同软链接安装要求。
 
 软件工程项目若尚未安装 `ask-matt`，Core 会先交给 `akira` Router；Router 说明需要 `Akira-TL/matt-skills` 的原因并获得用户明确同意后，再在当前项目安装 Matt suite。`ask-akira` 和 Parallel 系列随 Matt fork 提供，不存在独立 Engineering 产品仓。
 
@@ -66,7 +66,7 @@ browser-access
 
 Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 只在任务真正需要时从 `Akira-TL/skills` 安装对应单一 Skill。
 
-安装器不会管理或清理 `~/.agents/skills/`。ForgeRelay 的基线安装、更新与卸载统一通过 `npx skills` 和 `~/.forgerelay/skills-lock.json` 管理；其他 harness 的 Skill 状态由对应软件自行负责。
+安装器不会管理或清理全局 `~/.agents/skills/`。ForgeRelay 的基线安装、更新与卸载统一通过 `npx skills` 和 `~/.forgerelay/skills-lock.json` 管理，并机械检查 `~/.forgerelay/skills/<name>` 必须是指向本地 canonical store 的软链接；其他 harness 的 Skill 状态由对应软件自行负责。
 
 ## Guard
 

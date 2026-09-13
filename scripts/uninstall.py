@@ -15,6 +15,7 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 FORGERELAY_HOME = HOME / ".forgerelay"
+FORGERELAY_CANONICAL_SKILLS = FORGERELAY_HOME / ".agents" / "skills"
 FORGERELAY_SKILLS = FORGERELAY_HOME / "skills"
 INSTALL_MANIFEST = FORGERELAY_HOME / ".akira-skills-install.json"
 
@@ -93,11 +94,20 @@ def uninstall_runtime_skills() -> None:
     if npx is None:
         raise RuntimeError("npx 不可用，无法通过 skills CLI 卸载运行时 Skill")
 
-    # Match install.py's project-level npx skills profile so removal updates the
-    # same ~/.forgerelay/skills directory and skills-lock.json.
+    # Match install.py's project-level npx skills targets so removal updates both the
+    # canonical store and ForgeRelay symlink view, plus skills-lock.json.
     FORGERELAY_HOME.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
-        [npx, "skills", "remove", *names, "--agent", "openclaw", "--yes"],
+        [
+            npx,
+            "skills",
+            "remove",
+            *names,
+            "--agent",
+            "universal",
+            "openclaw",
+            "--yes",
+        ],
         cwd=FORGERELAY_HOME,
     )
     if result.returncode != 0:

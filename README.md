@@ -42,7 +42,7 @@ akira
 browser-access
 ```
 
-Skill 由 `npx skills` 以 `~/.forgerelay` 为项目目录管理，实际位于 `~/.forgerelay/skills/`，安装状态由 `~/.forgerelay/skills-lock.json` 记录。Lattice 不再把 `~/.agents/skills/` 作为正式 Skill 安装目标。
+Skill 由 `npx skills` 以 `~/.forgerelay` 为项目目录管理，并统一采用默认 symlink mode。`~/.forgerelay/.agents/skills/` 是 `npx skills` canonical store，`~/.forgerelay/skills/` 是 ForgeRelay 消费的软链接视图，安装状态由 `~/.forgerelay/skills-lock.json` 记录。安装命令不得使用 `--copy`；Lattice 不再把全局 `~/.agents/skills/` 作为正式 Skill 安装目标。
 
 同时部署 Core、references 与 Guard scripts。Matt、Research、Word、PPT、Agent 编排以及第三方专业能力都不常驻；当前项目真实需要时，由 `akira` Router 说明来源和用途、取得用户明确同意后项目级安装。
 

@@ -18,6 +18,7 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 FORGERELAY_HOME = HOME / ".forgerelay"
+FORGERELAY_CANONICAL_SKILLS = FORGERELAY_HOME / ".agents" / "skills"
 FORGERELAY_SKILLS = FORGERELAY_HOME / "skills"
 BACKUP_ROOT = REPO_ROOT / "backup"
 AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
@@ -160,9 +161,12 @@ def install_skill_source(
     label: str,
     skill_names: tuple[str, ...],
 ) -> None:
-    # npx skills currently has no arbitrary target-directory flag. Its project-level
-    # openclaw profile writes to <cwd>/skills, so using ~/.forgerelay as cwd lets the
-    # CLI own ~/.forgerelay/skills without involving ~/.agents/skills.
+    # npx skills currently has no arbitrary target-directory flag. Use its project-level
+    # universal canonical store plus the openclaw "skills/" profile while cwd is
+    # ~/.forgerelay. In symlink mode this gives:
+    #   ~/.forgerelay/.agents/skills/<name>  canonical store
+    #   ~/.forgerelay/skills/<name>          symlink view consumed by ForgeRelay
+    # Do not add --copy: our runtime contract requires npx skills symlink mode.
     command = [
         npx,
         "skills",
@@ -171,6 +175,7 @@ def install_skill_source(
         "--skill",
         *skill_names,
         "--agent",
+        "universal",
         "openclaw",
         "-y",
     ]
@@ -201,17 +206,22 @@ def install_runtime_skills() -> list[str]:
     )
 
     expected = set(DEFAULT_RUNTIME_SKILLS)
-    installed = sorted(
-        name
-        for name in expected
-        if (FORGERELAY_SKILLS / name).exists()
-        or (FORGERELAY_SKILLS / name).is_symlink()
-    )
-    missing = sorted(expected.difference(installed))
-    if missing:
-        raise RuntimeError(
-            "以下项目 Skill 未出现在 ForgeRelay 运行时：" + ", ".join(missing)
-        )
+    installed: list[str] = []
+    for name in sorted(expected):
+        runtime_path = FORGERELAY_SKILLS / name
+        canonical_path = FORGERELAY_CANONICAL_SKILLS / name
+        if not runtime_path.is_symlink():
+            raise RuntimeError(
+                f"ForgeRelay Skill 必须由 npx skills 以软链接安装：{runtime_path}"
+            )
+        if direct_link_target(runtime_path) != canonical_path.absolute():
+            raise RuntimeError(
+                f"ForgeRelay Skill 软链接目标异常：{runtime_path} -> "
+                f"{direct_link_target(runtime_path)}；预期 {canonical_path.absolute()}"
+            )
+        if not (canonical_path / "SKILL.md").is_file():
+            raise RuntimeError(f"npx skills canonical store 缺少 Skill：{canonical_path}")
+        installed.append(name)
     return installed
 
 

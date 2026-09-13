@@ -48,17 +48,48 @@ class InstallBoundaryTests(unittest.TestCase):
             self.assertEqual(command[skill_index + 1 : skill_index + 3], ["akira", "browser-access"])
             self.assertNotIn("remove", command)
             self.assertIn("--agent", command)
-            self.assertEqual(command[command.index("--agent") + 1], "openclaw")
+            agent_index = command.index("--agent")
+            self.assertEqual(
+                command[agent_index + 1 : agent_index + 3], ["universal", "openclaw"]
+            )
+            self.assertNotIn("--copy", command)
             self.assertNotIn("--global", command)
             self.assertNotIn("-g", command)
             self.assertEqual(run.call_args.kwargs["cwd"], install.FORGERELAY_HOME)
 
     def test_default_runtime_skills_are_minimal_common_baseline(self) -> None:
         self.assertEqual(install.DEFAULT_RUNTIME_SKILLS, ("akira", "browser-access"))
+        self.assertEqual(
+            install.FORGERELAY_CANONICAL_SKILLS,
+            Path.home() / ".forgerelay" / ".agents" / "skills",
+        )
         self.assertEqual(install.FORGERELAY_SKILLS, Path.home() / ".forgerelay" / "skills")
         source = (SCRIPTS_ROOT / "install.py").read_text(encoding="utf-8")
         self.assertNotIn("install_skill_source(npx, MATT_SKILLS_ROOT", source)
         self.assertNotIn("install_skill_source(npx, RESEARCH_SKILLS_ROOT", source)
+
+    def test_runtime_requires_symlink_to_npx_canonical_store(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            canonical = root / ".agents" / "skills"
+            runtime = root / "skills"
+            for name in install.DEFAULT_RUNTIME_SKILLS:
+                source = canonical / name
+                source.mkdir(parents=True, exist_ok=True)
+                (source / "SKILL.md").write_text("---\nname: test\n---\n", encoding="utf-8")
+                runtime.mkdir(parents=True, exist_ok=True)
+                (runtime / name).symlink_to(Path("..") / ".agents" / "skills" / name)
+
+            with (
+                mock.patch.object(install, "FORGERELAY_CANONICAL_SKILLS", canonical),
+                mock.patch.object(install, "FORGERELAY_SKILLS", runtime),
+                mock.patch.object(install, "find_npx", return_value="npx"),
+                mock.patch.object(install, "discover_skill_names", return_value=list(install.DEFAULT_RUNTIME_SKILLS)),
+                mock.patch.object(install, "install_skill_source"),
+            ):
+                self.assertEqual(
+                    install.install_runtime_skills(), sorted(install.DEFAULT_RUNTIME_SKILLS)
+                )
 
     def test_installer_contains_no_cleanup_or_uninstall_route(self) -> None:
         source = (SCRIPTS_ROOT / "install.py").read_text(encoding="utf-8")
