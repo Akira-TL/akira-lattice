@@ -14,7 +14,9 @@ CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
-INSTALL_MANIFEST = HUB / ".akira-skills-install.json"
+FORGERELAY_HOME = HOME / ".forgerelay"
+FORGERELAY_SKILLS = FORGERELAY_HOME / "skills"
+INSTALL_MANIFEST = FORGERELAY_HOME / ".akira-skills-install.json"
 
 
 def direct_link_target(path: Path) -> Path:
@@ -62,7 +64,7 @@ def manifest_skills() -> dict[str, str]:
 
 
 def runtime_skill_hash(name: str) -> str | None:
-    skill_file = HUB / "skills" / name / "SKILL.md"
+    skill_file = FORGERELAY_SKILLS / name / "SKILL.md"
     if not skill_file.is_file():
         return None
     return hashlib.sha256(skill_file.read_bytes()).hexdigest()
@@ -75,7 +77,7 @@ def installed_project_skills() -> list[str]:
         if current_hash is None:
             continue
         if current_hash != expected_hash:
-            print(f"KEEP   {HUB / 'skills' / name}（安装后已被其他内容替换）")
+            print(f"KEEP   {FORGERELAY_SKILLS / name}（安装后已被其他内容替换）")
             continue
         owned.append(name)
     return sorted(owned)
@@ -91,12 +93,15 @@ def uninstall_runtime_skills() -> None:
     if npx is None:
         raise RuntimeError("npx 不可用，无法通过 skills CLI 卸载运行时 Skill")
 
+    # Match install.py's project-level npx skills profile so removal updates the
+    # same ~/.forgerelay/skills directory and skills-lock.json.
+    FORGERELAY_HOME.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
-        [npx, "skills", "remove", *names, "--global", "--yes"],
-        cwd=REPO_ROOT,
+        [npx, "skills", "remove", *names, "--agent", "openclaw", "--yes"],
+        cwd=FORGERELAY_HOME,
     )
     if result.returncode != 0:
-        raise RuntimeError("skills CLI 卸载失败；全局提示词入口保持不变，请检查上方输出")
+        raise RuntimeError("skills CLI 卸载失败；Core 提示词入口保持不变，请检查上方输出")
 
 
 def uninstall_runtime_links() -> None:

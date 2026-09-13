@@ -17,12 +17,14 @@ CORE_ROOT = REPO_ROOT / "core"
 DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
+FORGERELAY_HOME = HOME / ".forgerelay"
+FORGERELAY_SKILLS = FORGERELAY_HOME / "skills"
 BACKUP_ROOT = REPO_ROOT / "backup"
 AKIRA_SKILLS_ROOT = REPO_ROOT / "skills" / "akira"
 RESEARCH_SKILLS_ROOT = REPO_ROOT / "skills" / "research"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
-DEFAULT_GLOBAL_SKILLS = ("akira", "browser-access")
-INSTALL_MANIFEST = HUB / ".akira-skills-install.json"
+DEFAULT_RUNTIME_SKILLS = ("akira", "browser-access")
+INSTALL_MANIFEST = FORGERELAY_HOME / ".akira-skills-install.json"
 NAME_PATTERN = re.compile(r"^name:\s*([^\s#]+)\s*$")
 
 
@@ -158,6 +160,9 @@ def install_skill_source(
     label: str,
     skill_names: tuple[str, ...],
 ) -> None:
+    # npx skills currently has no arbitrary target-directory flag. Its project-level
+    # openclaw profile writes to <cwd>/skills, so using ~/.forgerelay as cwd lets the
+    # CLI own ~/.forgerelay/skills without involving ~/.agents/skills.
     command = [
         npx,
         "skills",
@@ -166,14 +171,14 @@ def install_skill_source(
         "--skill",
         *skill_names,
         "--agent",
-        "*",
-        "-g",
+        "openclaw",
         "-y",
     ]
-    result = subprocess.run(command, cwd=REPO_ROOT)
+    FORGERELAY_HOME.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(command, cwd=FORGERELAY_HOME)
     if result.returncode != 0:
         print(
-            f"WARN   {label} 安装时部分 Agent 可能不支持全局 Skill；请检查上方 skills CLI 输出。",
+            f"WARN   {label} 安装失败；请检查上方 skills CLI 输出。",
             file=sys.stderr,
         )
 
@@ -181,33 +186,37 @@ def install_skill_source(
 def install_runtime_skills() -> list[str]:
     npx = find_npx()
     available = set(discover_skill_names(AKIRA_SKILLS_ROOT))
-    missing_source = sorted(set(DEFAULT_GLOBAL_SKILLS).difference(available))
+    missing_source = sorted(set(DEFAULT_RUNTIME_SKILLS).difference(available))
     if missing_source:
         raise RuntimeError(
-            "默认全局 Skill 未出现在 Akira 通用仓：" + ", ".join(missing_source)
+            "默认 ForgeRelay 运行时 Skill 未出现在 Akira 通用仓："
+            + ", ".join(missing_source)
         )
 
     install_skill_source(
         npx,
         AKIRA_SKILLS_ROOT,
         "Akira baseline Skills",
-        DEFAULT_GLOBAL_SKILLS,
+        DEFAULT_RUNTIME_SKILLS,
     )
 
-    expected = set(DEFAULT_GLOBAL_SKILLS)
+    expected = set(DEFAULT_RUNTIME_SKILLS)
     installed = sorted(
         name
         for name in expected
-        if (HUB / "skills" / name).exists() or (HUB / "skills" / name).is_symlink()
+        if (FORGERELAY_SKILLS / name).exists()
+        or (FORGERELAY_SKILLS / name).is_symlink()
     )
     missing = sorted(expected.difference(installed))
     if missing:
-        raise RuntimeError("以下项目 Skill 未出现在全局运行时：" + ", ".join(missing))
+        raise RuntimeError(
+            "以下项目 Skill 未出现在 ForgeRelay 运行时：" + ", ".join(missing)
+        )
     return installed
 
 
 def skill_runtime_hash(name: str) -> str:
-    skill_file = HUB / "skills" / name / "SKILL.md"
+    skill_file = FORGERELAY_SKILLS / name / "SKILL.md"
     if not skill_file.is_file():
         raise RuntimeError(f"运行时 Skill 缺少 SKILL.md：{name}")
     return hashlib.sha256(skill_file.read_bytes()).hexdigest()
@@ -234,6 +243,7 @@ def deploy() -> None:
     ensure_source_submodules()
     for path in (
         HUB,
+        FORGERELAY_HOME,
         HOME / ".codex",
         HOME / ".claude",
         HOME / ".config" / "opencode",
@@ -258,8 +268,9 @@ def deploy() -> None:
     print(f"Core source:    {CORE_ROOT}")
     print(f"Scripts source: {SCRIPT_ROOT}")
     print(f"Runtime hub:    {HUB}")
-    print(f"Skills state:   {HUB / 'skills'} (skills CLI owned)")
-    print(f"Skill lock:     {HUB / '.skill-lock.json'} (skills CLI owned)")
+    print(f"ForgeRelay:     {FORGERELAY_HOME}")
+    print(f"Skills state:   {FORGERELAY_SKILLS} (skills CLI owned)")
+    print(f"Skill lock:     {FORGERELAY_HOME / 'skills-lock.json'} (skills CLI owned)")
 
 
 def main() -> int:

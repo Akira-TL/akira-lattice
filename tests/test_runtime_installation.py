@@ -47,9 +47,15 @@ class InstallBoundaryTests(unittest.TestCase):
             skill_index = command.index("--skill")
             self.assertEqual(command[skill_index + 1 : skill_index + 3], ["akira", "browser-access"])
             self.assertNotIn("remove", command)
+            self.assertIn("--agent", command)
+            self.assertEqual(command[command.index("--agent") + 1], "openclaw")
+            self.assertNotIn("--global", command)
+            self.assertNotIn("-g", command)
+            self.assertEqual(run.call_args.kwargs["cwd"], install.FORGERELAY_HOME)
 
-    def test_default_global_skills_are_minimal_common_baseline(self) -> None:
-        self.assertEqual(install.DEFAULT_GLOBAL_SKILLS, ("akira", "browser-access"))
+    def test_default_runtime_skills_are_minimal_common_baseline(self) -> None:
+        self.assertEqual(install.DEFAULT_RUNTIME_SKILLS, ("akira", "browser-access"))
+        self.assertEqual(install.FORGERELAY_SKILLS, Path.home() / ".forgerelay" / "skills")
         source = (SCRIPTS_ROOT / "install.py").read_text(encoding="utf-8")
         self.assertNotIn("install_skill_source(npx, MATT_SKILLS_ROOT", source)
         self.assertNotIn("install_skill_source(npx, RESEARCH_SKILLS_ROOT", source)
@@ -89,15 +95,15 @@ class UninstallOwnershipTests(unittest.TestCase):
             root = Path(tempdir)
             with (
                 mock.patch.object(uninstall, "INSTALL_MANIFEST", root / "missing.json"),
-                mock.patch.object(uninstall, "HUB", root / "hub"),
+                mock.patch.object(uninstall, "FORGERELAY_SKILLS", root / "skills"),
             ):
                 self.assertEqual(uninstall.installed_project_skills(), [])
 
     def test_manifest_hash_must_match_current_runtime_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             root = Path(tempdir)
-            hub = root / "hub"
-            skill_file = hub / "skills" / "example" / "SKILL.md"
+            skills = root / "skills"
+            skill_file = skills / "example" / "SKILL.md"
             skill_file.parent.mkdir(parents=True)
             skill_file.write_text("current\n", encoding="utf-8")
 
@@ -118,16 +124,16 @@ class UninstallOwnershipTests(unittest.TestCase):
 
             with (
                 mock.patch.object(uninstall, "INSTALL_MANIFEST", manifest),
-                mock.patch.object(uninstall, "HUB", hub),
+                mock.patch.object(uninstall, "FORGERELAY_SKILLS", skills),
             ):
                 self.assertEqual(uninstall.installed_project_skills(), [])
 
     def test_matching_manifest_hash_is_owned(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             root = Path(tempdir)
-            hub = root / "hub"
+            skills = root / "skills"
             content = b"installed\n"
-            skill_file = hub / "skills" / "example" / "SKILL.md"
+            skill_file = skills / "example" / "SKILL.md"
             skill_file.parent.mkdir(parents=True)
             skill_file.write_bytes(content)
 
@@ -148,7 +154,7 @@ class UninstallOwnershipTests(unittest.TestCase):
 
             with (
                 mock.patch.object(uninstall, "INSTALL_MANIFEST", manifest),
-                mock.patch.object(uninstall, "HUB", hub),
+                mock.patch.object(uninstall, "FORGERELAY_SKILLS", skills),
             ):
                 self.assertEqual(uninstall.installed_project_skills(), ["example"])
 

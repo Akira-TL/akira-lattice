@@ -29,7 +29,7 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Guard**：机械可判断的约束；不复制业务/科研语义。
-- **Runtime state**：`~/.agents/skills/`、`.skill-lock.json`、MCP/plugin state、缓存与会话继续由对应软件管理。
+- **Runtime state**：ForgeRelay 的常驻 Skill 由 `~/.forgerelay/skills/` 与 `~/.forgerelay/skills-lock.json` 管理；`~/.agents/skills/` 不再作为 Lattice 正式安装目标。MCP/plugin state、缓存与会话继续由对应软件管理。
 
 ## 运行时拓扑
 
@@ -51,14 +51,14 @@ akira-lattice/
 ./install.sh
 ```
 
-Lattice pin 住多个 Skill 仓是为了开发、版本与 provenance，不代表全部进入全局 runtime。默认全局 Skill 基线只有：
+Lattice pin 住多个 Skill 仓是为了开发、版本与 provenance，不代表全部进入运行时。ForgeRelay 默认常驻 Skill 基线只有：
 
 ```text
 akira
 browser-access
 ```
 
-`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。其余通用 Skill 以及 Matt / Research 按真实项目需求项目级安装。
+`akira` 负责能力路由；`browser-access` 是 Research、Knowledge、工程与通用资料获取经常共同需要的跨域执行能力。两者通过 `npx skills` 安装到 `~/.forgerelay/skills/`；其余通用 Skill 以及 Matt / Research 按真实项目需求项目级安装。
 
 软件工程项目若尚未安装 `ask-matt`，Core 会先交给 `akira` Router；Router 说明需要 `Akira-TL/matt-skills` 的原因并获得用户明确同意后，再在当前项目安装 Matt suite。`ask-akira` 和 Parallel 系列随 Matt fork 提供，不存在独立 Engineering 产品仓。
 
@@ -66,7 +66,7 @@ browser-access
 
 Word、科研/学术 PPT、Guard Skill 或 `agent-orchestration` 只在任务真正需要时从 `Akira-TL/skills` 安装对应单一 Skill。
 
-安装器不会为了新基线主动清理历史全局 Skill。旧 runtime 的一次性迁移应由用户显式触发，通过现有安装 manifest 与 skills CLI 安全处理，避免误删其他来源的同名 Skill。
+安装器不会管理或清理 `~/.agents/skills/`。ForgeRelay 的基线安装、更新与卸载统一通过 `npx skills` 和 `~/.forgerelay/skills-lock.json` 管理；其他 harness 的 Skill 状态由对应软件自行负责。
 
 ## Guard
 
@@ -110,4 +110,4 @@ skills/matt      → git@github.com:Akira-TL/matt-skills.git
 
 ## 卸载
 
-`./uninstall.sh` 只移除仍明确属于最近一次 Lattice 安装 manifest 且内容哈希未被其他来源替换的运行时 Skill，以及直接指向本仓库的静态配置软链接。它不会猜测项目级 Matt / Research Skill，也不会清理其他软件状态。
+`./uninstall.sh` 只移除仍明确属于最近一次 Lattice 安装 manifest 且内容哈希未被其他来源替换的 ForgeRelay 基线 Skill，以及直接指向本仓库的静态配置软链接。它不会猜测项目级 Matt / Research Skill，不管理 `~/.agents/skills/`，也不会清理其他软件状态。
