@@ -21,6 +21,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 将软件工程全局入口从 `ask-matt` 切换为 `ask-akira`：Core 只指向 Engineering Primary Router；普通 `standard` flow 再由 `ask-akira` 按需加载 `ask-matt`，特殊 Execution Policy 与正式 Parallel coordination 保持在 Akira 工程路由层。
 - 将 Skill 生命周期职责从 Core 收回 `akira` Router：Core 只负责在能力缺失时路由到 `akira`，所有发现、复用、项目级 view 与安装规则均由 Router 单一维护。
 - 系统审查并重构 Matt 工程 Skills：把固定 sub-agent、后台 Agent、`/clear`、`/compact` 与固定 token 阈值等执行器假设下沉为 harness capability；保留 review isolation、TDD seam、claim、Gate 等真正的工程不变量，并为缺少隔离/并行能力的环境定义可审计退化路径。同步修正 `implement → code-review` 的提交顺序、将内部 Skill 依赖改为真实加载且 fail closed、把 Spec 从 `ready-for-agent` 执行队列移出，并升级 `setup-matt-pocock-skills` 为按已安装流程建立 workflow-role mapping、幂等补齐 GitHub/GitLab labels 与生成 tracker adapter 的仓库级初始化入口。
 - 继续收紧 Matt 工程契约与运行时兼容性：普通 Ticket 只有在 Acceptance Criteria、验证与 code-review 闭环后才关闭，`ready-for-agent` 与真实 execution frontier 分离，TDD 仅在存在可观察行为与独立 expected result 时进入 red→green；`implement` 的裸编号解析、内部依赖和 user-invoked Skill 边界统一 fail closed。Tracker adapter 改为 capability detection，不再按在线最新文档假设本机 GitHub CLI 已支持 sub-issue / issue-dependency flags；旧版 `gh` 使用 `gh api` 访问同一 native GitHub relationship。同步修复 ADR convention ownership、bulk triage evidence、architecture report-only 模式、prototype/merge 的 Git state ownership、Teach workspace/quiz、Wizard 输入与 Router/文档漂移。

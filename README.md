@@ -21,7 +21,7 @@ akira-lattice/
 仓库边界按高内聚能力域划分：
 
 - **Akira common**：Router、浏览器、Word、科研/学术 PPT、Guard 语义和通用 Agent 编排。
-- **Matt Engineering**：Matt 工程工作流；`ask-akira`、`parallel-coordinator`、`parallel-execution` 作为本 fork 的工程扩展与 Matt 同仓。
+- **Matt Engineering**：`ask-akira` 作为软件工程 Primary Router；`standard` 按需进入 `ask-matt` 的 Matt 标准工程流，Parallel 系列负责正式多 Agent coordination。
 - **Akira Research**：完整科研生命周期与 `research.sqlite` provenance，单独成仓。
 - **Akira Knowledge**：待形成真实知识工作流后再单独建仓，不维护空产品。
 
