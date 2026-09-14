@@ -22,6 +22,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 为 Akira Knowledge 增加探索记录，暂存 FLO.W / Notion 与 Obsidian 的知识组织、低摩擦捕获、动态视图、本地 Markdown、Properties、Links、Bases、CLI 与 Agent 集成观察；明确这些内容仍是待讨论材料，不构成对象模型、数据契约或已发布 Skill。
 - 收紧 `browser-access` 的动态表单交互策略：`click` 改为通过 CDP `Input.dispatchMouseEvent` 执行真实指针点击，新增 `type` 通过真实焦点、编辑键事件与 `Input.insertText` 输入文本；`fill` 降为原生表单控件的 DOM 兼容兜底并拒绝直接写入 `contenteditable`。表单验收同时要求核对站点自身 required/error/invalid 与条件显示等组件状态，避免“DOM 看起来有值但内部编辑器状态未同步”。
 - 将软件工程全局入口从 `ask-matt` 切换为 `ask-akira`：Core 只指向 Engineering Primary Router；普通 `standard` flow 再由 `ask-akira` 按需加载 `ask-matt`，特殊 Execution Policy 与正式 Parallel coordination 保持在 Akira 工程路由层。
 - 将 Skill 生命周期职责从 Core 收回 `akira` Router：Core 只负责在能力缺失时路由到 `akira`，所有发现、复用、项目级 view 与安装规则均由 Router 单一维护。
