@@ -35,17 +35,17 @@ Lattice pin 某个 source 不等于把它全局安装。
 ./install.sh
 ```
 
-该入口只部署 Lattice 的 Core、references、Guard 与其他静态运行时链接，不发现、不安装、不更新、不删除任何 Skill，也不维护 `~/.agents/akira-skills.json`。
+该入口部署 Lattice 的 Core、references、Guard 与其他静态运行时链接，并从远端 `https://github.com/Akira-TL/skills.git` bootstrap 最小机器级基线：`akira` 与 `browser-access`。bootstrap 使用临时 GitHub checkout 中的 `akira` 安装器执行，不从 Lattice 本地 `skills/akira` submodule 安装 Skill。
 
-Skill 生命周期由 `akira` Router 自己拥有。Router 已经可用后，Agent 先复用当前会话能力，再检查机器级 `~/.agents/skills/`；确有缺口时读取 Catalog，向用户说明来源、用途和最小安装范围，取得明确同意后调用：
+除这两个基础 Skill 的首次/重复 bootstrap 外，Skill 生命周期由 `akira` Router 自己拥有。Router 已经可用后，Agent 先复用当前会话能力，再检查机器级 `~/.agents/skills/`；确有缺口时读取 Catalog，向用户说明来源、用途和最小安装范围，取得明确同意后调用：
 
 ```bash
 uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
 ```
 
-该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt` 只用于开发、review 与固定 revision，不是运行时安装源，也不会因为执行 `./install.sh` 自动进入机器级注册表。
+该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt` 只用于开发、review 与固定 revision，不是运行时安装源。
 
-`akira` Router 本体的首次 bootstrap 不由 Lattice 根安装器或其自身安装器处理；一旦 Router 可用，后续通用 Skill、Matt、Research 与外部能力都由它按真实任务主动安装。
+根安装器只负责 bootstrap `akira` 与 `browser-access`；后续通用 Skill、Matt、Research 与外部能力都由 `akira` Router 按真实任务主动安装。
 
 ## Guard
 

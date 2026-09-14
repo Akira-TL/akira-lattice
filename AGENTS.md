@@ -20,7 +20,7 @@ Global static Agent configuration lives under `core/`. Deterministic checks and 
 
 ## Installation boundary
 
-Lattice root installation owns only global static Agent configuration and its runtime links. Skill discovery, installation, update, removal, manifest state and machine-level registration are owned by the `akira` Router in `skills/akira/routing/akira/`; the root installer and Guard do not manage Skill lifecycle.
+Lattice root installation owns global static Agent configuration plus a narrow cloud bootstrap for the baseline Skills `akira` and `browser-access`. General Skill discovery, installation, update, removal, manifest state and machine-level registration remain owned by the `akira` Router in `skills/akira/routing/akira/`; the root installer does not implement the general Skill lifecycle and never installs from local submodules.
 
 Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry. Specific harnesses continue to own their own Skill discovery views, links, caches and profiles.
 

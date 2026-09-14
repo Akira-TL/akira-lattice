@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import sys
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_ROOT = REPO_ROOT / "scripts"
@@ -32,6 +34,35 @@ class RootInstallBoundaryTests(unittest.TestCase):
         uninstall_entry = (REPO_ROOT / "uninstall.sh").read_text(encoding="utf-8")
         self.assertIn("exec uv run python scripts/install.py", install_entry)
         self.assertIn("exec uv run python scripts/uninstall.py", uninstall_entry)
+
+    def test_baseline_bootstrap_uses_remote_akira_installer(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            calls.append(command)
+            if command[:2] == ["git", "clone"]:
+                checkout = Path(command[-1])
+                installer = checkout / "routing" / "akira" / "scripts" / "skills.py"
+                installer.parent.mkdir(parents=True, exist_ok=True)
+                installer.write_text("# bootstrap fixture\n", encoding="utf-8")
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        with mock.patch.object(install.subprocess, "run", side_effect=fake_run):
+            install.bootstrap_baseline_skills()
+
+        self.assertEqual(install.BASELINE_SKILLS, ("akira", "browser-access"))
+        self.assertEqual(install.AKIRA_SKILLS_SOURCE, "https://github.com/Akira-TL/skills.git")
+        self.assertEqual(calls[0][0:2], ["git", "clone"])
+        self.assertIn(install.AKIRA_SKILLS_SOURCE, calls[0])
+        self.assertNotIn(str(REPO_ROOT / "skills" / "akira"), " ".join(calls[0]))
+
+        install_call = calls[1]
+        self.assertEqual(install_call[0], install.sys.executable)
+        self.assertEqual(install_call[2:4], ["install", install.AKIRA_SKILLS_SOURCE])
+        self.assertEqual(
+            install_call[4:],
+            ["--skill", "akira", "--skill", "browser-access"],
+        )
 
 
 class StaticLinkOwnershipTests(unittest.TestCase):

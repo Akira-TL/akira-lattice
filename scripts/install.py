@@ -3,6 +3,9 @@ from __future__ import annotations
 import filecmp
 import os
 import shutil
+import subprocess
+import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -13,6 +16,8 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
+AKIRA_SKILLS_SOURCE = "https://github.com/Akira-TL/skills.git"
+BASELINE_SKILLS = ("akira", "browser-access")
 
 def remove_path(path: Path) -> None:
     if path.is_symlink() or path.is_file():
@@ -79,6 +84,40 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     print(f"LINK   {target} -> {link_source}")
 
 
+def bootstrap_baseline_skills() -> None:
+    with tempfile.TemporaryDirectory(prefix="akira-skill-bootstrap-") as tempdir:
+        checkout = Path(tempdir) / "skills"
+        clone = subprocess.run(
+            [
+                "git",
+                "clone",
+                "--depth",
+                "1",
+                "--branch",
+                "main",
+                "--",
+                AKIRA_SKILLS_SOURCE,
+                str(checkout),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if clone.returncode != 0:
+            detail = clone.stderr.strip() or clone.stdout.strip() or "git clone failed"
+            raise RuntimeError(f"无法从远端获取 Akira Skill bootstrap：{detail}")
+
+        installer = checkout / "routing" / "akira" / "scripts" / "skills.py"
+        if not installer.is_file():
+            raise RuntimeError(f"远端 Akira Skill 缺少安装入口：{installer}")
+
+        command = [sys.executable, str(installer), "install", AKIRA_SKILLS_SOURCE]
+        for skill in BASELINE_SKILLS:
+            command.extend(["--skill", skill])
+        installed = subprocess.run(command)
+        if installed.returncode != 0:
+            raise RuntimeError("Akira 基础 Skill 云端安装失败")
+
+
 def deploy() -> None:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     for path in (
@@ -101,9 +140,13 @@ def deploy() -> None:
         stamp,
     )
 
-    print(f"Core source:    {CORE_ROOT}")
-    print(f"Scripts source: {SCRIPT_ROOT}")
-    print(f"Runtime hub:    {HUB}")
+    bootstrap_baseline_skills()
+
+    print(f"Core source:      {CORE_ROOT}")
+    print(f"Scripts source:   {SCRIPT_ROOT}")
+    print(f"Runtime hub:      {HUB}")
+    print(f"Baseline Skills:  {', '.join(BASELINE_SKILLS)}")
+    print(f"Skill source:     {AKIRA_SKILLS_SOURCE}")
 
 
 def main() -> int:
