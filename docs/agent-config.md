@@ -28,19 +28,16 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Akira Guard**：跨项目 Git 提交、暂存语法、架构与 Skill 结构机械检查，由默认安装的 `akira-guard` Skill 持有。Lattice 根仓只保留自身静态配置与 submodule 拓扑检查。
-- **Runtime state**：Skill 运行时状态由 `akira` Router 自带安装器管理：远端 source 位于 `~/.agents/sources/`，机器级注册表位于 `~/.agents/skills/`，manifest 位于 `~/.agents/akira-skills.json`。Lattice 根安装器只有一个 bootstrap 例外：从云端获取 `akira` 安装器并确保 `akira`、`browser-access`、`akira-guard` 三个基础 Skill 已注册。机器级注册表不会自动投影到项目或执行器自己的 Skill 目录；具体执行器的缓存/profile 与项目级 Skill view 仍由对应执行器/项目显式管理。`<project>/.agents/skills/` 是允许的开放 Agent Skills 项目级 view，Agent 可以在项目确实需要时显式建立指向 `~/.agents/skills/<name>` 的软链接；ForgeRelay 不负责把机器级注册表自动兼容成这些项目链接，但项目中已经存在的 `.agents/skills/` 仍可由 ForgeRelay 按项目 Skill 入口正常读取。
+- **Runtime state**：Skill 运行时状态由 `akira` Router 自带安装器管理：远端 source 位于 `~/.agents/sources/`，机器级注册表位于 `~/.agents/skills/`，manifest 位于 `~/.agents/akira-skills.json`。Lattice 根安装器只有一个 bootstrap 例外：从云端获取 `akira` 安装器并确保 `akira`、`browser-access`、`akira-guard` 三个基础 Skill 已注册。机器级注册表不会自动投影到项目级 Skill 目录。`<project>/.agents/skills/` 是允许的开放 Agent Skills 项目级 view；只有项目确实需要项目级暴露时，Agent 才可显式建立 `<project>/.agents/skills/<name> -> ~/.agents/skills/<name>` 软链接。已经存在的项目级 Skill view 按项目约定正常使用；机器级注册本身不构成自动创建项目链接的授权。
 
 ## 运行时拓扑
 
 ```text
 ~/Projects/akira-skills/core/AGENTS.md
-          ├──→ ~/.agents/AGENTS.md
-          ├──→ ~/.codex/AGENTS.md
-          ├──→ ~/.claude/CLAUDE.md
-          └──→ ~/.config/opencode/AGENTS.md
+          └──→ ~/.agents/AGENTS.md
 ```
 
-`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供 Lattice 静态配置部署、基础 Skill bootstrap 与 Lattice 自检；跨项目 Guard 脚本跟随 `akira-guard` Skill 发布，通用 Skill 安装脚本跟随 `akira` Skill 发布。第三方 Skill 仓不作为 Lattice submodule 或运行时 source view，需要时由 `akira` Router 从登记来源发现并安装。
+`~/.agents/AGENTS.md` 是全局规则入口；其他运行环境需要自己的规则入口时，由部署层建立指向同一 canonical source 的兼容引用，不在全局规则或架构文档中枚举具体产品。`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供 Lattice 静态配置部署、基础 Skill bootstrap 与 Lattice 自检；跨项目 Guard 脚本跟随 `akira-guard` Skill 发布，通用 Skill 安装脚本跟随 `akira` Skill 发布。外部 Skill 仓不作为 Lattice submodule 或运行时 source view，需要时由 `akira` Router 从登记来源发现并安装。
 
 ## Skill 安装边界
 
