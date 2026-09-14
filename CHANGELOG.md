@@ -21,6 +21,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 系统审查并重构 Matt 工程 Skills：把固定 sub-agent、后台 Agent、`/clear`、`/compact` 与固定 token 阈值等执行器假设下沉为 harness capability；保留 review isolation、TDD seam、claim、Gate 等真正的工程不变量，并为缺少隔离/并行能力的环境定义可审计退化路径。同步修正 `implement → code-review` 的提交顺序、将内部 Skill 依赖改为真实加载且 fail closed、把 Spec 从 `ready-for-agent` 执行队列移出，并升级 `setup-matt-pocock-skills` 为按已安装流程建立 workflow-role mapping、幂等补齐 GitHub/GitLab labels 与生成 tracker adapter 的仓库级初始化入口。
 - 补齐 Research 对 first-party 可选能力的按需路由：认证浏览器、DOCX 与科研 PPT 能力缺失时交给 `akira` Router 按 Catalog 请求用户授权并安装最小 Skill；Research 不复制这些执行层，拒绝或无法加载时保留明确的人工/格式未完成状态。
 - 审查并收紧 Akira 通用 Skill 边界：修正 `akira-guard` 的旧运行时入口；将 `humanizer-zh` 登记为科研 PPT 中文文案终检的显式外部按需依赖并限制为语言清理；将 Word Skill 收回 DOCX 表示层，不再决定文献来源准入、科研论证、Results / Discussion 解释或结论强度。
 - 根 `install.sh` 恢复最小 Skill bootstrap：只从云端 `Akira-TL/skills` 获取并执行 `akira` 自带安装器，确保 `akira`、`browser-access` 与 `akira-guard` 已注册；不从本地 submodule 安装，也不在 Lattice 根仓复制通用 Skill manager。
