@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Iterable
 
 from staged_syntax import staged_syntax_errors
-from upstream import sync_matt
 
 SCRIPT_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_ROOT.parent
@@ -449,7 +448,7 @@ def check_skills_root(root: Path) -> int:
         if name:
             names[name] += 1
 
-        if lifecycle not in {"in-progress", "deprecated"}:
+        if lifecycle not in {"in-progress", "deprecated", "misc"}:
             if suite_root.is_dir() and category is None:
                 doc = root / "docs" / f"{directory_name}.md"
             else:
@@ -542,20 +541,6 @@ def cmd_commit(args: argparse.Namespace) -> int:
     )
 
 
-def cmd_upstream(args: argparse.Namespace) -> int:
-    if args.target != "matt":
-        fail(f"暂不支持 upstream target: {args.target}")
-        return 1
-    return sync_matt(
-        parent=REPO_ROOT,
-        matt=MATT_SKILLS_ROOT,
-        origin_url=MATT_SKILLS_ORIGIN,
-        upstream_url=MATT_SKILLS_UPSTREAM,
-        push=args.push,
-        guarded_commit=lambda root, message: guarded_commit(root, message),
-    )
-
-
 def report_git_structure(target: Path) -> None:
     root = git_root(target)
     if root is None:
@@ -583,7 +568,12 @@ def cmd_check(args: argparse.Namespace) -> int:
         results.append(cmd_config(argparse.Namespace()))
         results.append(check_skills_root(AKIRA_SKILLS_ROOT))
         results.append(check_skills_root(RESEARCH_SKILLS_ROOT))
-    elif target in {AKIRA_SKILLS_ROOT.resolve(), RESEARCH_SKILLS_ROOT.resolve()}:
+        results.append(check_skills_root(MATT_SKILLS_ROOT))
+    elif target in {
+        AKIRA_SKILLS_ROOT.resolve(),
+        RESEARCH_SKILLS_ROOT.resolve(),
+        MATT_SKILLS_ROOT.resolve(),
+    }:
         results.append(check_skills_root(target))
 
     return 1 if any(results) else 0
@@ -622,18 +612,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="明确接受已审查的代码规模阈值告警后继续提交",
     )
     commit_parser.set_defaults(func=cmd_commit)
-
-    upstream_parser = subparsers.add_parser(
-        "upstream",
-        help="同步受管 fork 的 upstream，并按需更新父仓库 submodule pointer",
-    )
-    upstream_parser.add_argument("target", choices=["matt"])
-    upstream_parser.add_argument(
-        "--push",
-        action="store_true",
-        help="把同步结果 push 到我们的 fork，并用 Guard 提交 Lattice submodule pointer",
-    )
-    upstream_parser.set_defaults(func=cmd_upstream)
 
     check_parser = subparsers.add_parser("check", help="运行当前项目适用的机械检查")
     check_parser.add_argument("path", nargs="?", default=".")

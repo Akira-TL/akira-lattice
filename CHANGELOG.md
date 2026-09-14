@@ -16,12 +16,13 @@ All user-visible changes to stable skills will be documented in this file.
 - Added the harness-agnostic `agent-orchestration` Skill for mapping already-defined work units onto execution primitives actually provided by the current Agent harness, without making it a Parallel protocol dependency.
 - Added `scientific-presentation-authoring` for structuring scientific presentations, writing evidence-bounded result slides, adapting reference-deck design rules without copying template content, and applying `humanizer-zh` to Chinese slide text.
 - Added cross-platform `scripts/guard.py` and `scripts/install.py` entry points for static configuration deployment, architecture thresholds, Skill structure validation, and guarded Git commits.
-- Added `core/references/matt-skills.md` to record ownership and upstream-merge rules for the maintained `Akira-TL/matt-skills` fork.
-- Added `guard.py upstream matt` to fetch, compare and merge Matt upstream safely; explicit `--push` publishes our fork and commits the updated Lattice submodule pointer.
+- Added `core/references/matt-skills.md` to record ownership and selective upstream-reference rules for the maintained `Akira-TL/matt-skills` repository.
 - Added root `install.sh` and `uninstall.sh` as the human-facing static Agent configuration deploy and uninstall entry points.
 
 ### Changed
 
+- Matt 工程仓改为 Akira 自主维护产品：移除 Claude plugin、marketplace、Changesets/npm release、本地执行器链接和整仓 upstream 自动合并基础设施；`mattpocock/skills` 只作为选择性参考来源。
+- Guard 将 `misc` 视为非稳定 Skill bucket，并把 `skills/matt` 纳入根项目结构检查；删除 `upstream matt` 自动 merge/push 命令。
 - 重构 Skill 发现与安装拓扑：`~/.agents/sources/` 作为唯一受管 Skill source checkout，`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表；安装实现归属 `akira` Router，不管理项目级或执行器专用 Skill view。具体执行器按自身机制引用机器级注册项，不复制 Skill 内容或维护第二份 source checkout；同名不同 repository 冲突继续 fail closed。
 - 更新 Core 的 Skill 发现规则：当前会话缺少能力时先检查 `~/.agents/skills/<skill>`；机器级已有则不重复安装，机器级缺失时才由 `akira` Router 确认来源、用途与最小集合，并在用户授权后调用自身安装脚本。Lattice 根安装器不参与 Skill 生命周期。
 - 收紧 Core 的语言与 Git ownership 判断：凡自然语言中出现英文术语都先按可核验的规范名称处理；提交前遇到此前会话、其他 Agent、用户或来源不明的修改时，先判断是否属于当前接手文件或已确认工作内容，只有无法确认归属时才提醒用户。
@@ -72,6 +73,6 @@ All user-visible changes to stable skills will be documented in this file.
 - Standardized Git submission on `guard.py commit`: agents may selectively stage with `git add -- <paths...>`, but normal commits go through the Guard; documented that an Agent harness or tool contract may impose stricter shell constraints than the repository itself.
 - Made the per-turn Git development cadence explicit in Core: decide whether the previous atomic change should be committed, plan the next change, implement, run minimum syntax checks, show all local branches/worktrees, then optionally surface broader build or check commands.
 - Centralized installer-created Agent configuration backups under the Git-ignored `backup/` mirror tree and migrate legacy adjacent backups from managed prompt paths.
-- Changed Matt-derived runtime Skills to install from the `skills/matt` Git submodule, whose `origin` is the maintained `Akira-TL/matt-skills` fork while Matt's repository remains fetch-only `upstream`; Guard now verifies this ownership boundary.
+- Matt runtime Skills 统一从远端 `Akira-TL/matt-skills` 安装；Lattice 的 `skills/matt` submodule 只固定开发 revision。`mattpocock/skills` 保留为 fetch-only upstream 参考源，Guard 只验证远端所有权，不再自动整体同步。
 - Split Akira-authored Skills into the independent `Akira-TL/skills` repository and mount it at `skills/akira`, leaving Lattice to pin both self-authored and Matt-derived Skill repositories as separate submodules.
 - Moved Akira Skill user documentation into `skills/akira/docs/`, so Skill source and its documentation now share one independent repository and Lattice no longer keeps duplicate Skill docs.

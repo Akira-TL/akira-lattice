@@ -51,7 +51,7 @@ Agent 可以根据任务需要充分展开分析、设计、证据和细节，�
 
 当前 harness 或项目规则要求显式指定模型时必须显式指定，但不得假设不同 harness 共享模型名称、别名或参数，也不得自行跨产品映射或降级。
 
-需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的 fork、来源或上游同步时读取 `~/.agents/references/matt-skills.md`。多 Agent 的任务拆分、Task、claim、Ownership、frontier、Gate、Worker / Coordinator 生命周期与验收不由 Core 定义；这些属于当前执行器实际加载的协作 Skill 或项目协议。
+需要确认当前 harness 能力或标准 Git worktree 边界时读取 `~/.agents/references/agent-harness.md`；涉及 Matt skills 的所有权、来源或选择性上游吸收时读取 `~/.agents/references/matt-skills.md`。多 Agent 的任务拆分、Task、claim、Ownership、frontier、Gate、Worker / Coordinator 生命周期与验收不由 Core 定义；这些属于当前执行器实际加载的协作 Skill 或项目协议。
 
 ## 独立 Agent 验收
 

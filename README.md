@@ -7,7 +7,7 @@ Akira 的个人 Agent 基础设施与 Skill source control 仓库。这里维护
 ```text
 akira-lattice/
 ├── core/                    # 全局静态 Agent 配置
-├── scripts/                 # Guard / install / uninstall / upstream
+├── scripts/                 # Guard / install / uninstall
 ├── skills/
 │   ├── akira/               # Akira-TL/skills：通用 Skills + akira Router
 │   ├── research/            # Akira-TL/akira-research-skills

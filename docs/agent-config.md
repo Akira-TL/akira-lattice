@@ -12,8 +12,7 @@ akira-lattice/
 ├── scripts/
 │   ├── install.py
 │   ├── uninstall.py
-│   ├── guard.py
-│   └── upstream.py
+│   └── guard.py
 ├── skills/
 │   ├── akira/               # 通用 Akira Skills + akira Router
 │   ├── research/            # 独立 Research suite
