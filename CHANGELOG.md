@@ -21,6 +21,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 审查并收紧 Akira 通用 Skill 边界：修正 `akira-guard` 的旧运行时入口；将 `humanizer-zh` 登记为科研 PPT 中文文案终检的显式外部按需依赖并限制为语言清理；将 Word Skill 收回 DOCX 表示层，不再决定文献来源准入、科研论证、Results / Discussion 解释或结论强度。
 - 根 `install.sh` 恢复最小 Skill bootstrap：只从云端 `Akira-TL/skills` 获取并执行 `akira` 自带安装器，确保 `akira`、`browser-access` 与 `akira-guard` 已注册；不从本地 submodule 安装，也不在 Lattice 根仓复制通用 Skill manager。
 - Matt 工程仓改为 Akira 自主维护产品：移除 Claude plugin、marketplace、Changesets/npm release、本地执行器链接和整仓 upstream 自动合并基础设施；`mattpocock/skills` 只作为选择性参考来源。
 - 进一步裁剪 Matt 产品面：删除不属于 Akira Matt 路线的上游 `misc` 与实验性 `in-progress` Skills，只保留 `ask-akira`、`parallel-coordinator`、`parallel-execution` 三个 Akira 扩展，并移除上游网站导航与旧安装分发语义。
