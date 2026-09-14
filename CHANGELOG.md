@@ -22,6 +22,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 收紧 `browser-access` 的动态表单交互策略：`click` 改为通过 CDP `Input.dispatchMouseEvent` 执行真实指针点击，新增 `type` 通过真实焦点、编辑键事件与 `Input.insertText` 输入文本；`fill` 降为原生表单控件的 DOM 兼容兜底并拒绝直接写入 `contenteditable`。表单验收同时要求核对站点自身 required/error/invalid 与条件显示等组件状态，避免“DOM 看起来有值但内部编辑器状态未同步”。
 - 将软件工程全局入口从 `ask-matt` 切换为 `ask-akira`：Core 只指向 Engineering Primary Router；普通 `standard` flow 再由 `ask-akira` 按需加载 `ask-matt`，特殊 Execution Policy 与正式 Parallel coordination 保持在 Akira 工程路由层。
 - 将 Skill 生命周期职责从 Core 收回 `akira` Router：Core 只负责在能力缺失时路由到 `akira`，所有发现、复用、项目级 view 与安装规则均由 Router 单一维护。
 - 系统审查并重构 Matt 工程 Skills：把固定 sub-agent、后台 Agent、`/clear`、`/compact` 与固定 token 阈值等执行器假设下沉为 harness capability；保留 review isolation、TDD seam、claim、Gate 等真正的工程不变量，并为缺少隔离/并行能力的环境定义可审计退化路径。同步修正 `implement → code-review` 的提交顺序、将内部 Skill 依赖改为真实加载且 fail closed、把 Spec 从 `ready-for-agent` 执行队列移出，并升级 `setup-matt-pocock-skills` 为按已安装流程建立 workflow-role mapping、幂等补齐 GitHub/GitLab labels 与生成 tracker adapter 的仓库级初始化入口。
