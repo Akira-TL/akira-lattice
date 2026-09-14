@@ -6,6 +6,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
+- 建立公开的 `Akira-TL/akira-knowledge-skills` 产品仓，并以 `skills/knowledge` submodule 接入 Lattice；当前只固定 Akira Knowledge 产品边界与未来 `akira-knowledge` Primary Router 名称，尚无可安装 Skill。
 - Initialized the `akira-skills` repository structure.
 - Added the first productivity skill, `general-word-document-generation`.
 - Added `visible-browser-form-automation` for WSL-to-Windows Chrome CDP automation, dynamic form inspection, human-visible review, upload handoff, and explicit pre-submit safety boundaries.

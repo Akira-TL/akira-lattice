@@ -16,6 +16,8 @@ RESEARCH_SKILLS_ORIGIN = "git@github.com:Akira-TL/akira-research-skills.git"
 MATT_SKILLS_ROOT = REPO_ROOT / "skills" / "matt"
 MATT_SKILLS_ORIGIN = "git@github.com:Akira-TL/matt-skills.git"
 MATT_SKILLS_UPSTREAM = "git@github.com:mattpocock/skills.git"
+KNOWLEDGE_SKILLS_ROOT = REPO_ROOT / "skills" / "knowledge"
+KNOWLEDGE_SKILLS_ORIGIN = "git@github.com:Akira-TL/akira-knowledge-skills.git"
 CORE_LINE_LIMIT = 200
 
 
@@ -142,17 +144,18 @@ def check_config() -> int:
 
     gitmodules = REPO_ROOT / ".gitmodules"
     if not gitmodules.is_file():
-        fail("缺少 .gitmodules，Akira、Research 与 Matt 必须作为 Git submodule 管理")
+        fail("缺少 .gitmodules，Akira、Research、Matt 与 Knowledge 必须作为 Git submodule 管理")
         failed = True
     else:
         for name, expected in (
             ("skills/akira", AKIRA_SKILLS_ORIGIN),
             ("skills/research", RESEARCH_SKILLS_ORIGIN),
             ("skills/matt", MATT_SKILLS_ORIGIN),
+            ("skills/knowledge", KNOWLEDGE_SKILLS_ORIGIN),
         ):
             failed = not check_submodule_url(name, expected) or failed
 
-    for name in ("skills/akira", "skills/research", "skills/matt"):
+    for name in ("skills/akira", "skills/research", "skills/matt", "skills/knowledge"):
         failed = not check_submodule_revision(name) or failed
 
     if AKIRA_SKILLS_ROOT.is_dir():
@@ -181,6 +184,14 @@ def check_config() -> int:
         else:
             fail("Matt upstream push 必须设置为 DISABLED")
             failed = True
+
+    if KNOWLEDGE_SKILLS_ROOT.is_dir():
+        failed = not check_remote(
+            KNOWLEDGE_SKILLS_ROOT,
+            "Knowledge skills origin",
+            "origin",
+            KNOWLEDGE_SKILLS_ORIGIN,
+        ) or failed
 
     return 1 if failed else 0
 

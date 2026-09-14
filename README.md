@@ -11,7 +11,8 @@ akira-lattice/
 ├── skills/
 │   ├── akira/               # Akira-TL/skills：通用 Skills + akira Router
 │   ├── research/            # Akira-TL/akira-research-skills
-│   └── matt/                # Akira-TL/matt-skills：Matt + Akira engineering extensions
+│   ├── matt/                # Akira-TL/matt-skills：Matt + Akira engineering extensions
+│   └── knowledge/           # Akira-TL/akira-knowledge-skills：Akira Knowledge
 ├── docs/                    # Lattice 基础设施说明
 └── .agents/adr/             # 长期架构决定
 ```
@@ -23,7 +24,7 @@ akira-lattice/
 - **Akira common**：Router、浏览器、Word、科研/学术 PPT、Guard 语义和通用 Agent 编排。
 - **Matt Engineering**：`ask-akira` 作为软件工程 Primary Router；`standard` 按需进入 `ask-matt` 的 Matt 标准工程流，Parallel 系列负责正式多 Agent coordination。
 - **Akira Research**：完整科研生命周期与 `research.sqlite` provenance，单独成仓。
-- **Akira Knowledge**：待形成真实知识工作流后再单独建仓，不维护空产品。
+- **Akira Knowledge**：独立产品仓已经建立；当前只固定产品边界与未来 `akira-knowledge` Router 名称，尚无可安装 Skill。
 
 Lattice pin 某个 source 不等于把它全局安装。
 
@@ -43,7 +44,7 @@ Lattice pin 某个 source 不等于把它全局安装。
 uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
 ```
 
-该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt` 只用于开发、review 与固定 revision，不是运行时安装源。
+该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt`、`skills/knowledge` 只用于开发、review 与固定 revision，不是运行时安装源。
 
 根安装器只负责 bootstrap `akira`、`browser-access` 与 `akira-guard`；后续通用 Skill、Matt、Research 与外部能力都由 `akira` Router 按真实任务主动安装。
 
@@ -72,5 +73,6 @@ uv run scripts/lattice_check.py
 - 通用 / Router → `skills/akira`
 - Research → `skills/research`
 - Matt / Ask Akira / Parallel → `skills/matt`
+- Knowledge → `skills/knowledge`
 
 Matt 系列由 `Akira-TL/matt-skills` 独立维护；原 `mattpocock/skills` 只作为选择性参考 upstream，不再整体 merge。具体规则见 `core/references/matt-skills.md`。

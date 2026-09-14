@@ -9,10 +9,11 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 - `skills/akira` → `Akira-TL/skills`：通用 Akira Skills 与 `akira` 能力 Router。保留 Productivity、Akira Guard 和通用 Agent 编排。
 - `skills/research` → `Akira-TL/akira-research-skills`：完整 Research 产品族，拥有自己的 `skills/`、`docs/`、scripts、tests 与 research.sqlite 契约。
 - `skills/matt` → `Akira-TL/matt-skills`：Akira 自主维护的 Matt 系列工程 Skills；历史来源于 `mattpocock/skills`，上游只作为选择性参考来源。
+- `skills/knowledge` → `Akira-TL/akira-knowledge-skills`：Akira Knowledge 产品仓；当前只完成仓库初始化，尚未发布可安装 Skill。
 
 第三方 Skill 仓库不作为 Lattice submodule 固定；由 `skills/akira` 中的 Router 维护可信来源和按需安装边界。
 
-不要为了路由方便复制产品正文。未来只有当 Knowledge 等能力形成独立、高内聚产品族时才新增子仓。
+不要为了路由方便复制产品正文。新的独立子仓只在能力形成清晰、高内聚产品边界后建立。
 
 Lattice `docs/` 只保存基础设施、部署、仓库拓扑和第三方 source 说明；Skill 的人类文档跟随其 owning repository。
 
@@ -38,7 +39,7 @@ Stable Skill behaviour changes require the owning repository's docs to change in
 
 ## Changes
 
-修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`。
+修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`；Knowledge 产品修改属于 `skills/knowledge`。
 
 Core、根静态配置部署、Lattice 自检、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`；跨项目 Guard 行为变化先在 `skills/akira` 提交，再更新 submodule pointer。所有修改提交后运行适用的 Guard / targeted tests。
 

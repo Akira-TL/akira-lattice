@@ -7,3 +7,6 @@
 [submodule "skills/research"]
 	path = skills/research
 	url = git@github.com:Akira-TL/akira-research-skills.git
+[submodule "skills/knowledge"]
+	path = skills/knowledge
+	url = git@github.com:Akira-TL/akira-knowledge-skills.git
