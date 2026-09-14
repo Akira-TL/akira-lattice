@@ -9,8 +9,8 @@
 - 专有名词以及程序、命令、工具、库、框架、产品、项目等名称，以官方名称和原始拼写为准；没有规范且通行的中文名称，或翻译会造成失真时，直接保留原名，不得为了中文化强行直译。例如 `ssh` 作为命令名直接写作 `ssh`，不翻译成“安全壳”。文件名、路径、代码标识符、参数和其他必须逐字准确的技术字面量同样保留原文。
 - 不得自行创造、拼接、直译或以近义词改写出缺乏专业严谨来源的术语、缩写、分类名或概念名。使用一个疑似专业表述前先确认是否已有学术或行业通行名称；无法确认时使用普通描述性语言并明确其不是既有术语。确需提出新的概念或命名时，必须先与用户讨论并取得明确同意，再给出清晰定义并与既有术语区分。
 - 仅当任务确实需要用户个人资料、联系方式、报名、简历、自我介绍、项目经历，或本机系统、服务部署、端口、反向代理与开发环境信息时，才读取 `~/.config/akira/`；无关任务不得读取。
-- Lattice 根安装器只在机器初始化时从远端 `Akira-TL/skills` bootstrap `akira`、`browser-access` 与 `akira-guard` 三个基础 Skill，不从本地 submodule 安装。任务需要其他 Skill 而当前会话不可用时，先检查机器级注册表 `~/.agents/skills/<skill>`；若已存在，不重复安装。只有机器级也不存在时，才使用 `akira` Skill Router 确认来源、用途与最小安装集合；取得用户明确同意后，由 `akira` Skill 自带安装脚本完成远端 source 与机器级注册。
-- 处理代码相关项目需求时优先使用 `ask-matt`。当前会话没有 `ask-matt` 时先按上一条检查 `~/.agents/skills/ask-matt`；机器级已有则由当前执行器自行软链接并加载，机器级缺失时再通过 `akira` Router 安装 Matt 所需能力，然后进入 `ask-matt` 路由。
+- Lattice 根安装器只在机器初始化时从远端 `Akira-TL/skills` bootstrap `akira`、`browser-access` 与 `akira-guard` 三个基础 Skill，不从本地 submodule 安装。任务需要其他 Skill 而当前会话不可用时，先检查机器级注册表 `~/.agents/skills/<skill>`；若已存在，不重复安装，并优先按当前执行器正常的 Skill 加载机制使用该机器级注册项。机器级已安装不等于自动向项目目录投影：`<project>/.agents/skills/` 是允许的开放 Agent Skills 项目级 view，只有项目或执行器确实需要该 view 时，Agent 才可显式建立 `<project>/.agents/skills/<skill> -> ~/.agents/skills/<skill>` 软链接；不得仅因当前会话没有暴露 Skill 就自动创建项目软链接。只有机器级也不存在时，才使用 `akira` Skill Router 确认来源、用途与最小安装集合；取得用户明确同意后，由 `akira` Skill 自带安装脚本完成远端 source 与机器级注册。
+- 处理代码相关项目需求时优先使用 `ask-matt`。当前会话没有 `ask-matt` 时先按上一条检查 `~/.agents/skills/ask-matt`；机器级已有时先按当前执行器正常的 Skill 加载机制使用，不因当前会话未暴露就自动创建项目软链接。若当前项目明确采用 `.agents/skills` view 且确有项目级暴露需要，Agent 可以显式建立指向机器级注册项的项目软链接；机器级缺失时再通过 `akira` Router 安装 Matt 所需能力，然后进入 `ask-matt` 路由。
 - 多步骤、可复用的大型规则或执行流程优先使用 Skill；短小、稳定、跨项目的个人工程默认直接保留在本文件。
 
 ## 用户可见回复
