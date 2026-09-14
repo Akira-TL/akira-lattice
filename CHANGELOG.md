@@ -23,6 +23,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 - 根 `install.sh` 恢复最小 Skill bootstrap：只从云端 `Akira-TL/skills` 获取并执行 `akira` 自带安装器，确保 `akira` 与 `browser-access` 已注册；不从本地 submodule 安装，也不在 Lattice 根仓复制通用 Skill manager。
 - Matt 工程仓改为 Akira 自主维护产品：移除 Claude plugin、marketplace、Changesets/npm release、本地执行器链接和整仓 upstream 自动合并基础设施；`mattpocock/skills` 只作为选择性参考来源。
+- 进一步裁剪 Matt 产品面：删除不属于 Akira Matt 路线的上游 `misc` 与实验性 `in-progress` Skills，只保留 `ask-akira`、`parallel-coordinator`、`parallel-execution` 三个 Akira 扩展，并移除上游网站导航与旧安装分发语义。
 - Guard 将 `misc` 视为非稳定 Skill bucket，并把 `skills/matt` 纳入根项目结构检查；删除 `upstream matt` 自动 merge/push 命令。
 - 修正 Akira 共享 source checkout 的 revision 记录：同一 repository 的 checkout 被安装或更新动作推进时，同步刷新该 source 下所有已注册 Skill 的 manifest commit/ref，避免机器级 provenance 落后于实际文件。
 - 重构 Skill 发现与安装拓扑：`~/.agents/sources/` 作为唯一受管 Skill source checkout，`~/.agents/skills/` 作为唯一机器级已安装 Skill 注册表；安装实现归属 `akira` Router，不管理项目级或执行器专用 Skill view。具体执行器按自身机制引用机器级注册项，不复制 Skill 内容或维护第二份 source checkout；同名不同 repository 冲突继续 fail closed。
