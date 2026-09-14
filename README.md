@@ -66,8 +66,4 @@ uv run scripts/guard.py check .
 - Research → `skills/research`
 - Matt / Ask Akira / Parallel → `skills/matt`
 
-Matt upstream 同步继续使用：
-
-```bash
-uv run scripts/guard.py upstream matt
-```
+Matt 系列由 `Akira-TL/matt-skills` 独立维护；原 `mattpocock/skills` 只作为选择性参考 upstream，不再整体 merge。具体规则见 `core/references/matt-skills.md`。

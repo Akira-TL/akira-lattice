@@ -77,7 +77,6 @@ config        检查静态配置与受管 submodule
 architecture  检查代码与目录规模
 skills PATH   检查指定 Akira Skill 仓的结构与稳定 Skill 文档映射
 commit        检查提交信息、staged 语法和架构门禁后正式提交
-upstream matt 同步 Matt fork upstream；显式 --push 时才发布
 check PATH    组合运行当前路径适用检查并显示 Git/worktree 状态
 ```
 
