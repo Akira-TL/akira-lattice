@@ -6,7 +6,7 @@
 
 ## Ubiquitous language
 
-**Akira common Skill source** means `skills/akira` (`Akira-TL/skills`). It owns the `akira` capability Router plus cross-domain Productivity, Guard semantics, and harness-agnostic Agent orchestration.
+**Akira common Skill source** means `skills/akira` (`Akira-TL/skills`). It owns the `akira` capability Router plus cross-domain Productivity, the `akira-guard` execution/semantics layer, and harness-agnostic Agent orchestration.
 
 **Research Skill source** means `skills/research` (`Akira-TL/akira-research-skills`). It owns the complete Research workflow family and research.sqlite provenance model.
 
@@ -14,11 +14,11 @@
 
 **Pinned source** means a repository recorded as a Lattice Git submodule for development, reproducibility, and Guard checks. A pinned source is not automatically part of the global runtime installation.
 
-**Global baseline Skills** are the deliberately small set installed by Lattice for every environment. The current baseline is `akira` plus `browser-access`; specialised common Skills, Matt, and Research remain on-demand.
+**Global baseline Skills** are the deliberately small set installed by Lattice for every environment. The current baseline is `akira`, `browser-access`, and `akira-guard`; specialised common Skills, Matt, and Research remain on-demand.
 
 **Global configuration source** means `core/`. `core/AGENTS.md` is the always-loaded core; `core/references/` contains low-frequency facts and tool boundaries.
 
-**Guard** means `scripts/guard.py`, the mechanical interface for deterministic configuration, architecture, Skill-repository, and commit checks. It does not replace semantic judgement such as diff ownership.
+**Akira Guard** means the default-installed `akira-guard` Skill and its `scripts/guard.py`, the cross-project mechanical interface for architecture, Skill-repository, staged syntax, and guarded Git commits. Lattice-specific static configuration and submodule topology checks live separately in root `scripts/lattice_check.py`. Guard does not replace semantic judgement such as diff ownership.
 
 **Runtime configuration view** means `~/.agents` and tool-specific files such as `~/.claude/CLAUDE.md`. These expose canonical source and are not independent copies.
 

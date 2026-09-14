@@ -18,16 +18,15 @@ import uninstall
 
 class RootInstallBoundaryTests(unittest.TestCase):
     def test_root_runtime_scripts_do_not_own_skill_lifecycle(self) -> None:
-        for name in ("install.py", "uninstall.py", "guard.py"):
+        for name in ("install.py", "uninstall.py", "lattice_check.py"):
             source = (SCRIPTS_ROOT / name).read_text(encoding="utf-8")
             self.assertNotIn("skill_manager", source)
             self.assertNotIn("akira-skills.json", source)
             self.assertNotIn("~/.agents/sources", source)
             self.assertNotIn("~/.agents/skills", source)
 
-        guard_source = (SCRIPTS_ROOT / "guard.py").read_text(encoding="utf-8")
-        self.assertNotIn('HUB / "skills"', guard_source)
-        self.assertNotIn("运行时 Skill", guard_source)
+        self.assertFalse((SCRIPTS_ROOT / "guard.py").exists())
+        self.assertFalse((SCRIPTS_ROOT / "staged_syntax.py").exists())
 
     def test_shell_entrypoints_use_uv(self) -> None:
         install_entry = (REPO_ROOT / "install.sh").read_text(encoding="utf-8")
@@ -50,7 +49,7 @@ class RootInstallBoundaryTests(unittest.TestCase):
         with mock.patch.object(install.subprocess, "run", side_effect=fake_run):
             install.bootstrap_baseline_skills()
 
-        self.assertEqual(install.BASELINE_SKILLS, ("akira", "browser-access"))
+        self.assertEqual(install.BASELINE_SKILLS, ("akira", "browser-access", "akira-guard"))
         self.assertEqual(install.AKIRA_SKILLS_SOURCE, "https://github.com/Akira-TL/skills.git")
         self.assertEqual(calls[0][0:2], ["git", "clone"])
         self.assertIn(install.AKIRA_SKILLS_SOURCE, calls[0])
@@ -61,7 +60,14 @@ class RootInstallBoundaryTests(unittest.TestCase):
         self.assertEqual(install_call[2:4], ["install", install.AKIRA_SKILLS_SOURCE])
         self.assertEqual(
             install_call[4:],
-            ["--skill", "akira", "--skill", "browser-access"],
+            [
+                "--skill",
+                "akira",
+                "--skill",
+                "browser-access",
+                "--skill",
+                "akira-guard",
+            ],
         )
 
 

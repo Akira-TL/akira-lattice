@@ -1,6 +1,6 @@
 # Repository instructions
 
-This repository is the source of truth for Akira's maintained global static Agent configuration, Guard, deployment, cross-repository routing, and pinned Skill repositories.
+This repository is the source of truth for Akira's maintained global static Agent configuration, Lattice deployment/checks, cross-repository routing, and pinned Skill repositories. Cross-project Guard execution is owned by the `akira-guard` Skill.
 
 ## Source and ownership
 
@@ -16,11 +16,11 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 
 Lattice `docs/` 只保存基础设施、部署、仓库拓扑和第三方 source 说明；Skill 的人类文档跟随其 owning repository。
 
-Global static Agent configuration lives under `core/`. Deterministic checks and deployment live under `scripts/`. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
+Global static Agent configuration lives under `core/`. Lattice-specific deployment and repository checks live under root `scripts/`; cross-project Git Guard execution lives under `skills/akira/engineering/akira-guard/`. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
 
 ## Installation boundary
 
-Lattice root installation owns global static Agent configuration plus a narrow cloud bootstrap for the baseline Skills `akira` and `browser-access`. General Skill discovery, installation, update, removal, manifest state and machine-level registration remain owned by the `akira` Router in `skills/akira/routing/akira/`; the root installer does not implement the general Skill lifecycle and never installs from local submodules.
+Lattice root installation owns global static Agent configuration plus a narrow cloud bootstrap for the baseline Skills `akira`, `browser-access`, and `akira-guard`. General Skill discovery, installation, update, removal, manifest state and machine-level registration remain owned by the `akira` Router in `skills/akira/routing/akira/`; the root installer does not implement the general Skill lifecycle and never installs from local submodules.
 
 Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry. Specific harnesses continue to own their own Skill discovery views, links, caches and profiles.
 
@@ -40,6 +40,6 @@ Stable Skill behaviour changes require the owning repository's docs to change in
 
 修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`。
 
-Core、Guard、根静态配置部署、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`，并在提交后运行适用的 Guard / targeted tests。
+Core、根静态配置部署、Lattice 自检、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`；跨项目 Guard 行为变化先在 `skills/akira` 提交，再更新 submodule pointer。所有修改提交后运行适用的 Guard / targeted tests。
 
 Do not add release tooling, package metadata, CI, marketplace manifests, or a license by assumption. Treat each as a separate repository decision.

@@ -10,10 +10,10 @@ Accepted
 
 ## Decision
 
-- `./install.sh` 除部署 Core 静态配置外，负责 bootstrap 两个基础 Skill：`akira` 与 `browser-access`。
+- `./install.sh` 除部署 Core 静态配置外，负责 bootstrap 三个基础 Skill：`akira`、`browser-access` 与 `akira-guard`。
 - bootstrap 只从 `https://github.com/Akira-TL/skills.git` 获取，不从 Lattice 本地 `skills/akira` submodule 安装。
 - 根安装器不复制 Akira 的 Skill manager 实现。它创建临时 Git checkout，执行该云端 checkout 中 `routing/akira/scripts/skills.py`，由 `akira` 自己的安装实现完成 canonical source、manifest 与机器级软链接注册。
-- bootstrap 完成后，所有其他 Skill 的发现、安装、更新、删除与诊断仍由已经安装的 `akira` Router 负责。
+- bootstrap 完成后，所有其他 Skill 的发现、安装、更新、删除与诊断仍由已经安装的 `akira` Router 负责；跨项目 Git Guard 则直接由已安装的 `akira-guard` 提供。
 - Lattice 根卸载器不反向猜测或清理机器级 Skill 状态；Skill 生命周期继续通过 `akira` 安装器显式处理。
 
 ## Consequences

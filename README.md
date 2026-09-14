@@ -7,7 +7,7 @@ Akira 的个人 Agent 基础设施与 Skill source control 仓库。这里维护
 ```text
 akira-lattice/
 ├── core/                    # 全局静态 Agent 配置
-├── scripts/                 # Guard / install / uninstall
+├── scripts/                 # Lattice install / uninstall / repository check
 ├── skills/
 │   ├── akira/               # Akira-TL/skills：通用 Skills + akira Router
 │   ├── research/            # Akira-TL/akira-research-skills
@@ -35,9 +35,9 @@ Lattice pin 某个 source 不等于把它全局安装。
 ./install.sh
 ```
 
-该入口部署 Lattice 的 Core、references、Guard 与其他静态运行时链接，并从远端 `https://github.com/Akira-TL/skills.git` bootstrap 最小机器级基线：`akira` 与 `browser-access`。bootstrap 使用临时 GitHub checkout 中的 `akira` 安装器执行，不从 Lattice 本地 `skills/akira` submodule 安装 Skill。
+该入口部署 Lattice 的 Core、references 与静态运行时链接，并从远端 `https://github.com/Akira-TL/skills.git` bootstrap 最小机器级基线：`akira`、`browser-access` 与 `akira-guard`。bootstrap 使用临时 GitHub checkout 中的 `akira` 安装器执行，不从 Lattice 本地 `skills/akira` submodule 安装 Skill。
 
-除这两个基础 Skill 的首次/重复 bootstrap 外，Skill 生命周期由 `akira` Router 自己拥有。Router 已经可用后，Agent 先复用当前会话能力，再检查机器级 `~/.agents/skills/`；确有缺口时读取 Catalog，向用户说明来源、用途和最小安装范围，取得明确同意后调用：
+除这三个基础 Skill 的首次/重复 bootstrap 外，Skill 生命周期由 `akira` Router 自己拥有。Router 已经可用后，Agent 先复用当前会话能力，再检查机器级 `~/.agents/skills/`；确有缺口时读取 Catalog，向用户说明来源、用途和最小安装范围，取得明确同意后调用：
 
 ```bash
 uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
@@ -45,18 +45,25 @@ uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
 
 该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt` 只用于开发、review 与固定 revision，不是运行时安装源。
 
-根安装器只负责 bootstrap `akira` 与 `browser-access`；后续通用 Skill、Matt、Research 与外部能力都由 `akira` Router 按真实任务主动安装。
+根安装器只负责 bootstrap `akira`、`browser-access` 与 `akira-guard`；后续通用 Skill、Matt、Research 与外部能力都由 `akira` Router 按真实任务主动安装。
 
 ## Guard
 
+跨项目 Guard 由默认安装的 `akira-guard` Skill 提供：
+
 ```bash
-uv run scripts/guard.py config
-uv run scripts/guard.py skills ./skills/akira
-uv run scripts/guard.py skills ./skills/research
-uv run scripts/guard.py check .
+uv run ~/.agents/skills/akira-guard/scripts/guard.py skills ./skills/akira
+uv run ~/.agents/skills/akira-guard/scripts/guard.py skills ./skills/research
+uv run ~/.agents/skills/akira-guard/scripts/guard.py check .
 ```
 
-`commit` 仍是正式 Git 提交入口；项目自身测试、schema validator 和高风险验证按实际修改追加。
+Lattice 自身的静态配置与 submodule 拓扑检查单独运行：
+
+```bash
+uv run scripts/lattice_check.py
+```
+
+`akira-guard ... commit` 是正式 Git 提交入口；项目自身测试、schema validator 和高风险验证按实际修改追加。
 
 ## Source ownership
 

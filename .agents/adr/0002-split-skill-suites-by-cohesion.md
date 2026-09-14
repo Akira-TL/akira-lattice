@@ -24,7 +24,7 @@ Accepted；其中 Skill 安装 ownership 已由 ADR 0003 取代。
 - 不建立独立 `akira-engineering-skills` 或 `akira-productivity-skills`。
 - Knowledge 只有在形成真实、高内聚工作流后才建立独立仓库；不预先维护空产品。
 - Lattice 可以 pin 多个 Skill source，但 **pin 不等于全局安装**。
-- Lattice 默认全局只安装最小跨域基线：`akira` Router 与 `browser-access`。Matt、Research、Word、PPT、Agent 编排等由 Router 根据当前项目真实需求，在用户明确同意后项目级安装。
+- Lattice 默认全局只安装最小跨域基线：`akira` Router、`browser-access` 与 `akira-guard`。Matt、Research、Word、PPT、Agent 编排等由 Router 根据当前项目真实需求，在用户明确同意后机器级按需安装。
 
 ## Consequences
 
@@ -33,5 +33,5 @@ Accepted；其中 Skill 安装 ownership 已由 ADR 0003 取代。
 - 通用仓仍有实际能力价值；Router 可以优先补一个单一通用 Skill，而不是任何缺口都升级成整仓安装。
 - 全局运行时保持较小，降低 Skill trigger 噪声；项目级 `skills-lock.json` 更接近项目真实用途。
 - 旧运行时中历史上全局安装的 Matt / Research / 其他 Skill 不由新版安装器静默清理；一次性迁移必须显式执行并遵守现有安装 ownership manifest。
-- Lattice Guard 需要同时理解通用仓的分类目录结构，以及 Research suite 的 `skills/<category>/<skill>/` + `docs/<category>/<skill>.md` 镜像结构。
+- `akira-guard` 的 Skill 结构检查需要同时理解通用仓的分类目录结构，以及 Research suite 的 `skills/<category>/<skill>/` + `docs/<category>/<skill>.md` 镜像结构。
 - 第三方 Skill 仓库不作为 Lattice submodule 固定；Router 只维护可信来源、发现方式与项目级最小安装边界。

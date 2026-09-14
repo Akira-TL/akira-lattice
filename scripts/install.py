@@ -17,7 +17,7 @@ HOME = Path.home()
 HUB = HOME / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
 AKIRA_SKILLS_SOURCE = "https://github.com/Akira-TL/skills.git"
-BASELINE_SKILLS = ("akira", "browser-access")
+BASELINE_SKILLS = ("akira", "browser-access", "akira-guard")
 
 def remove_path(path: Path) -> None:
     if path.is_symlink() or path.is_file():

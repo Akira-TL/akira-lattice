@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted；其中“所有自定义 Agent 能力正文位于单一版本管理仓库”的部分已由 ADR 0002 的产品仓拆分决定修订。Lattice 仍是全局静态配置、部署、Guard 与各 Skill source pin 的控制面。
+Accepted；其中“所有自定义 Agent 能力正文位于单一版本管理仓库”的部分已由 ADR 0002 修订，跨项目 Guard 实现所有权已由 ADR 0005 修订。Lattice 仍是全局静态配置、部署、Lattice 自检与各 Skill source pin 的控制面。
 
 ## Context
 
@@ -12,9 +12,9 @@ Accepted；其中“所有自定义 Agent 能力正文位于单一版本管理�
 
 ## Decision
 
-- `/home/Akira/Projects/akira-skills` 是全局静态 Agent 配置、部署、Guard 与受管 Skill source pin 的控制面；具体 Skill 正文的仓库边界以后按 ADR 0002 管理。
+- `/home/Akira/Projects/akira-skills` 是全局静态 Agent 配置、部署、Lattice 自检与受管 Skill source pin 的控制面；具体 Skill 正文的仓库边界按 ADR 0002 管理，跨项目 Guard 按 ADR 0005 由 `akira-guard` Skill 持有。
 - 全局静态配置源码放在 `core/`，其中 `AGENTS.md` 是常驻 Core，`references/` 只保存有独立阅读价值的低频事实和工具边界。
-- 确定性规则与部署工具统一放在根 `scripts/`；`scripts/guard.py` 负责机械检查，`scripts/install.py` 负责跨平台部署。Agent Prompt 只保留需要语义判断的规则和 Guard 的调用边界。
+- 根 `scripts/` 只保存 Lattice 自身部署与配置/仓库拓扑检查；`scripts/install.py` 负责跨平台部署，`scripts/lattice_check.py` 负责 Lattice 自检。跨项目 Git Guard、暂存语法与工程结构检查由默认安装的 `akira-guard` Skill 持有。Agent Prompt 只保留需要语义判断的规则和 Guard 的调用边界。
 - 项目知识继续由 Matt flow 的 `CONTEXT.md`、ADR 等项目文件管理；动态上下文与 Memory 不属于本仓库，未来由 `contextd` 负责。
 - `~/.agents` 仅作为运行时 hub，不再初始化 Git；`AGENTS.md`、`references/`、`scripts/` 等自定义内容通过软链接指向仓库源码。
 - Claude、Codex、OpenCode 的全局提示词入口使用各自原生文件名，并直接软链接到 `core/AGENTS.md`；`~/.agents/AGENTS.md` 只作为通用运行时入口，不承担二次转发。

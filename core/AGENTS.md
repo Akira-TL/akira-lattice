@@ -9,7 +9,7 @@
 - 专有名词以及程序、命令、工具、库、框架、产品、项目等名称，以官方名称和原始拼写为准；没有规范且通行的中文名称，或翻译会造成失真时，直接保留原名，不得为了中文化强行直译。例如 `ssh` 作为命令名直接写作 `ssh`，不翻译成“安全壳”。文件名、路径、代码标识符、参数和其他必须逐字准确的技术字面量同样保留原文。
 - 不得自行创造、拼接、直译或以近义词改写出缺乏专业严谨来源的术语、缩写、分类名或概念名。使用一个疑似专业表述前先确认是否已有学术或行业通行名称；无法确认时使用普通描述性语言并明确其不是既有术语。确需提出新的概念或命名时，必须先与用户讨论并取得明确同意，再给出清晰定义并与既有术语区分。
 - 仅当任务确实需要用户个人资料、联系方式、报名、简历、自我介绍、项目经历，或本机系统、服务部署、端口、反向代理与开发环境信息时，才读取 `~/.config/akira/`；无关任务不得读取。
-- Lattice 根安装器只在机器初始化时从远端 `Akira-TL/skills` bootstrap `akira` 与 `browser-access` 两个基础 Skill，不从本地 submodule 安装。任务需要其他 Skill 而当前会话不可用时，先检查机器级注册表 `~/.agents/skills/<skill>`；若已存在，不重复安装。只有机器级也不存在时，才使用 `akira` Skill Router 确认来源、用途与最小安装集合；取得用户明确同意后，由 `akira` Skill 自带安装脚本完成远端 source 与机器级注册。
+- Lattice 根安装器只在机器初始化时从远端 `Akira-TL/skills` bootstrap `akira`、`browser-access` 与 `akira-guard` 三个基础 Skill，不从本地 submodule 安装。任务需要其他 Skill 而当前会话不可用时，先检查机器级注册表 `~/.agents/skills/<skill>`；若已存在，不重复安装。只有机器级也不存在时，才使用 `akira` Skill Router 确认来源、用途与最小安装集合；取得用户明确同意后，由 `akira` Skill 自带安装脚本完成远端 source 与机器级注册。
 - 处理代码相关项目需求时优先使用 `ask-matt`。当前会话没有 `ask-matt` 时先按上一条检查 `~/.agents/skills/ask-matt`；机器级已有则由当前执行器自行软链接并加载，机器级缺失时再通过 `akira` Router 安装 Matt 所需能力，然后进入 `ask-matt` 路由。
 - 多步骤、可复用的大型规则或执行流程优先使用 Skill；短小、稳定、跨项目的个人工程默认直接保留在本文件。
 
@@ -42,8 +42,8 @@ Agent 可以根据任务需要充分展开分析、设计、证据和细节，�
 - 用户明确表示最近一次实现“不行”“不接受”“回退”或其他等价否定时，停止在该实现之上继续叠加修正。若被否定的修改由当前 Agent 创建、连续位于当前 `HEAD`，且回退不会覆盖用户、其他 Agent 或来源不明的工作，则先 `reset` 到被否定修改之前的提交，再按用户新要求重新实现并形成新的原子提交；不要保留被否定实现再追加一个“修正提交”。若安全 `reset` 的前提不成立，先保护现有非当前 Agent 修改并向用户说明冲突，不得为追求整洁历史而破坏他人工作。
 - 提交前检查当前原子修改的 diff ownership，只暂存归属明确的当前修改。此前会话、其他 Agent、用户或来源不明的修改不得顺带提交、修改、还原或删除；存在时先判断是否是接手的文件或者确定是自己的工作内容，否则提醒用户。
 - 提交信息默认一行：`<TYPE>: (<SCOPE>) <DETAIL>`；`TYPE` 使用全大写的 `FIX`、`FEAT`、`REFACTOR`、`TEST`、`DOCS` 或 `CHORE`，`SCOPE` 使用简短英文单词，`DETAIL` 必须具体。确有必要使用多行时，每一行都必须独立完整地遵守同一格式。
-- 提交前可使用 `git add -- <paths...>` 选择性暂存归属明确的当前原子修改；正式提交只能使用 `uv run ~/.agents/scripts/guard.py commit -m '<message>'`，不得直接以 `git commit` 作为正常提交入口。Guard 对每次提交自动执行 staged 最低语法检查、提交格式校验和暂存架构门禁；普通提交不默认额外运行全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改在对应阶段提交前，再根据实际失败模式执行 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。语义归属仍由 Agent 负责。
-- 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。涉及 GitHub push、云端 CI、tag、release 或包发布时，先读取 `~/.agents/references/github-release.md` 并遵守其中的本地验收与发布顺序。
+- 提交前可使用 `git add -- <paths...>` 选择性暂存归属明确的当前原子修改；正式提交只能使用 `uv run ~/.agents/skills/akira-guard/scripts/guard.py commit -m '<message>'`，不得直接以 `git commit` 作为正常提交入口。Guard 对每次提交自动执行 staged 最低语法检查、提交格式校验和暂存架构门禁；普通提交不默认额外运行全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改在对应阶段提交前，再根据实际失败模式执行 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。语义归属仍由 Agent 负责。
+- 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/skills/akira-guard/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。涉及 GitHub push、云端 CI、tag、release 或包发布时，先读取 `~/.agents/references/github-release.md` 并遵守其中的本地验收与发布顺序。
 
 ## 模型与执行环境
 
