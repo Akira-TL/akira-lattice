@@ -7,6 +7,7 @@ All user-visible changes to stable skills will be documented in this file.
 ### Added
 
 - 建立公开的 `Akira-TL/akira-knowledge-skills` 产品仓，并以 `skills/knowledge` submodule 接入 Lattice；当前只固定 Akira Knowledge 产品边界与未来 `akira-knowledge` Primary Router 名称，尚无可安装 Skill。
+- 扩展 Akira Knowledge 的探索记录：补充开源 Agent / Obsidian 知识库项目中的能力分层、round-trip safety、Raw Source / 长期 Knowledge、最小结构与写权限边界观察，并吸收 Akira Research 已落地的人类可读层 / Agent 内部层、单一 canonical editable source、用户内容 authority boundary 等设计原则；仍不将这些探索材料视为已定对象模型或 Skill 契约。
 - Initialized the `akira-skills` repository structure.
 - Added the first productivity skill, `general-word-document-generation`.
 - Added `visible-browser-form-automation` for WSL-to-Windows Chrome CDP automation, dynamic form inspection, human-visible review, upload handoff, and explicit pre-submit safety boundaries.
