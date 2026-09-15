@@ -23,6 +23,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 调整 Matt `wayfinder` 的连续推进语义：普通 decision ticket 完成后先向用户汇报决策与 frontier 变化，再重新查询 frontier 并直接准备下一张已授权 ticket；ticket closure 不再强制结束 session，只有真实的人机交互、阻塞、范围重议或上下文边界才暂停。
 - 扩展 Akira Knowledge 探索记录：纳入 ContextD 的 Source-first、Authority / Projection 分离、派生 lineage 与 current-view 历史保留原则，并将人类可读知识正文的治理边界明确为“Agent 先说明拟新增、删除或修改内容，用户明确同意后再执行落盘”。
 
 - 为 Akira Knowledge 增加探索记录，暂存 FLO.W / Notion 与 Obsidian 的知识组织、低摩擦捕获、动态视图、本地 Markdown、Properties、Links、Bases、CLI 与 Agent 集成观察；明确这些内容仍是待讨论材料，不构成对象模型、数据契约或已发布 Skill。
