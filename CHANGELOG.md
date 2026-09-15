@@ -23,6 +23,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 扩展 Akira Knowledge 探索记录：纳入 ContextD 的 Source-first、Authority / Projection 分离、派生 lineage 与 current-view 历史保留原则，并将人类可读知识正文的治理边界明确为“Agent 先说明拟新增、删除或修改内容，用户明确同意后再执行落盘”。
+
 - 为 Akira Knowledge 增加探索记录，暂存 FLO.W / Notion 与 Obsidian 的知识组织、低摩擦捕获、动态视图、本地 Markdown、Properties、Links、Bases、CLI 与 Agent 集成观察；明确这些内容仍是待讨论材料，不构成对象模型、数据契约或已发布 Skill。
 - 收紧 `browser-access` 的动态表单交互策略：`click` 改为通过 CDP `Input.dispatchMouseEvent` 执行真实指针点击，新增 `type` 通过真实焦点、编辑键事件与 `Input.insertText` 输入文本；`fill` 降为原生表单控件的 DOM 兼容兜底并拒绝直接写入 `contenteditable`。表单验收同时要求核对站点自身 required/error/invalid 与条件显示等组件状态，避免“DOM 看起来有值但内部编辑器状态未同步”。
 - 将软件工程全局入口从 `ask-matt` 切换为 `ask-akira`：Core 只指向 Engineering Primary Router；普通 `standard` flow 再由 `ask-akira` 按需加载 `ask-matt`，特殊 Execution Policy 与正式 Parallel coordination 保持在 Akira 工程路由层。
