@@ -6,6 +6,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
+- 为 Akira Research 的 Review series 增加 independent review / project-informed mentor review 信息边界、正式同行评议报告、多视角隔离语义与真实第三方未发表稿件的 confidentiality / generative-AI policy gate；只有目标 venue 当前规则明确允许且授权成立时才处理第三方全文。
 - 为 `akira-research-skills` 的 Review series 增加 `review-literature`：在 novelty / priority / contribution 判断前建立 bounded field frame 与 closest prior work，要求强 prior-work 判断读取足够原始内容，并复用 `literature-access` / `research-standards` 而不创建 Research Literature canonical state。
 - 为 `akira-research-skills` 增加与 `akira-research` 平级的 `akira-review` 顶层 Router 及 `review-science` 核心科学评议 Skill：支持部分或完整科研材料的 Assessment Boundary、Research Question / Claim 重建、Claim-driven scientific assessment、可验收 Concern，以及“严在 Claim，克制在 Scope”的最低诚实修复边界。
 - 建立公开的 `Akira-TL/akira-knowledge-skills` 产品仓，并以 `skills/knowledge` submodule 接入 Lattice；当前只固定 Akira Knowledge 产品边界与未来 `akira-knowledge` Primary Router 名称，尚无可安装 Skill。
