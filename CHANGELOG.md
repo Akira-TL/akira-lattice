@@ -27,6 +27,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 将 Akira Research 的独立 Reviewer scientific assessment、多视角 Review 与 re-review ownership 从 Communication 迁移到平级 Review series；Communication 继续只拥有作者侧 integrity、revision、response 与 submission，Review Result 只有经用户决定后才 hand back 到 Research / Communication 修改 canonical state 或稿件。
 - 为 `akira-research-skills` 配置 Matt 工程流所需的 GitHub Issues tracker、workflow role label 映射与 single-context domain-doc 约定，并由 Lattice 固定对应 Research submodule revision。
 - 收紧 Core 的用户可见中文表述规则：项目内部的领域概念、架构对象、状态、流程和决策名不再因英文命名或首字母大写而获得裸英文豁免；人类可读说明优先使用规范中文或普通中文描述，仅在首次建立对应关系时括注项目原英文名，并把命令、文件名、代码标识符、API/协议字段等必须逐字匹配的技术字面量与一般概念明确区分。
 
