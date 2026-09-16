@@ -6,6 +6,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
+- 为 Akira Research 的 Review series 增加 `review-revision`：修回再审按 evidence-before-persuasion 固定原 concern / resolution criterion，先检查真实 revised artifact 再核对 response letter，并区分已解决、部分解决、合理降低 Claim 闭合、新证据改变原问题与当前仍无法判断。
 - 为 Akira Research 的 Review series 增加 independent review / project-informed mentor review 信息边界、正式同行评议报告、多视角隔离语义与真实第三方未发表稿件的 confidentiality / generative-AI policy gate；只有目标 venue 当前规则明确允许且授权成立时才处理第三方全文。
 - 为 `akira-research-skills` 的 Review series 增加 `review-literature`：在 novelty / priority / contribution 判断前建立 bounded field frame 与 closest prior work，要求强 prior-work 判断读取足够原始内容，并复用 `literature-access` / `research-standards` 而不创建 Research Literature canonical state。
 - 为 `akira-research-skills` 增加与 `akira-research` 平级的 `akira-review` 顶层 Router 及 `review-science` 核心科学评议 Skill：支持部分或完整科研材料的 Assessment Boundary、Research Question / Claim 重建、Claim-driven scientific assessment、可验收 Concern，以及“严在 Claim，克制在 Scope”的最低诚实修复边界。
