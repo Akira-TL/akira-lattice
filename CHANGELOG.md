@@ -27,6 +27,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 `akira` first-party Catalog：`akira-research-skills` 现在按同一产品包中的 Research / Review 两个平级 series 发现与安装；新增 `akira-review`、`review-literature`、`review-science`、`review-revision` 路由说明，并用当前 installer 的显式 `--skill` 列表提供按需 series bundle，不伪造自动依赖解析。
 - 扩展 Akira Research Review series 的仓库级契约检查：机械验证双 Primary Router、三个 Review 专业 Skill 的调用方式与文档/metadata、共享科研能力边界、Communication 作者侧职责保留、Review 不进入 Current Loop 且不新增 Review 数据库 schema。
 - 将 Akira Research 的独立 Reviewer scientific assessment、多视角 Review 与 re-review ownership 从 Communication 迁移到平级 Review series；Communication 继续只拥有作者侧 integrity、revision、response 与 submission，Review Result 只有经用户决定后才 hand back 到 Research / Communication 修改 canonical state 或稿件。
 - 为 `akira-research-skills` 配置 Matt 工程流所需的 GitHub Issues tracker、workflow role label 映射与 single-context domain-doc 约定，并由 Lattice 固定对应 Research submodule revision。
