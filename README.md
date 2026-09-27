@@ -24,7 +24,7 @@ akira-lattice/
 - **Akira common**：Router、浏览器、Word、科研/学术 PPT、Guard 语义和通用 Agent 编排。
 - **Matt Engineering**：`ask-akira` 作为软件工程 Primary Router；`standard` 按需进入 `ask-matt` 的 Matt 标准工程流，Parallel 系列负责正式多 Agent coordination。
 - **Akira Research**：完整科研生命周期与 `research.sqlite` provenance，单独成仓。
-- **Akira Knowledge**：独立产品仓已经建立；当前只固定产品边界与未来 `akira-knowledge` Router 名称，尚无可安装 Skill。
+- **Akira Knowledge**：独立产品仓；`akira-knowledge` 为 Primary Router，Capture / Curate / Maintain / Retrieve 由 Package dependency graph 组织。
 
 Lattice pin 某个 source 不等于把它全局安装。
 
@@ -36,17 +36,18 @@ Lattice pin 某个 source 不等于把它全局安装。
 ./install.sh
 ```
 
-该入口部署 Lattice 的 Core、references 与静态运行时链接，并从远端 `https://github.com/Akira-TL/skills.git` bootstrap 最小机器级基线：`akira`、`browser-access` 与 `akira-guard`。bootstrap 使用临时 GitHub checkout 中的 `akira` 安装器执行，不从 Lattice 本地 `skills/akira` submodule 安装 Skill。
+该入口要求 `skiloom >= 0.8.15`，部署 Lattice 的 Core、references 与静态运行时链接；Skill bootstrap 先以 Git `main` 安装 `akira-tl/skiloom/skiloom`，再通过同一 public CLI 安装 Akira 最小用户级基线：`akira-tl/skills/akira`、`akira-tl/skills/browser-access` 与 `akira-tl/skills/akira-guard`。Lattice 本地 `skills/*` submodule 只用于开发、review 与固定 revision，不是运行时安装源。
 
-除这三个基础 Skill 的首次/重复 bootstrap 外，Skill 生命周期由 `akira` Router 自己拥有。Router 已经可用后，Agent 先复用当前会话能力，再检查机器级 `~/.agents/skills/`；确有缺口时读取 Catalog，向用户说明来源、用途和最小安装范围，取得明确同意后调用：
+后续由 `akira` Router 判断当前任务需要哪个入口 Package；完整 dependency closure、source resolution、exact revision、Registry / Store / Target ownership、安装、更新、移除、同步、修复与恢复全部由 Skiloom 管理。当前 first-party source mode 使用 Git `main`。
 
-```bash
-uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
+典型流程：
+
+```text
+skiloom install <coordinate> --git main --scope user --plan --json
+skiloom install <coordinate> --git main --scope user --yes --json
 ```
 
-该脚本负责远端 Git source、`~/.agents/sources/`、`~/.agents/skills/` 和机器级 manifest。Lattice 中的 `skills/akira`、`skills/research`、`skills/matt`、`skills/knowledge` 只用于开发、review 与固定 revision，不是运行时安装源。
-
-根安装器只负责 bootstrap `akira`、`browser-access` 与 `akira-guard`；后续通用 Skill、Matt、Research 与外部能力都由 `akira` Router 按真实任务主动安装。
+Akira 不再维护 `~/.agents/akira-skills.json`、`~/.agents/sources/` 或自己的 Git + symlink installer，也没有 Skiloom 失败后的 fallback 路径。
 
 ## Guard
 

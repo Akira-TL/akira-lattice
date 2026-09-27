@@ -48,7 +48,7 @@ def uninstall_runtime_links() -> None:
 
 def main() -> int:
     uninstall_runtime_links()
-    print("卸载完成；仅移除本仓静态配置软链接，Skill 状态未修改。")
+    print("卸载完成；仅移除本仓静态配置软链接，Skiloom Target / Package 状态未修改。")
     return 0
 
 

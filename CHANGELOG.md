@@ -27,6 +27,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 将 Akira Skill 生命周期统一迁移到 Skiloom：`akira` 只保留能力选择与入口 Package 路由，依赖闭包以 `skiloom-package.toml` 为唯一事实来源；删除 Akira 自建 Git + symlink installer 与 `~/.agents/akira-skills.json` authority。Lattice 根安装器改为要求 `skiloom >= 0.8.15`，先以显式 Git `main` 建立 `akira-tl/skiloom/skiloom` direct requirement，再通过 public CLI bootstrap `akira`、`browser-access`、`akira-guard`。同时将 Akira Knowledge 更新为 available 的 `akira-knowledge` Package 产品入口。
+
 - 更新 `akira` first-party Catalog：`akira-research-skills` 现在按同一产品包中的 Research / Review 两个平级 series 发现与安装；新增 `akira-review`、`review-literature`、`review-science`、`review-revision` 路由说明，并用当前 installer 的显式 `--skill` 列表提供按需 series bundle，不伪造自动依赖解析。
 - 扩展 Akira Research Review series 的仓库级契约检查：机械验证双 Primary Router、三个 Review 专业 Skill 的调用方式与文档/metadata、共享科研能力边界、Communication 作者侧职责保留、Review 不进入 Current Loop 且不新增 Review 数据库 schema。
 - 将 Akira Research 的独立 Reviewer scientific assessment、多视角 Review 与 re-review ownership 从 Communication 迁移到平级 Review series；Communication 继续只拥有作者侧 integrity、revision、response 与 submission，Review Result 只有经用户决定后才 hand back 到 Research / Communication 修改 canonical state 或稿件。

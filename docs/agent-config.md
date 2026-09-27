@@ -16,7 +16,8 @@ akira-lattice/
 ├── skills/
 │   ├── akira/               # 通用 Akira Skills + akira Router
 │   ├── research/            # 独立 Research suite
-│   └── matt/                # Matt fork + Akira engineering extensions
+│   ├── matt/                # Matt fork + Akira engineering extensions
+│   └── knowledge/           # Akira Knowledge
 ├── docs/
 └── .agents/adr/
 ```
@@ -24,11 +25,11 @@ akira-lattice/
 边界：
 
 - **Core**：短小、稳定、跨项目并需要常驻的默认规则。
-- **Akira common Skills**：跨领域可复用能力和安装 Router；Productivity、Akira Guard、通用 Agent 编排留在 `skills/akira`。
+- **Akira common Skills**：跨领域可复用能力和能力 Router；Productivity、Akira Guard、通用 Agent 编排留在 `skills/akira`。Skill 生命周期不再由 Akira 自建安装器实现。
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Akira Guard**：跨项目 Git 提交、暂存语法、架构与 Skill 结构机械检查，由默认安装的 `akira-guard` Skill 持有。Lattice 根仓只保留自身静态配置与 submodule 拓扑检查。
-- **Runtime state**：Skill 运行时状态由 `akira` Router 自带安装器管理：远端 source 位于 `~/.agents/sources/`，机器级注册表位于 `~/.agents/skills/`，manifest 位于 `~/.agents/akira-skills.json`。Lattice 根安装器只有一个 bootstrap 例外：从云端获取 `akira` 安装器并确保 `akira`、`browser-access`、`akira-guard` 三个基础 Skill 已注册。机器级注册表不会自动投影到项目级 Skill 目录。`<project>/.agents/skills/` 是允许的开放 Agent Skills 项目级 view；只有项目确实需要项目级暴露时，Agent 才可显式建立 `<project>/.agents/skills/<name> -> ~/.agents/skills/<name>` 软链接。已经存在的项目级 Skill view 按项目约定正常使用；机器级注册本身不构成自动创建项目链接的授权。
+- **Runtime state**：Skill Package 的 Registry、Store、Target identity、accepted exact state、managed projection 与 recovery 统一由 Skiloom 拥有。`akira` 只选择入口 Package；旧 `~/.agents/akira-skills.json` 与 `~/.agents/sources/` 不再是 lifecycle authority。Lattice 默认 bootstrap 使用 Skiloom `--scope user` Target，并不直接写 Target 内容。
 
 ## 运行时拓扑
 
@@ -37,7 +38,7 @@ akira-lattice/
           └──→ ~/.agents/AGENTS.md
 ```
 
-`~/.agents/AGENTS.md` 是全局规则入口；其他运行环境需要自己的规则入口时，由部署层建立指向同一 canonical source 的兼容引用，不在全局规则或架构文档中枚举具体产品。`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供 Lattice 静态配置部署、基础 Skill bootstrap 与 Lattice 自检；跨项目 Guard 脚本跟随 `akira-guard` Skill 发布，通用 Skill 安装脚本跟随 `akira` Skill 发布。外部 Skill 仓不作为 Lattice submodule 或运行时 source view，需要时由 `akira` Router 从登记来源发现并安装。
+`~/.agents/AGENTS.md` 是全局规则入口；其他运行环境需要自己的规则入口时，由部署层建立指向同一 canonical source 的兼容引用，不在全局规则或架构文档中枚举具体产品。`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供 Lattice 静态配置部署、Skiloom 基础 Package bootstrap 与 Lattice 自检；跨项目 Guard 脚本跟随 `akira-guard` Skill 发布。外部 Skill 仓不作为 Lattice submodule，需要时由 `akira` Router 选择候选并交给 Skiloom。
 
 ## Skill 安装边界
 
@@ -47,15 +48,11 @@ akira-lattice/
 ./install.sh
 ```
 
-该命令部署 Core、references 与其他静态配置链接，并从远端 `Akira-TL/skills` bootstrap `akira`、`browser-access` 与 `akira-guard` 三个基础 Skill。bootstrap 不使用 Lattice 本地 submodule，而是临时 clone 云端仓库并执行其中的 `akira` 安装器。Lattice pin 住的其他 Skill 仓仍只用于开发、review、provenance 与固定 source revision。
+该命令先确认 `skiloom >= 0.8.15`，再部署 Core、references 与其他静态配置链接。Skill bootstrap 先以显式 Git `main` 安装 `akira-tl/skiloom/skiloom`，随后通过同一 public CLI 把 `akira-tl/skills/akira`、`akira-tl/skills/browser-access`、`akira-tl/skills/akira-guard` 作为 Akira 基础 direct requirements 安装到用户级 Target。Lattice 本地 submodule 仍只用于开发、review、provenance 与固定 source revision。
 
-基础 bootstrap 完成后，Skill 生命周期由 `akira` Router 自己负责。Router 按“当前会话 → 机器级注册表 → 远端 source”判断能力缺口；需要新增能力时先说明来源、用途与最小集合并取得用户明确同意，再调用：
+基础 bootstrap 完成后，`akira` Router 只负责判断能力缺口并选择入口 Package coordinate；Skiloom 负责完整 Candidate Graph、dependency closure、source authorization、exact revision、Store、Target ownership 与生命周期状态。新增能力时先生成 `--plan --json`，用户明确授权后才用 `--yes --json` 提交。
 
-```bash
-uv run python ~/.agents/skills/akira/scripts/skills.py <command> ...
-```
-
-该脚本独立管理 `~/.agents/akira-skills.json`、`~/.agents/sources/` 与 `~/.agents/skills/`。Matt、Research、Word、科研/学术 PPT、`akira-guard`、`agent-orchestration` 与外部专业能力都遵循同一机制。Lattice 根安装器只触发基础 bootstrap，不实现通用 Skill 生命周期；根卸载器与 `lattice_check.py` 不读取或修改这些状态。
+根卸载器只移除 Lattice 静态配置链接，不直接修改 Skiloom Target；Skill Package 的移除、修复或清理由 Skiloom 生命周期命令单独完成。
 
 ## Guard
 
@@ -95,6 +92,7 @@ check PATH    运行通用机械检查并显示 Git/worktree 状态
 skills/akira     → git@github.com:Akira-TL/skills.git
 skills/research  → git@github.com:Akira-TL/akira-research-skills.git
 skills/matt      → git@github.com:Akira-TL/matt-skills.git
+skills/knowledge → git@github.com:Akira-TL/akira-knowledge-skills.git
 ```
 
 第三方 Skill 来源不作为 Lattice submodule。当前可信外部来源及发现方式由 `skills/akira` 中的 `akira` Router 维护；需要时只安装当前任务对应的具体 Skill。
@@ -103,4 +101,4 @@ skills/matt      → git@github.com:Akira-TL/matt-skills.git
 
 ## 卸载
 
-`./uninstall.sh` 只移除直接指向本仓库的静态配置软链接。所有 Skill 注册项、manifest、Git source checkout 与执行器自己的 Skill 引用都保持不变。
+`./uninstall.sh` 只移除直接指向本仓库的静态配置软链接。Skiloom Registry、Store、Target 与 accepted Package state 保持不变；需要删除 Skill Package 时另行使用 Skiloom。

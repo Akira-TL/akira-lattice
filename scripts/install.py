@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import filecmp
+import json
 import os
+import re
 import shutil
 import subprocess
-import sys
-import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -16,8 +16,16 @@ DOC_PATH = REPO_ROOT / "docs" / "agent-config.md"
 HOME = Path.home()
 HUB = HOME / ".agents"
 BACKUP_ROOT = REPO_ROOT / "backup"
-AKIRA_SKILLS_SOURCE = "https://github.com/Akira-TL/skills.git"
-BASELINE_SKILLS = ("akira", "browser-access", "akira-guard")
+
+SKILOOM_MIN_VERSION = (0, 8, 15)
+SKILOOM_GIT_REF = "main"
+BASELINE_PACKAGES = (
+    "akira-tl/skiloom/skiloom",
+    "akira-tl/skills/akira",
+    "akira-tl/skills/browser-access",
+    "akira-tl/skills/akira-guard",
+)
+
 
 def remove_path(path: Path) -> None:
     if path.is_symlink() or path.is_file():
@@ -84,41 +92,82 @@ def ensure_link(source: Path, target: Path, stamp: str) -> None:
     print(f"LINK   {target} -> {link_source}")
 
 
-def bootstrap_baseline_skills() -> None:
-    with tempfile.TemporaryDirectory(prefix="akira-skill-bootstrap-") as tempdir:
-        checkout = Path(tempdir) / "skills"
-        clone = subprocess.run(
-            [
-                "git",
-                "clone",
-                "--depth",
-                "1",
-                "--branch",
-                "main",
-                "--",
-                AKIRA_SKILLS_SOURCE,
-                str(checkout),
-            ],
-            capture_output=True,
-            text=True,
+def _parse_skiloom_version(output: str) -> tuple[int, int, int]:
+    match = re.search(r"skiloom\s+(\d+)\.(\d+)\.(\d+)", output)
+    if match is None:
+        raise RuntimeError(f"无法解析 Skiloom 版本：{output.strip() or '<empty>'}")
+    return int(match.group(1)), int(match.group(2)), int(match.group(3))
+
+
+def require_skiloom() -> str:
+    executable = shutil.which("skiloom")
+    if executable is None:
+        raise RuntimeError(
+            "缺少 Skiloom CLI。Akira Skill 生命周期已统一交给 Skiloom；"
+            "请先安装受支持的 Skiloom，再重新运行 ./install.sh。"
         )
-        if clone.returncode != 0:
-            detail = clone.stderr.strip() or clone.stdout.strip() or "git clone failed"
-            raise RuntimeError(f"无法从远端获取 Akira Skill bootstrap：{detail}")
 
-        installer = checkout / "routing" / "akira" / "scripts" / "skills.py"
-        if not installer.is_file():
-            raise RuntimeError(f"远端 Akira Skill 缺少安装入口：{installer}")
+    result = subprocess.run(
+        [executable, "--version"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "skiloom --version failed"
+        raise RuntimeError(f"无法执行 Skiloom CLI：{detail}")
 
-        command = [sys.executable, str(installer), "install", AKIRA_SKILLS_SOURCE]
-        for skill in BASELINE_SKILLS:
-            command.extend(["--skill", skill])
-        installed = subprocess.run(command)
-        if installed.returncode != 0:
-            raise RuntimeError("Akira 基础 Skill 云端安装失败")
+    version = _parse_skiloom_version(result.stdout or result.stderr)
+    if version < SKILOOM_MIN_VERSION:
+        required = ".".join(str(part) for part in SKILOOM_MIN_VERSION)
+        actual = ".".join(str(part) for part in version)
+        raise RuntimeError(f"Skiloom 版本过旧：{actual}；至少需要 {required}")
+    return executable
+
+
+def _skiloom_error(output: str) -> str:
+    try:
+        payload = json.loads(output)
+    except json.JSONDecodeError:
+        return output.strip() or "unknown Skiloom error"
+    error = payload.get("error")
+    if isinstance(error, dict):
+        code = error.get("code", "SkiloomError")
+        facts = error.get("facts")
+        return f"{code}: {facts}" if facts else str(code)
+    return output.strip() or "unknown Skiloom error"
+
+
+def bootstrap_baseline_skills(skiloom: str | None = None) -> None:
+    skiloom = skiloom or require_skiloom()
+    for coordinate in BASELINE_PACKAGES:
+        command = [
+            skiloom,
+            "install",
+            coordinate,
+            "--git",
+            SKILOOM_GIT_REF,
+            "--scope",
+            "user",
+            "--yes",
+            "--non-interactive",
+            "--json",
+        ]
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode != 0:
+            detail = _skiloom_error(result.stdout or result.stderr)
+            raise RuntimeError(f"Skiloom 基础 Package bootstrap 失败（{coordinate}）：{detail}")
+
+        try:
+            payload = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Skiloom 返回非 JSON 输出（{coordinate}）") from exc
+        if payload.get("schema") != "SKILOOM-CLI-V1" or payload.get("ok") is not True:
+            raise RuntimeError(f"Skiloom bootstrap 返回异常结果（{coordinate}）：{payload}")
+        print(f"SKILOOM {coordinate}")
 
 
 def deploy() -> None:
+    skiloom = require_skiloom()
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     for path in (
         HUB,
@@ -140,13 +189,13 @@ def deploy() -> None:
         stamp,
     )
 
-    bootstrap_baseline_skills()
+    bootstrap_baseline_skills(skiloom)
 
     print(f"Core source:      {CORE_ROOT}")
     print(f"Scripts source:   {SCRIPT_ROOT}")
     print(f"Runtime hub:      {HUB}")
-    print(f"Baseline Skills:  {', '.join(BASELINE_SKILLS)}")
-    print(f"Skill source:     {AKIRA_SKILLS_SOURCE}")
+    print(f"Skiloom:          {skiloom}")
+    print(f"Baseline Packages: {', '.join(BASELINE_PACKAGES)}")
 
 
 def main() -> int:
@@ -155,4 +204,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except RuntimeError as exc:
+        print(f"ERROR  {exc}")
+        raise SystemExit(1) from exc

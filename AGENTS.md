@@ -9,7 +9,7 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 - `skills/akira` → `Akira-TL/skills`：通用 Akira Skills 与 `akira` 能力 Router。保留 Productivity、Akira Guard 和通用 Agent 编排。
 - `skills/research` → `Akira-TL/akira-research-skills`：完整 Research 产品族，拥有自己的 `skills/`、`docs/`、scripts、tests 与 research.sqlite 契约。
 - `skills/matt` → `Akira-TL/matt-skills`：Akira 自主维护的 Matt 系列工程 Skills；历史来源于 `mattpocock/skills`，上游只作为选择性参考来源。
-- `skills/knowledge` → `Akira-TL/akira-knowledge-skills`：Akira Knowledge 产品仓；当前只完成仓库初始化，尚未发布可安装 Skill。
+- `skills/knowledge` → `Akira-TL/akira-knowledge-skills`：Akira Knowledge 产品仓；当前已提供 `akira-knowledge` Primary Router 与 Capture / Curate / Maintain / Retrieve 系列 Package。
 
 第三方 Skill 仓库不作为 Lattice submodule 固定；由 `skills/akira` 中的 Router 维护可信来源和按需安装边界。
 
@@ -21,9 +21,9 @@ Global static Agent configuration lives under `core/`. Lattice-specific deployme
 
 ## Installation boundary
 
-Lattice root installation owns global static Agent configuration plus a narrow cloud bootstrap for the baseline Skills `akira`, `browser-access`, and `akira-guard`. General Skill discovery, installation, update, removal, manifest state and machine-level registration remain owned by the `akira` Router in `skills/akira/routing/akira/`; the root installer does not implement the general Skill lifecycle and never installs from local submodules.
+Lattice root installation owns global static Agent configuration plus a narrow Skiloom bootstrap. It first establishes `akira-tl/skiloom/skiloom` from explicit Git `main`, then installs the Akira baseline Packages `akira-tl/skills/akira`, `akira-tl/skills/browser-access`, and `akira-tl/skills/akira-guard`. `scripts/install.py` requires a supported Skiloom CLI and uses only its public candidate operations; it does not clone Skill repositories, maintain a private manifest, or write Skill Target projections directly.
 
-Being pinned as a Lattice submodule does not mean a Skill repository is installed into the machine registry. Specific harnesses continue to own their own Skill discovery views, links, caches and profiles.
+General capability selection remains owned by the `akira` Router in `skills/akira/routing/akira/`, while Package discovery, dependency resolution, source resolution, Registry / Store / Target state, install/update/remove/sync/repair/recovery are owned by Skiloom. Being pinned as a Lattice submodule does not mean a Package is installed into a Target.
 
 ## Authoring discipline
 
