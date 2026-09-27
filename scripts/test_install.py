@@ -63,13 +63,13 @@ class SkiloomBootstrapTests(unittest.TestCase):
         ):
             install.bootstrap_baseline_skills()
 
-        self.assertEqual(run.call_count, len(install.BASELINE_PACKAGES))
+        self.assertEqual(run.call_count, 1 + len(install.BASELINE_PACKAGES))
         expected = [
             mock.call(
                 [
                     "/usr/bin/skiloom",
                     "install",
-                    coordinate,
+                    "akira-tl/skiloom/skiloom",
                     "--git",
                     "main",
                     "--scope",
@@ -80,8 +80,26 @@ class SkiloomBootstrapTests(unittest.TestCase):
                 ],
                 capture_output=True,
                 text=True,
-            )
-            for coordinate in install.BASELINE_PACKAGES
+            ),
+            *[
+                mock.call(
+                    [
+                        "/usr/bin/skiloom",
+                        "install",
+                        coordinate,
+                        "--git",
+                        "main",
+                        "--scope",
+                        "user",
+                        "--yes",
+                        "--non-interactive",
+                        "--json",
+                    ],
+                    capture_output=True,
+                    text=True,
+                )
+                for coordinate in install.BASELINE_PACKAGES
+            ],
         ]
         self.assertEqual(run.call_args_list, expected)
 

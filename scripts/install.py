@@ -20,7 +20,6 @@ BACKUP_ROOT = REPO_ROOT / "backup"
 SKILOOM_MIN_VERSION = (0, 8, 15)
 SKILOOM_GIT_REF = "main"
 BASELINE_PACKAGES = (
-    "akira-tl/skiloom/skiloom",
     "akira-tl/skills/akira",
     "akira-tl/skills/browser-access",
     "akira-tl/skills/akira-guard",
@@ -137,13 +136,29 @@ def _skiloom_error(output: str) -> str:
     return output.strip() or "unknown Skiloom error"
 
 
+def _run_skiloom_json(command: list[str], subject: str) -> dict[str, object]:
+    result = subprocess.run(command, capture_output=True, text=True)
+    output = result.stdout or result.stderr
+    if result.returncode != 0:
+        raise RuntimeError(f"Skiloom 操作失败（{subject}）：{_skiloom_error(output)}")
+
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Skiloom 返回非 JSON 输出（{subject}）") from exc
+    if payload.get("schema") != "SKILOOM-CLI-V1" or payload.get("ok") is not True:
+        raise RuntimeError(f"Skiloom 返回异常结果（{subject}）：{payload}")
+    return payload
+
+
 def bootstrap_baseline_skills(skiloom: str | None = None) -> None:
     skiloom = skiloom or require_skiloom()
-    for coordinate in BASELINE_PACKAGES:
-        command = [
+
+    _run_skiloom_json(
+        [
             skiloom,
             "install",
-            coordinate,
+            "akira-tl/skiloom/skiloom",
             "--git",
             SKILOOM_GIT_REF,
             "--scope",
@@ -151,18 +166,27 @@ def bootstrap_baseline_skills(skiloom: str | None = None) -> None:
             "--yes",
             "--non-interactive",
             "--json",
-        ]
-        result = subprocess.run(command, capture_output=True, text=True)
-        if result.returncode != 0:
-            detail = _skiloom_error(result.stdout or result.stderr)
-            raise RuntimeError(f"Skiloom 基础 Package bootstrap 失败（{coordinate}）：{detail}")
+        ],
+        "akira-tl/skiloom/skiloom",
+    )
+    print("SKILOOM akira-tl/skiloom/skiloom")
 
-        try:
-            payload = json.loads(result.stdout)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"Skiloom 返回非 JSON 输出（{coordinate}）") from exc
-        if payload.get("schema") != "SKILOOM-CLI-V1" or payload.get("ok") is not True:
-            raise RuntimeError(f"Skiloom bootstrap 返回异常结果（{coordinate}）：{payload}")
+    for coordinate in BASELINE_PACKAGES:
+        _run_skiloom_json(
+            [
+                skiloom,
+                "install",
+                coordinate,
+                "--git",
+                SKILOOM_GIT_REF,
+                "--scope",
+                "user",
+                "--yes",
+                "--non-interactive",
+                "--json",
+            ],
+            coordinate,
+        )
         print(f"SKILOOM {coordinate}")
 
 
