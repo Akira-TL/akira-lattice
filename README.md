@@ -36,7 +36,7 @@ Lattice pin 某个 source 不等于把它全局安装。
 ./install.sh
 ```
 
-该入口要求 `skiloom >= 0.8.15`，部署 Lattice 的 Core、references 与静态运行时链接；Skill bootstrap 先以 Git `main` 安装 `akira-tl/skiloom/skiloom`，再通过同一 public CLI 安装 Akira 最小用户级基线：`akira-tl/skills/akira`、`akira-tl/skills/browser-access` 与 `akira-tl/skills/akira-guard`。Lattice 本地 `skills/*` submodule 只用于开发、review 与固定 revision，不是运行时安装源。
+该入口要求 `skiloom >= 0.8.15`，部署 Lattice 的 Core、references 与静态运行时链接；Skill bootstrap 先以 Git `main` 安装 `akira-tl/skiloom/skiloom`，再通过同一 public CLI 安装 Akira 最小用户级基线：`akira-tl/skills/akira` 与 `akira-tl/skills/browser-access`。Guard 已内置在必装 `akira` Package 中。Lattice 本地 `skills/*` submodule 只用于开发、review 与固定 revision，不是运行时安装源。
 
 后续由 `akira` Router 判断当前任务需要哪个入口 Package；完整 dependency closure、source resolution、exact revision、Registry / Store / Target ownership、安装、更新、移除、同步、修复与恢复全部由 Skiloom 管理。当前 first-party source mode 使用 Git `main`。
 
@@ -51,12 +51,12 @@ Akira 不再维护 `~/.agents/akira-skills.json`、`~/.agents/sources/` 或自�
 
 ## Guard
 
-跨项目 Guard 由默认安装的 `akira-guard` Skill 提供：
+跨项目 Guard 内置在默认安装的 `akira` Package 中：
 
 ```bash
-uv run ~/.agents/skills/akira-guard/scripts/guard.py skills ./skills/akira
-uv run ~/.agents/skills/akira-guard/scripts/guard.py skills ./skills/research
-uv run ~/.agents/skills/akira-guard/scripts/guard.py check .
+uv run ~/.agents/skills/akira/scripts/guard.py skills ./skills/akira
+uv run ~/.agents/skills/akira/scripts/guard.py skills ./skills/research
+uv run ~/.agents/skills/akira/scripts/guard.py check .
 ```
 
 Lattice 自身的静态配置与 submodule 拓扑检查单独运行：
@@ -65,7 +65,7 @@ Lattice 自身的静态配置与 submodule 拓扑检查单独运行：
 uv run scripts/lattice_check.py
 ```
 
-`akira-guard ... commit` 是正式 Git 提交入口；项目自身测试、schema validator 和高风险验证按实际修改追加。
+`akira/scripts/guard.py commit` 是正式 Git 提交入口；项目自身测试、schema validator 和高风险验证按实际修改追加。
 
 ## Source ownership
 

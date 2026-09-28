@@ -22,7 +22,6 @@ SKILOOM_GIT_REF = "main"
 BASELINE_PACKAGES = (
     "akira-tl/skills/akira",
     "akira-tl/skills/browser-access",
-    "akira-tl/skills/akira-guard",
 )
 
 

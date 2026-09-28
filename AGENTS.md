@@ -1,6 +1,6 @@
 # Repository instructions
 
-This repository is the source of truth for Akira's maintained global static Agent configuration, Lattice deployment/checks, cross-repository routing, and pinned Skill repositories. Cross-project Guard execution is owned by the `akira-guard` Skill.
+This repository is the source of truth for Akira's maintained global static Agent configuration, Lattice deployment/checks, cross-repository routing, and pinned Skill repositories. Cross-project Guard execution is bundled into the always-installed `akira` Package.
 
 ## Source and ownership
 
@@ -17,11 +17,11 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 
 Lattice `docs/` 只保存基础设施、部署、仓库拓扑和第三方 source 说明；Skill 的人类文档跟随其 owning repository。
 
-Global static Agent configuration lives under `core/`. Lattice-specific deployment and repository checks live under root `scripts/`; cross-project Git Guard execution lives under `skills/akira/engineering/akira-guard/`. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
+Global static Agent configuration lives under `core/`. Lattice-specific deployment and repository checks live under root `scripts/`; cross-project Git Guard execution is bundled into the always-installed `skills/akira/routing/akira/` Package. `~/.agents` and tool-specific prompt paths are runtime views, never canonical source.
 
 ## Installation boundary
 
-Lattice root installation owns global static Agent configuration plus a narrow Skiloom bootstrap. It first establishes `akira-tl/skiloom/skiloom` from explicit Git `main`, then installs the Akira baseline Packages `akira-tl/skills/akira`, `akira-tl/skills/browser-access`, and `akira-tl/skills/akira-guard`. `scripts/install.py` requires a supported Skiloom CLI and uses only its public candidate operations; it does not clone Skill repositories, maintain a private manifest, or write Skill Target projections directly.
+Lattice root installation owns global static Agent configuration plus a narrow Skiloom bootstrap. It first establishes `akira-tl/skiloom/skiloom` from explicit Git `main`, then installs the Akira baseline Packages `akira-tl/skills/akira` and `akira-tl/skills/browser-access`. Guard is bundled inside the always-installed `akira` Package. `scripts/install.py` requires a supported Skiloom CLI and uses only its public candidate operations; it does not clone Skill repositories, maintain a private manifest, or write Skill Target projections directly.
 
 General capability selection remains owned by the `akira` Router in `skills/akira/routing/akira/`, while Package discovery, dependency resolution, source resolution, Registry / Store / Target state, install/update/remove/sync/repair/recovery are owned by Skiloom. Being pinned as a Lattice submodule does not mean a Package is installed into a Target.
 

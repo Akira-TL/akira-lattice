@@ -1,6 +1,6 @@
 # Agent 静态配置管理
 
-本仓库维护 Akira 的全局静态 Agent 规则、运行时部署、Lattice 自检和各 Skill 仓的固定开发 revision；跨项目机械 Guard 由 `akira-guard` Skill 维护。`~/.agents` 只是运行时入口，不是第二份源码仓库。
+本仓库维护 Akira 的全局静态 Agent 规则、运行时部署、Lattice 自检和各 Skill 仓的固定开发 revision；跨项目机械 Guard 内置在必装 `akira` Package 中。`~/.agents` 只是运行时入口，不是第二份源码仓库。
 
 ## 分层
 
@@ -28,7 +28,7 @@ akira-lattice/
 - **Akira common Skills**：跨领域可复用能力和能力 Router；Productivity、Akira Guard、通用 Agent 编排留在 `skills/akira`。Skill 生命周期不再由 Akira 自建安装器实现。
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
-- **Akira Guard**：跨项目 Git 提交、暂存语法、架构与 Skill 结构机械检查，由默认安装的 `akira-guard` Skill 持有。Lattice 根仓只保留自身静态配置与 submodule 拓扑检查。
+- **Akira Guard**：跨项目 Git 提交、暂存语法、架构与 Skill 结构机械检查，作为必装 `akira` Package 的内置执行能力持有。Lattice 根仓只保留自身静态配置与 submodule 拓扑检查。
 - **Runtime state**：Skill Package 的 Registry、Store、Target identity、accepted exact state、managed projection 与 recovery 统一由 Skiloom 拥有。`akira` 只选择入口 Package；旧 `~/.agents/akira-skills.json` 与 `~/.agents/sources/` 不再是 lifecycle authority。Lattice 默认 bootstrap 使用 Skiloom `--scope user` Target，并不直接写 Target 内容。
 
 ## 运行时拓扑
@@ -38,7 +38,7 @@ akira-lattice/
           └──→ ~/.agents/AGENTS.md
 ```
 
-`~/.agents/AGENTS.md` 是全局规则入口；其他运行环境需要自己的规则入口时，由部署层建立指向同一 canonical source 的兼容引用，不在全局规则或架构文档中枚举具体产品。`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供 Lattice 静态配置部署、Skiloom 基础 Package bootstrap 与 Lattice 自检；跨项目 Guard 脚本跟随 `akira-guard` Skill 发布。外部 Skill 仓不作为 Lattice submodule，需要时由 `akira` Router 选择候选并交给 Skiloom。
+`~/.agents/AGENTS.md` 是全局规则入口；其他运行环境需要自己的规则入口时，由部署层建立指向同一 canonical source 的兼容引用，不在全局规则或架构文档中枚举具体产品。`~/.agents/references` 指向 `core/references/`，`~/.agents/scripts` 指向根 `scripts/`。根 `scripts/` 只提供 Lattice 静态配置部署、Skiloom 基础 Package bootstrap 与 Lattice 自检；跨项目 Guard 脚本随必装 `akira` Package 发布。外部 Skill 仓不作为 Lattice submodule，需要时由 `akira` Router 选择候选并交给 Skiloom。
 
 ## Skill 安装边界
 
@@ -48,7 +48,7 @@ akira-lattice/
 ./install.sh
 ```
 
-该命令先确认 `skiloom >= 0.8.15`，再部署 Core、references 与其他静态配置链接。Skill bootstrap 先以显式 Git `main` 安装 `akira-tl/skiloom/skiloom`，随后通过同一 public CLI 把 `akira-tl/skills/akira`、`akira-tl/skills/browser-access`、`akira-tl/skills/akira-guard` 作为 Akira 基础 direct requirements 安装到用户级 Target。Lattice 本地 submodule 仍只用于开发、review、provenance 与固定 source revision。
+该命令先确认 `skiloom >= 0.8.15`，再部署 Core、references 与其他静态配置链接。Skill bootstrap 先以显式 Git `main` 安装 `akira-tl/skiloom/skiloom`，随后通过同一 public CLI 把 `akira-tl/skills/akira` 与 `akira-tl/skills/browser-access` 作为 Akira 基础 direct requirements 安装到用户级 Target。Guard 已内置在 `akira` Package 中。Lattice 本地 submodule 仍只用于开发、review、provenance 与固定 source revision。
 
 基础 bootstrap 完成后，`akira` Router 只负责判断能力缺口并选择入口 Package coordinate；Skiloom 负责完整 Candidate Graph、dependency closure、source authorization、exact revision、Store、Target ownership 与生命周期状态。新增能力时先生成 `--plan --json`，用户明确授权后才用 `--yes --json` 提交。
 
@@ -59,7 +59,7 @@ akira-lattice/
 跨项目统一入口：
 
 ```bash
-uv run ~/.agents/skills/akira-guard/scripts/guard.py <command>
+uv run ~/.agents/skills/akira/scripts/guard.py <command>
 ```
 
 Lattice 自身配置与 submodule 拓扑检查：

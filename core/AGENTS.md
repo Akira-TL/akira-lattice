@@ -43,8 +43,8 @@ Agent 可以根据任务需要充分展开分析、设计、证据和细节，�
 - 用户明确表示最近一次实现“不行”“不接受”“回退”或其他等价否定时，停止在该实现之上继续叠加修正。若被否定的修改由当前 Agent 创建、连续位于当前 `HEAD`，且回退不会覆盖用户、其他 Agent 或来源不明的工作，则先 `reset` 到被否定修改之前的提交，再按用户新要求重新实现并形成新的原子提交；不要保留被否定实现再追加一个“修正提交”。若安全 `reset` 的前提不成立，先保护现有非当前 Agent 修改并向用户说明冲突，不得为追求整洁历史而破坏他人工作。
 - 提交前检查当前原子修改的 diff ownership，只暂存归属明确的当前修改。此前会话、其他 Agent、用户或来源不明的修改不得顺带提交、修改、还原或删除；存在时先判断是否是接手的文件或者确定是自己的工作内容，否则提醒用户。
 - 提交信息默认一行：`<TYPE>: (<SCOPE>) <DETAIL>`；`TYPE` 使用全大写的 `FIX`、`FEAT`、`REFACTOR`、`TEST`、`DOCS` 或 `CHORE`，`SCOPE` 使用简短英文单词，`DETAIL` 必须具体。确有必要使用多行时，每一行都必须独立完整地遵守同一格式。
-- 提交前可使用 `git add -- <paths...>` 选择性暂存归属明确的当前原子修改；正式提交只能使用 `uv run ~/.agents/skills/akira-guard/scripts/guard.py commit -m '<message>'`，不得直接以 `git commit` 作为正常提交入口。Guard 对每次提交自动执行 staged 最低语法检查、提交格式校验和暂存架构门禁；普通提交不默认额外运行全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改在对应阶段提交前，再根据实际失败模式执行 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。语义归属仍由 Agent 负责。
-- 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/skills/akira-guard/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。涉及 GitHub push、云端 CI、tag、release 或包发布时，先读取 `~/.agents/references/github-release.md` 并遵守其中的本地验收与发布顺序。
+- 提交前可使用 `git add -- <paths...>` 选择性暂存归属明确的当前原子修改；正式提交只能使用 `uv run ~/.agents/skills/akira/scripts/guard.py commit -m '<message>'`，不得直接以 `git commit` 作为正常提交入口。Guard 对每次提交自动执行 staged 最低语法检查、提交格式校验和暂存架构门禁；普通提交不默认额外运行全项目 lint、typecheck、build 或 test suite。大型、关键或高风险修改在对应阶段提交前，再根据实际失败模式执行 targeted test、类型检查、构建、schema/migration validator 或项目专属验证。语义归属仍由 Agent 负责。
+- 当前任务的实现型修改全部提交后，再进入可选的大范围测试、检查和收尾。收尾时可运行 `uv run ~/.agents/skills/akira/scripts/guard.py check` 获取适用检查和完整分支/worktree 概览，并向用户提供可选的构建/检查命令或说明。测试发现的新问题作为新的原子修改独立提交；除非用户明确要求，不 squash 已合理拆分的提交。涉及 GitHub push、云端 CI、tag、release 或包发布时，先读取 `~/.agents/references/github-release.md` 并遵守其中的本地验收与发布顺序。
 
 ## 模型与执行环境
 
