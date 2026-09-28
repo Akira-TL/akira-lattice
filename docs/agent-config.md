@@ -29,7 +29,7 @@ akira-lattice/
 - **Matt Engineering**：软件工程方法与其 Akira delta 同仓。`ask-akira`、`parallel-coordinator`、`parallel-execution` 属于 `skills/matt`，因为它们直接扩展 Matt 的 Spec/Ticket/implement/TDD/review 流程。
 - **Research**：共享 Research Tree、schema、migration、research.sqlite 与科研对象契约，作为独立 `skills/research` 产品仓。
 - **Akira Guard**：跨项目 Git 提交、暂存语法、架构与 Skill 结构机械检查，作为必装 `akira` Package 的内置执行能力持有。Lattice 根仓只保留自身静态配置与 submodule 拓扑检查。
-- **Runtime state**：Skill Package 的 Registry、Store、Target identity、accepted exact state、managed projection 与 recovery 统一由 Skiloom 拥有。`akira` 只选择入口 Package与默认 scope；旧 `~/.agents/akira-skills.json` 与 `~/.agents/sources/` 不再是 lifecycle authority。Lattice 默认 bootstrap 使用 Skiloom `--scope user` Target；Matt Engineering、Research 与 Review 使用目标项目根目录下的 `--scope workspace` Target，并不进入用户级 `~/.agents/skills`。
+- **Runtime state**：Skill Package 的 Registry、Store、Target identity、accepted exact state、managed projection 与 recovery 统一由 Skiloom 拥有。`akira` 只选择入口 Package与默认 scope；旧 `~/.agents/akira-skills.json` 与 `~/.agents/sources/` 不再是 lifecycle authority。Lattice 默认 bootstrap 使用 Skiloom `--scope user` Target；Matt Engineering、Research、Review 与 Akira Knowledge 使用目标项目 / Vault 工作目录下的 `--scope workspace` Target，并不进入用户级 `~/.agents/skills`。
 
 ## 运行时拓扑
 
@@ -50,7 +50,7 @@ akira-lattice/
 
 该命令先确认 `skiloom >= 0.8.15`，再部署 Core、references 与其他静态配置链接。Skill bootstrap 先以显式 Git `main` 安装 `akira-tl/skiloom/skiloom`，随后通过同一 public CLI 把 `akira-tl/skills/akira` 与 `akira-tl/skills/browser-access` 作为 Akira 基础 direct requirements 安装到用户级 Target。Guard 已内置在 `akira` Package 中。Lattice 本地 submodule 仍只用于开发、review、provenance 与固定 source revision。
 
-基础 bootstrap 完成后，`akira` Router 只负责判断能力缺口、选择入口 Package coordinate 与 Catalog 登记的默认 scope；Skiloom 负责完整 Candidate Graph、dependency closure、source authorization、exact revision、Store、Target ownership 与生命周期状态。Matt / Research / Review 必须从目标项目根目录使用 `workspace` scope；新增能力时先生成 `--plan --json`，用户明确授权后才用 `--yes --json` 提交。
+基础 bootstrap 完成后，`akira` Router 只负责判断能力缺口、选择入口 Package coordinate 与 Catalog 登记的默认 scope；Skiloom 负责完整 Candidate Graph、dependency closure、source authorization、exact revision、Store、Target ownership 与生命周期状态。Matt / Research / Review / Knowledge 必须从目标项目 / Vault 对应工作目录使用 `workspace` scope；新增能力时先生成 `--plan --json`，用户明确授权后才用 `--yes --json` 提交。
 
 根卸载器只移除 Lattice 静态配置链接，不直接修改 Skiloom Target；Skill Package 的移除、修复或清理由 Skiloom 生命周期命令单独完成。
 

@@ -14,7 +14,7 @@
 
 **Pinned source** means a repository recorded as a Lattice Git submodule for development, reproducibility, and Guard checks. A pinned source is not automatically part of the global runtime installation.
 
-**Global baseline Skills** are the deliberately small set installed by Lattice for every environment. The current baseline is `akira` and `browser-access`; Guard is bundled inside `akira`. Specialised common Skills and Knowledge remain on-demand user capabilities, while Matt Engineering, Research and Review are project-level workflows installed only into the target project's Skiloom `workspace` Target.
+**Global baseline Skills** are the deliberately small set installed by Lattice for every environment. The current baseline is `akira` and `browser-access`; Guard is bundled inside `akira`. Specialised common Skills remain on-demand user capabilities, while Matt Engineering, Research, Review and Akira Knowledge are project-level workflows installed only into the target project's Skiloom `workspace` Target.
 
 **Global configuration source** means `core/`. `core/AGENTS.md` is the always-loaded core; `core/references/` contains low-frequency facts and tool boundaries.
 
@@ -30,4 +30,4 @@
 
 The common repository contains `akira` (including Guard), `browser-access`, `general-word-document-generation`, `scientific-presentation-authoring`, and `agent-orchestration`. Research/Review, Matt, and Knowledge are independent product repositories with their own Primary Routers.
 
-Project-local capability expansion is routed by `akira`: install the smallest missing common Skill when possible; install Matt Engineering, Research or Review into the current project's `workspace` Target only when sustained project work requires that workflow family. These professional product suites are not part of the global user Target.
+Project-local capability expansion is routed by `akira`: install the smallest missing common Skill when possible; install Matt Engineering, Research, Review or Akira Knowledge into the current project's / Vault's `workspace` Target only when sustained work requires that workflow family. These professional product suites are not part of the global user Target.
