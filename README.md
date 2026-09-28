@@ -38,13 +38,13 @@ Lattice pin 某个 source 不等于把它全局安装。
 
 该入口要求 `skiloom >= 0.8.15`，部署 Lattice 的 Core、references 与静态运行时链接；Skill bootstrap 先以 Git `main` 安装 `akira-tl/skiloom/skiloom`，再通过同一 public CLI 安装 Akira 最小用户级基线：`akira-tl/skills/akira` 与 `akira-tl/skills/browser-access`。Guard 已内置在必装 `akira` Package 中。Lattice 本地 `skills/*` submodule 只用于开发、review 与固定 revision，不是运行时安装源。
 
-后续由 `akira` Router 判断当前任务需要哪个入口 Package；完整 dependency closure、source resolution、exact revision、Registry / Store / Target ownership、安装、更新、移除、同步、修复与恢复全部由 Skiloom 管理。当前 first-party source mode 使用 Git `main`。
+后续由 `akira` Router 判断当前任务需要哪个入口 Package及其默认 scope；完整 dependency closure、source resolution、exact revision、Registry / Store / Target ownership、安装、更新、移除、同步、修复与恢复全部由 Skiloom 管理。Matt Engineering、Research 与 Review 属于项目级专业工作流，只安装到目标项目的 `workspace` Target；不会进入用户级 `~/.agents/skills`。当前 first-party source mode 使用 Git `main`。
 
 典型流程：
 
 ```text
-skiloom install <coordinate> --git main --scope user --plan --json
-skiloom install <coordinate> --git main --scope user --yes --json
+skiloom install <coordinate> --git main --scope <catalog-scope> --plan --json
+skiloom install <coordinate> --git main --scope <catalog-scope> --yes --json
 ```
 
 Akira 不再维护 `~/.agents/akira-skills.json`、`~/.agents/sources/` 或自己的 Git + symlink installer，也没有 Skiloom 失败后的 fallback 路径。
