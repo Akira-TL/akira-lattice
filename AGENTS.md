@@ -10,6 +10,7 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 - `skills/research` → `Akira-TL/akira-research-skills`：完整 Research 产品族，拥有自己的 `skills/`、`docs/`、scripts、tests 与 research.sqlite 契约。
 - `skills/matt` → `Akira-TL/matt-skills`：Akira 自主维护的 Matt 系列工程 Skills；历史来源于 `mattpocock/skills`，上游只作为选择性参考来源。
 - `skills/knowledge` → `Akira-TL/akira-knowledge-skills`：Akira Knowledge 产品仓；当前已提供 `akira-knowledge` Primary Router 与 Capture / Curate / Maintain / Retrieve 系列 Package。
+- `skills/video` → `Akira-TL/akira-video-skills`：Akira Video 产品仓；当前提供 `akira-video` Primary Router 与视频脚本、复用素材、镜头、生成、审片、整片后期系列 Package。
 
 第三方 Skill 仓库不作为 Lattice submodule 固定；由 `skills/akira` 中的 Router 维护可信来源和按需安装边界。
 
@@ -23,7 +24,7 @@ Global static Agent configuration lives under `core/`. Lattice-specific deployme
 
 Lattice root installation owns global static Agent configuration plus a narrow Skiloom bootstrap. It first establishes `akira-tl/skiloom/skiloom` from explicit Git `main`, then installs the Akira baseline Packages `akira-tl/skills/akira` and `akira-tl/skills/browser-access`. Guard is bundled inside the always-installed `akira` Package. `scripts/install.py` requires a supported Skiloom CLI and uses only its public candidate operations; it does not clone Skill repositories, maintain a private manifest, or write Skill Target projections directly.
 
-General capability selection remains owned by the `akira` Router in `skills/akira/routing/akira/`, including the Catalog-defined default Target scope, while Package discovery, dependency resolution, source resolution, Registry / Store / Target state, install/update/remove/sync/repair/recovery are owned by Skiloom. Matt Engineering, Research, Review and Akira Knowledge are project-level workflow products and must use the target project / Vault `workspace` Target rather than the global user Target. Being pinned as a Lattice submodule does not mean a Package is installed into a Target.
+General capability selection remains owned by the `akira` Router in `skills/akira/routing/akira/`, including the Catalog-defined default Target scope, while Package discovery, dependency resolution, source resolution, Registry / Store / Target state, install/update/remove/sync/repair/recovery are owned by Skiloom. Matt Engineering, Research, Review, Akira Knowledge and Akira Video are project-level workflow products and must use the target project / Vault `workspace` Target rather than the global user Target. Being pinned as a Lattice submodule does not mean a Package is installed into a Target.
 
 ## Authoring discipline
 
@@ -39,7 +40,7 @@ Stable Skill behaviour changes require the owning repository's docs to change in
 
 ## Changes
 
-修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`；Knowledge 产品修改属于 `skills/knowledge`。
+修改 Skill 时先在 owning child repository 完成、验证并提交，再回到 Lattice 更新对应 submodule pointer。Router / 通用 Skill 修改属于 `skills/akira`；Research 修改属于 `skills/research`；Matt workflow、`ask-akira` 和 Parallel 修改属于 `skills/matt`；Knowledge 产品修改属于 `skills/knowledge`；Video 产品修改属于 `skills/video`。
 
 Core、根静态配置部署、Lattice 自检、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`；跨项目 Guard 行为变化先在 `skills/akira` 提交，再更新 submodule pointer。所有修改提交后运行适用的 Guard / targeted tests。
 

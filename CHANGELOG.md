@@ -6,6 +6,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
+- 建立公开的 `Akira-TL/akira-video-skills` 产品仓并以 `skills/video` submodule 接入 Lattice；首版提供 `akira-video` Primary Router，以及视频脚本、复用素材、镜头、一次性生成包、审片、整片后期核心 Skill 和可选广告领域 Skill。
 - 为 Akira Research 的 Review series 增加 `review-revision`：修回再审按 evidence-before-persuasion 固定原 concern / resolution criterion，先检查真实 revised artifact 再核对 response letter，并区分已解决、部分解决、合理降低 Claim 闭合、新证据改变原问题与当前仍无法判断。
 - 为 Akira Research 的 Review series 增加 independent review / project-informed mentor review 信息边界、正式同行评议报告、多视角隔离语义与真实第三方未发表稿件的 confidentiality / generative-AI policy gate；只有目标 venue 当前规则明确允许且授权成立时才处理第三方全文。
 - 为 `akira-research-skills` 的 Review series 增加 `review-literature`：在 novelty / priority / contribution 判断前建立 bounded field frame 与 closest prior work，要求强 prior-work 判断读取足够原始内容，并复用 `literature-access` / `research-standards` 而不创建 Research Literature canonical state。
@@ -26,6 +27,8 @@ All user-visible changes to stable skills will be documented in this file.
 - Added root `install.sh` and `uninstall.sh` as the human-facing static Agent configuration deploy and uninstall entry points.
 
 ### Changed
+
+- 扩展 `akira` first-party Catalog 与 Lattice submodule 拓扑：AI 视频制作通过 `akira-tl/akira-video-skills/akira-video` 作为项目级 `workspace` 入口，完整核心依赖由其 `skiloom-package.toml` 解析，广告与模型适配能力按需增加。
 
 - 将 Akira Guard 并入必装 `akira` Package：Guard 脚本、staged syntax 检查、测试与运行规则从独立 `akira-guard` Skill 迁入 `routing/akira/`，正式提交入口改为 `~/.agents/skills/akira/scripts/guard.py`；Skiloom bootstrap 不再维护独立 `akira-guard` direct requirement。
 

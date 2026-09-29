@@ -10,3 +10,6 @@
 [submodule "skills/knowledge"]
 	path = skills/knowledge
 	url = git@github.com:Akira-TL/akira-knowledge-skills.git
+[submodule "skills/video"]
+	path = skills/video
+	url = git@github.com:Akira-TL/akira-video-skills.git
