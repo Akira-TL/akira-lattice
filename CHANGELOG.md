@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本：将剧情/素材/镜头/审片/后期的详细生产规范下沉为按需 references，并加入 Runway、Veo、Seedance 三个不进入默认闭包的 in-progress 模型适配 Package。
+
 - 扩展 `akira` first-party Catalog 与 Lattice submodule 拓扑：AI 视频制作通过 `akira-tl/akira-video-skills/akira-video` 作为项目级 `workspace` 入口，完整核心依赖由其 `skiloom-package.toml` 解析，广告与模型适配能力按需增加。
 
 - 将 Akira Guard 并入必装 `akira` Package：Guard 脚本、staged syntax 检查、测试与运行规则从独立 `akira-guard` Skill 迁入 `routing/akira/`，正式提交入口改为 `~/.agents/skills/akira/scripts/guard.py`；Skiloom bootstrap 不再维护独立 `akira-guard` direct requirement。
