@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本到当前完整制作骨架：增加 `video-audio`、角色 / 场景 / 灯光设计、严格四视图、小说改编与对白时长、镜头摄影 / 表演 / 交互 / 连续性、项目内一次性生成包 CLI、返回候选真实审片、声音 / 字幕 / 多语言 / finishing、统一模型适配器契约与三组独立黑盒 fixture；保持浅目录、无项目状态数据库、广告与模型适配按需安装。
+
 - 更新 Akira Video 固定版本：增加 `video-design` 角色 / 场景视觉设计能力，并恢复人物、衣物角色、普通衣物、道具、场景五套严格 1:1、2×2 四视图生图模板；四视图只负责稳定已确认设计，不替代视觉设计本身。
 
 - 更新 Akira Video 固定版本：将剧情/素材/镜头/审片/后期的详细生产规范下沉为按需 references，并加入 Runway、Veo、Seedance 三个不进入默认闭包的 in-progress 模型适配 Package。
