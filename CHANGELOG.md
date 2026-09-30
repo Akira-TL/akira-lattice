@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本：增加 `video-design` 角色 / 场景视觉设计能力，并恢复人物、衣物角色、普通衣物、道具、场景五套严格 1:1、2×2 四视图生图模板；四视图只负责稳定已确认设计，不替代视觉设计本身。
+
 - 更新 Akira Video 固定版本：将剧情/素材/镜头/审片/后期的详细生产规范下沉为按需 references，并加入 Runway、Veo、Seedance 三个不进入默认闭包的 in-progress 模型适配 Package。
 
 - 扩展 `akira` first-party Catalog 与 Lattice submodule 拓扑：AI 视频制作通过 `akira-tl/akira-video-skills/akira-video` 作为项目级 `workspace` 入口，完整核心依赖由其 `skiloom-package.toml` 解析，广告与模型适配能力按需增加。

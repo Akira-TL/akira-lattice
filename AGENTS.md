@@ -10,7 +10,7 @@ Akira Skill source is intentionally split by cohesion rather than stored in one 
 - `skills/research` → `Akira-TL/akira-research-skills`：完整 Research 产品族，拥有自己的 `skills/`、`docs/`、scripts、tests 与 research.sqlite 契约。
 - `skills/matt` → `Akira-TL/matt-skills`：Akira 自主维护的 Matt 系列工程 Skills；历史来源于 `mattpocock/skills`，上游只作为选择性参考来源。
 - `skills/knowledge` → `Akira-TL/akira-knowledge-skills`：Akira Knowledge 产品仓；当前已提供 `akira-knowledge` Primary Router 与 Capture / Curate / Maintain / Retrieve 系列 Package。
-- `skills/video` → `Akira-TL/akira-video-skills`：Akira Video 产品仓；当前提供 `akira-video` Primary Router 与视频脚本、复用素材、镜头、生成、审片、整片后期系列 Package。
+- `skills/video` → `Akira-TL/akira-video-skills`：Akira Video 产品仓；当前提供 `akira-video` Primary Router 与视频脚本、角色/场景视觉设计、复用素材、镜头、生成、审片、整片后期系列 Package。
 
 第三方 Skill 仓库不作为 Lattice submodule 固定；由 `skills/akira` 中的 Router 维护可信来源和按需安装边界。
 

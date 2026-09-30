@@ -26,7 +26,7 @@ akira-lattice/
 - **Matt Engineering**：`ask-akira` 作为软件工程 Primary Router；`standard` 按需进入 `ask-matt` 的 Matt 标准工程流，Parallel 系列负责正式多 Agent coordination。
 - **Akira Research**：完整科研生命周期与 `research.sqlite` provenance，单独成仓。
 - **Akira Knowledge**：独立产品仓；`akira-knowledge` 为 Primary Router，Capture / Curate / Maintain / Retrieve 由 Package dependency graph 组织。
-- **Akira Video**：独立 AI 视频制作产品仓；`akira-video` 为 Primary Router，视频脚本、复用素材、镜头、生成包、审片与整片后期由 Package dependency graph 组织。
+- **Akira Video**：独立 AI 视频制作产品仓；`akira-video` 为 Primary Router，视频脚本、角色/场景视觉设计、复用素材、镜头、生成包、审片与整片后期由 Package dependency graph 组织。
 
 Lattice pin 某个 source 不等于把它全局安装。
 
