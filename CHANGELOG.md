@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本到新生产拓扑收口阶段：统一共享资产、单支 `Vxxx`、Generation / Input Version / Take 与 `Vxxx/edit/` 的正式路径和采用边界，删除仍暴露旧 Shot-owned Take 流程的生成包兼容命令，并把媒体审片 / 交付 QC 测试改为自包含当前拓扑夹具；完整 Video 子仓验证通过。
+
 - 更新 Akira Video 固定版本到生成 / 接收实现验证阶段：在已接受的单 Agent Production、共享资产 + 单支视频、Generation / Shot 解耦设计上，新增作用域化 G / I outbound pack、输入冻结、G 内连续 Take、幂等 Receive、用户实际改输入后的 I 映射、分批返回 / 中断恢复和正式接收后自动清包，并以一次性短片、两集共享资产升级、返工恢复三个完整案例验证；完整 Skill 迁移仍后续进行。
 
 - 更新 Akira Video 固定版本到已接受的下一阶段生产模型文档：明确单 Agent / `video-production` 唯一流程负责人、共享资产 + 单支视频记录、Generation 与 Shot 解耦的 G / I / take 追溯，以及幂等 Receive / 自动临时包清理；当前仅归档设计决策，Skill 重构尚未实施。
