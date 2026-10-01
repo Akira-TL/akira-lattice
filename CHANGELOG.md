@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本到生成 / 接收实现验证阶段：在已接受的单 Agent Production、共享资产 + 单支视频、Generation / Shot 解耦设计上，新增作用域化 G / I outbound pack、输入冻结、G 内连续 Take、幂等 Receive、用户实际改输入后的 I 映射、分批返回 / 中断恢复和正式接收后自动清包，并以一次性短片、两集共享资产升级、返工恢复三个完整案例验证；完整 Skill 迁移仍后续进行。
+
 - 更新 Akira Video 固定版本到已接受的下一阶段生产模型文档：明确单 Agent / `video-production` 唯一流程负责人、共享资产 + 单支视频记录、Generation 与 Shot 解耦的 G / I / take 追溯，以及幂等 Receive / 自动临时包清理；当前仅归档设计决策，Skill 重构尚未实施。
 
 - 更新 Akira Video 固定版本到当前完整制作骨架：增加 `video-audio`、角色 / 场景 / 灯光设计、严格四视图、小说改编与对白时长、镜头摄影 / 表演 / 交互 / 连续性、项目内一次性生成包 CLI、返回候选真实审片、声音 / 字幕 / 多语言 / finishing、统一模型适配器契约与三组独立黑盒 fixture；保持浅目录、无项目状态数据库、广告与模型适配按需安装。
