@@ -28,6 +28,10 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本到多 Agent 友好的语义目录命名：Video、Material、Scene、Shot、Batch 正式目录统一采用 `<编号前缀>_<中文语义描述>`，编号仅作排序提示、完整目录名才是路径身份；Scene 内 Shot 顺序由 `SCxx.md` 显式维护，Batch task 保留完整中文目录名，并同步 `akira` Catalog / 人类说明到当前 Material / Scene / Shot / Batch 模型。
+
+- 更新 Akira Video 脚本写作能力：增加按需台词与互动写法参考，在不改剧情结构 / 事件的前提下，用身体反应、视线、停顿、打断、本能声、沉默、重复词 / 小动作、配角即时反应和潜台词把功能性对白改成自然表演；潜台词只用于指导表演，进入 Shot / 视频 Prompt 时只编译可观察动作、声音状态、时间窗口和正式台词。
+
 - 更新 Akira Video 固定版本：新增按需逐镜 Prompt 写法参考，从真实 Scene 导演稿抽象目的 / 前因、空间 Blocking、站位与机位、摄影、相对时间节拍、台词、光声、入口 / 计划出口、参考 / 约束等写法，并明确这些字段如何编译为视频模型 `prompt.md`；复杂 Shot 可参考完整导演稿密度，简单 Shot 仍按真实需要裁剪。
 
 - 更新 Akira Video 固定版本到 Material / Scene / Shot / Batch / Take 模型：取消长期 Generation / Input Version 层，人物 / 地点 / 道具 / 声音 Material 直接共置对象记录、用途 Prompt 与返回 Take，视频 Shot 直接共置 `SHOT.md`、`prompt.md` 与视频 Take；Prompt 文本历史由 Git 保存，真实外部执行由保留的 `Bxxx` 快照冻结。视频 Prompt 统一编译参考图身份及对应生图 Prompt、角色站位、景别、焦段、镜头时长、机位 / 运镜、主体动作、光影、场景氛围、台词、相对时间戳与 Continuity In / Out；Receive 的幂等状态也收回 Batch，不再污染 Material / Shot 目录。
