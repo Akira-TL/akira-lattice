@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本到 Material / Scene / Shot / Batch / Take 模型：取消长期 Generation / Input Version 层，人物 / 地点 / 道具 / 声音 Material 直接共置对象记录、用途 Prompt 与返回 Take，视频 Shot 直接共置 `SHOT.md`、`prompt.md` 与视频 Take；Prompt 文本历史由 Git 保存，真实外部执行由保留的 `Bxxx` 快照冻结。视频 Prompt 统一编译参考图身份及对应生图 Prompt、角色站位、景别、焦段、镜头时长、机位 / 运镜、主体动作、光影、场景氛围、台词、相对时间戳与 Continuity In / Out；Receive 的幂等状态也收回 Batch，不再污染 Material / Shot 目录。
+
 - 更新 Akira Video 固定版本到 Scene / Shot 视频生成模型：可复用资产继续使用 G/I/Take，成片视频不再建立 G；每个 `SCxx` 目录直接包含 `SCxx.md` 与多个 `SHxxx/`，每个 Shot 通常约 5–30 秒并表示一段内部不断开的连续画面，直接拥有 `SHOT.md`、Input Version 与 Take，发生切镜即建立新 Shot。`Bxxx` 批次可混合资产 G/I 与视频 Shot/I，Receive 分别写回原 G 或原 SH，并拒绝旧 `Vxxx/generations/Gxxx` 视频目标。
 
 - 更新 Akira Video 固定版本到简化生成组织：单支视频直接位于 `video/Vxxx_*`，共享人物 / 地点等对象的 Prompt 与 Generated Take 在对象自己的 G 内共置，资产逻辑版本直接引用 G/take；外部执行改为可同时包含多个 G/I 的 `video/batches/Bxxx/`，共享参考只复制一次并就地保留 `Bxxx.tar.gz`，不再为每个 G 建 `.tmp` 包或 handoff；同时增加人物、环境与场面调度（Blocking）专用 Prompt，并同步 `akira` Catalog 的 Video 产品说明。
