@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Video 固定版本：新增按需逐镜 Prompt 写法参考，从真实 Scene 导演稿抽象目的 / 前因、空间 Blocking、站位与机位、摄影、相对时间节拍、台词、光声、入口 / 计划出口、参考 / 约束等写法，并明确这些字段如何编译为视频模型 `prompt.md`；复杂 Shot 可参考完整导演稿密度，简单 Shot 仍按真实需要裁剪。
+
 - 更新 Akira Video 固定版本到 Material / Scene / Shot / Batch / Take 模型：取消长期 Generation / Input Version 层，人物 / 地点 / 道具 / 声音 Material 直接共置对象记录、用途 Prompt 与返回 Take，视频 Shot 直接共置 `SHOT.md`、`prompt.md` 与视频 Take；Prompt 文本历史由 Git 保存，真实外部执行由保留的 `Bxxx` 快照冻结。视频 Prompt 统一编译参考图身份及对应生图 Prompt、角色站位、景别、焦段、镜头时长、机位 / 运镜、主体动作、光影、场景氛围、台词、相对时间戳与 Continuity In / Out；Receive 的幂等状态也收回 Batch，不再污染 Material / Shot 目录。
 
 - 更新 Akira Video 固定版本到 Scene / Shot 视频生成模型：可复用资产继续使用 G/I/Take，成片视频不再建立 G；每个 `SCxx` 目录直接包含 `SCxx.md` 与多个 `SHxxx/`，每个 Shot 通常约 5–30 秒并表示一段内部不断开的连续画面，直接拥有 `SHOT.md`、Input Version 与 Take，发生切镜即建立新 Shot。`Bxxx` 批次可混合资产 G/I 与视频 Shot/I，Receive 分别写回原 G 或原 SH，并拒绝旧 `Vxxx/generations/Gxxx` 视频目标。
