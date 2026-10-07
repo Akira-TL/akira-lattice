@@ -28,6 +28,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 Akira Knowledge 固定版本：新增 Material Record 的显式结案治理，允许已核验但无需沉淀为长期知识的材料在绑定 current revision、记录原因并取得明确确认后进入 `已处理`；同步修正材料状态镜像写入后的 Authority fingerprint，并把 Authority edit CLI 适配器下沉到子模块以保持架构阈值。
+
 - 更新 Akira Video 固定版本到多 Agent 友好的语义目录命名：Video、Material、Scene、Shot、Batch 正式目录统一采用 `<编号前缀>_<中文语义描述>`，编号仅作排序提示、完整目录名才是路径身份；Scene 内 Shot 顺序由 `SCxx.md` 显式维护，Batch task 保留完整中文目录名，并同步 `akira` Catalog / 人类说明到当前 Material / Scene / Shot / Batch 模型。
 
 - 更新 Akira Video 脚本写作能力：增加按需台词与互动写法参考，在不改剧情结构 / 事件的前提下，用身体反应、视线、停顿、打断、本能声、沉默、重复词 / 小动作、配角即时反应和潜台词把功能性对白改成自然表演；潜台词只用于指导表演，进入 Shot / 视频 Prompt 时只编译可观察动作、声音状态、时间窗口和正式台词。
