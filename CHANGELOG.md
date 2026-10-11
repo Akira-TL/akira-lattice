@@ -6,6 +6,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
+- 固定 `Akira-TL/skills` 新版本并加入实验性 `midjourney-discord`：通过用户已授权、已登录的 Discord 浏览器会话调用 Midjourney Bot，提供精确频道锁、`/info` / `/help` / `/settings` 只读命令、`/imagine`、任务状态与原图解析、按 message ID 的 U/V / Upscale / Remix 操作和附件下载；组件动作使用真实 pointer click 并按源 Prompt 关联结果，避免 Discord 虚拟列表复用导致跨任务误操作。该能力依赖 `browser-access`，通过 Skiloom 作为用户级 Codex Skill 安装，不读取 Discord token/Cookie，也不提供账号设置修改或 `Vary (Region)` / `Custom Zoom` 等复杂模态流程。
 - 更新 `browser-access` 固定版本：支持专用浏览器数据目录、配置子目录与独立连接地址，以及 `profile-save` / `profiles` / `--profile` 命名配置保存、查询和选择；不提供参数时继续使用原有 `agent-browser`、`localhost:9222` 与 `.agent-browser\profile`。配置管理不读取、导入或管理日常 Chrome 配置；自定义实例控制前核验实际目录，拒绝目录不匹配、默认目录占用及相互嵌套，保存配置本身不启动浏览器。
 - 建立公开的 `Akira-TL/akira-video-skills` 产品仓并以 `skills/video` submodule 接入 Lattice；首版提供 `akira-video` Primary Router，以及视频脚本、复用素材、镜头、一次性生成包、审片、整片后期核心 Skill 和可选广告领域 Skill。
 - 为 Akira Research 的 Review series 增加 `review-revision`：修回再审按 evidence-before-persuasion 固定原 concern / resolution criterion，先检查真实 revised artifact 再核对 response letter，并区分已解决、部分解决、合理降低 Claim 闭合、新证据改变原问题与当前仍无法判断。
