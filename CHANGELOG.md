@@ -31,6 +31,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 `browser-access` 固定版本：新增固定目标的长连接会话和公开 Python 接口，统一错误码，强化作用域定位、真实点击、输入与文件上传验证，并提供变化等待、失败证据、截图、网络条件和资源解析。通用执行层通过单元、模拟协议、本地动态页面及 WSL 到 Windows Chrome 上传验证；真实 Discord 业务回归仍由上层技能在授权频道执行。
 - 更新 `midjourney-discord` 固定版本：将浏览器/消息解析底层与 CLI/动作层拆分，保持现有 Discord 频道锁、Midjourney 生成、Remix 与下载行为不变，并通过 Akira Guard 的代码规模阈值检查。
 
 - 更新 Akira Knowledge 固定版本：新增 Material Record 的显式结案治理，允许已核验但无需沉淀为长期知识的材料在绑定 current revision、记录原因并取得明确确认后进入 `已处理`；同步修正材料状态镜像写入后的 Authority fingerprint，将 Authority edit / Maintenance CLI 适配器从总入口下沉到专用模块，并要求 schema 8 缺失 Material resolution 结构化 Authority 时 fail closed，避免静默重建空治理表。
