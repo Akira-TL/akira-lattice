@@ -7,6 +7,7 @@ All user-visible changes to stable skills will be documented in this file.
 ### Added
 
 - 接入实验性 `auto-gpt` 技能源码：复用 `browser-access` 专用可见窗口，由当前 Agent 每分钟检查全部 ChatGPT 页面，完整阅读回复后显式续接或暂停；保留用户草稿和默认配置，不使用 Pro，不保存聊天，不建立自动发送后台服务。技能尚未通过 Skiloom 安装。
+- 固定 `auto-gpt` 适用验证记录：真实任务自然传输超时后，由 Agent 阅读回复并发起一次“继续”，新用户轮次与新回复确认成功；单独列出尚未真实复现的人工、错误暂停及并发分支，不保存实际聊天。
 - 记录 `auto-gpt` 专用可见浏览器与当前 Agent 会话监听的启动阶段执行能力调查，明确一分钟观察、人工认证及输入冲突的验证边界。
 
 - 补齐主仓 Matt 工作流配置：集中使用 `Akira-TL/akira-lattice` GitHub Issues，明确工作流标签映射、原生子议题与阻塞关系、共享账号串行领取，以及现有 `CONTEXT.md` 和 `.agents/adr/` 读取约定。
