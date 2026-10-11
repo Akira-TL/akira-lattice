@@ -6,7 +6,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
-- 记录 `auto-gpt` 专用可见浏览器与当前 Agent 会话监听的执行能力调查，明确一分钟观察、人工认证及输入冲突的待验证边界；新技能尚未安装或开始监听。
+- 接入实验性 `auto-gpt` 技能源码：复用 `browser-access` 专用可见窗口，由当前 Agent 每分钟检查全部 ChatGPT 页面，完整阅读回复后显式续接或暂停；保留用户草稿和默认配置，不使用 Pro，不保存聊天，不建立自动发送后台服务。技能尚未通过 Skiloom 安装。
+- 记录 `auto-gpt` 专用可见浏览器与当前 Agent 会话监听的启动阶段执行能力调查，明确一分钟观察、人工认证及输入冲突的验证边界。
 
 - 补齐主仓 Matt 工作流配置：集中使用 `Akira-TL/akira-lattice` GitHub Issues，明确工作流标签映射、原生子议题与阻塞关系、共享账号串行领取，以及现有 `CONTEXT.md` 和 `.agents/adr/` 读取约定。
 - 固定 `Akira-TL/skills` 新版本并加入实验性 `midjourney-discord`：通过用户已授权、已登录的 Discord 浏览器会话调用 Midjourney Bot，提供精确频道锁、`/info` / `/help` / `/settings` 只读命令、`/imagine`、任务状态与原图解析、按 message ID 的 U/V / Upscale / Remix 操作和附件下载；组件动作使用真实 pointer click 并按源 Prompt 关联结果，避免 Discord 虚拟列表复用导致跨任务误操作。该能力依赖 `browser-access`，通过 Skiloom 作为用户级 Codex Skill 安装，不读取 Discord token/Cookie，也不提供账号设置修改或 `Vary (Region)` / `Custom Zoom` 等复杂模态流程。
