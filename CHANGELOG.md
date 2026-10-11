@@ -33,6 +33,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 为 `auto-gpt` 的人工输入保护固定 `browser-access` 新版本：显式页面调用可在同一连接中先核对只读条件，条件未严格返回 `true` 时不发送动作；保护检查不决定续接或停止。
+
 - 更新 `browser-access` 固定版本：本地专用 Chrome 改为核对 Windows 端口所有者、实际启动参数及调试实例标识，不再为身份核验强制添加 `--enable-automation`；无法核验时继续拒绝控制，网站认证仍交由用户人工处理。
 
 - 更新 `browser-access` 固定版本：Windows Chrome 自动启动前实际检查调试端口的回环绑定能力，被系统保留或占用时提前报错，不再打开无法连接的窗口；不自动更换配置端口。
