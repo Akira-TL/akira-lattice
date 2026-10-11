@@ -6,6 +6,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Added
 
+- 更新 `browser-access` 固定版本：支持专用浏览器数据目录、配置子目录与独立连接地址，以及 `profile-save` / `profiles` / `--profile` 命名配置保存、查询和选择；不提供参数时继续使用原有 `agent-browser`、`localhost:9222` 与 `.agent-browser\profile`。配置管理不读取、导入或管理日常 Chrome 配置；自定义实例控制前核验实际目录，拒绝目录不匹配、默认目录占用及相互嵌套，保存配置本身不启动浏览器。
 - 建立公开的 `Akira-TL/akira-video-skills` 产品仓并以 `skills/video` submodule 接入 Lattice；首版提供 `akira-video` Primary Router，以及视频脚本、复用素材、镜头、一次性生成包、审片、整片后期核心 Skill 和可选广告领域 Skill。
 - 为 Akira Research 的 Review series 增加 `review-revision`：修回再审按 evidence-before-persuasion 固定原 concern / resolution criterion，先检查真实 revised artifact 再核对 response letter，并区分已解决、部分解决、合理降低 Claim 闭合、新证据改变原问题与当前仍无法判断。
 - 为 Akira Research 的 Review series 增加 independent review / project-informed mentor review 信息边界、正式同行评议报告、多视角隔离语义与真实第三方未发表稿件的 confidentiality / generative-AI policy gate；只有目标 venue 当前规则明确允许且授权成立时才处理第三方全文。
