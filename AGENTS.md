@@ -45,3 +45,17 @@ Stable Skill behaviour changes require the owning repository's docs to change in
 Core、根静态配置部署、Lattice 自检、Router 产品目录或 submodule 集成变化需要记录 Lattice `CHANGELOG.md`；跨项目 Guard 行为变化先在 `skills/akira` 提交，再更新 submodule pointer。所有修改提交后运行适用的 Guard / targeted tests。
 
 Do not add release tooling, package metadata, CI, marketplace manifests, or a license by assumption. Treat each as a separate repository decision.
+
+## Agent skills
+
+### 议题跟踪
+
+需求、规格和规划决策统一记录在 `Akira-TL/akira-lattice` 的 GitHub Issues，使用 `gh` 并显式指定仓库。详见 `docs/agents/issue-tracker.md`。
+
+### 工作流角色
+
+`to-tickets`、`triage` 和 `wayfinder` 所需角色映射到同名 GitHub 标签。详见 `docs/agents/triage-labels.md`。
+
+### 领域文档
+
+读取根 `CONTEXT.md` 与相关 `.agents/adr/` 决策记录，保留现有单一上下文与 ADR 约定。详见 `docs/agents/domain.md`。
