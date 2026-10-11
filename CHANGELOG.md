@@ -31,6 +31,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 `browser-access` 固定版本：本地专用 Chrome 改为核对 Windows 端口所有者、实际启动参数及调试实例标识，不再为身份核验强制添加 `--enable-automation`；无法核验时继续拒绝控制，网站认证仍交由用户人工处理。
+
 - 更新 `browser-access` 固定版本：Windows Chrome 自动启动前实际检查调试端口的回环绑定能力，被系统保留或占用时提前报错，不再打开无法连接的窗口；不自动更换配置端口。
 
 - 更新 `midjourney-discord` 固定版本：新增本地单图/多图参考上传、Discord CDN attachment URL 解析、带图 `/imagine`、image-prompt 文本签名关联、同一根任务的 grid / selected image / variation / upscale 结果 `collect` 与 `download-all`；实测完成双参考图上传 → Midjourney 生图 → U1/U2 → 任务树收集 → 全部图片下载闭环。运行入口同时禁写 Python bytecode，避免直接从 Skiloom immutable store 执行时生成 `__pycache__` 并触发 `CorruptStoreEntry`。
