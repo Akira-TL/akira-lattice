@@ -31,6 +31,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 更新 `midjourney-discord` 固定版本：新增本地单图/多图参考上传、Discord CDN attachment URL 解析、带图 `/imagine`、image-prompt 文本签名关联、同一根任务的 grid / selected image / variation / upscale 结果 `collect` 与 `download-all`；实测完成双参考图上传 → Midjourney 生图 → U1/U2 → 任务树收集 → 全部图片下载闭环。
+
 - 更新 `midjourney-discord` 固定版本：将浏览器/消息解析底层与 CLI/动作层拆分，保持现有 Discord 频道锁、Midjourney 生成、Remix 与下载行为不变，并通过 Akira Guard 的代码规模阈值检查。
 
 - 更新 Akira Knowledge 固定版本：新增 Material Record 的显式结案治理，允许已核验但无需沉淀为长期知识的材料在绑定 current revision、记录原因并取得明确确认后进入 `已处理`；同步修正材料状态镜像写入后的 Authority fingerprint，将 Authority edit / Maintenance CLI 适配器从总入口下沉到专用模块，并要求 schema 8 缺失 Material resolution 结构化 Authority 时 fail closed，避免静默重建空治理表。
