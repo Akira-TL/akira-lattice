@@ -31,7 +31,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
-- 更新 `midjourney-discord` 固定版本：新增本地单图/多图参考上传、Discord CDN attachment URL 解析、带图 `/imagine`、image-prompt 文本签名关联、同一根任务的 grid / selected image / variation / upscale 结果 `collect` 与 `download-all`；实测完成双参考图上传 → Midjourney 生图 → U1/U2 → 任务树收集 → 全部图片下载闭环。
+- 更新 `midjourney-discord` 固定版本：新增本地单图/多图参考上传、Discord CDN attachment URL 解析、带图 `/imagine`、image-prompt 文本签名关联、同一根任务的 grid / selected image / variation / upscale 结果 `collect` 与 `download-all`；实测完成双参考图上传 → Midjourney 生图 → U1/U2 → 任务树收集 → 全部图片下载闭环。运行入口同时禁写 Python bytecode，避免直接从 Skiloom immutable store 执行时生成 `__pycache__` 并触发 `CorruptStoreEntry`。
 
 - 更新 `midjourney-discord` 固定版本：将浏览器/消息解析底层与 CLI/动作层拆分，保持现有 Discord 频道锁、Midjourney 生成、Remix 与下载行为不变，并通过 Akira Guard 的代码规模阈值检查。
 
