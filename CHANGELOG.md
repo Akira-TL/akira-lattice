@@ -41,6 +41,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- 固定 `browser-access` 的复用连接保护修复：Python 与逐行会话的协议调用支持严格布尔保护条件，异步条件失败、非法参数或页面变化均不发送动作；避免续接为了保护输入而反复重建连接。
 - 合并 `94d5` 开发树的 `browser-access` 整改与主树 `auto-gpt`、专用配置及 Midjourney 修改，固定同时保留页面目标锁定和单次动作条件复核的版本；合并后 99 项浏览器测试（含 16 项本地 Chromium 测试）与 25 项 Midjourney 本地测试通过，真实 Discord 业务回归继续保持待执行。
 - 为 `auto-gpt` 的人工输入保护固定 `browser-access` 新版本：显式页面调用可在同一连接中先核对只读条件，条件未严格返回 `true` 时不发送动作；保护检查不决定续接或停止。
 
