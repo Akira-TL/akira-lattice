@@ -41,6 +41,7 @@ All user-visible changes to stable skills will be documented in this file.
 
 ### Changed
 
+- `auto-gpt` 增加经 Agent 核验的回复提取：完整回复、界面控件和机械载荷分开，载荷摘要仍绑定回复版本；四项独立本地 Chromium 场景通过，减少工具面板文字变化与编码输出造成的重复读取。
 - `auto-gpt` 改为同一前台进程持续返回控件变化，30 分钟到期才交接完整基线；Agent 保留待处理队列并优先核对已结束对话。断线只等待自然恢复，取消旧的三分钟掉线事件和刷新分支；不更新本地安装来测试。
 - 固定 `browser-access` 的复用连接保护修复：Python 与逐行会话的协议调用支持严格布尔保护条件，异步条件失败、非法参数或页面变化均不发送动作；避免续接为了保护输入而反复重建连接。
 - 合并 `94d5` 开发树的 `browser-access` 整改与主树 `auto-gpt`、专用配置及 Midjourney 修改，固定同时保留页面目标锁定和单次动作条件复核的版本；合并后 99 项浏览器测试（含 16 项本地 Chromium 测试）与 25 项 Midjourney 本地测试通过，真实 Discord 业务回归继续保持待执行。
