@@ -31,6 +31,12 @@ akira-lattice/
 - **Akira Guard**：跨项目 Git 提交、暂存语法、架构与 Skill 结构机械检查，作为必装 `akira` Package 的内置执行能力持有。Lattice 根仓只保留自身静态配置与 submodule 拓扑检查。
 - **Runtime state**：Skill Package 的 Registry、Store、Target identity、accepted exact state、managed projection 与 recovery 统一由 Skiloom 拥有。`akira` 只选择入口 Package与默认 scope；旧 `~/.agents/akira-skills.json` 与 `~/.agents/sources/` 不再是 lifecycle authority。Lattice 默认 bootstrap 使用 Skiloom `--scope user` Target；Matt Engineering、Research、Review 与 Akira Knowledge 使用目标项目 / Vault 工作目录下的 `--scope workspace` Target，并不进入用户级 `~/.agents/skills`。
 
+## 写作规则的加载
+
+核心提示词中的“直接表达与必要限定”适用于所有回复和写作：先说观点，以证据确定措辞和范围，保留影响准确性、方法理解、结果使用及伦理、法律、安全要求的限定。
+
+起草、修改或定稿文章、论文及其段落，以及模拟审稿或根据审稿意见修改正文时，读取 `core/references/direct-writing.md`（运行时入口为 `~/.agents/references/direct-writing.md`）。该文件集中保存论文主线、指标、实验、不利结果、审稿意见、中英文表达与定稿检查细则。文章正文按用户指定语言输出，未指定时沿用原稿语言。
+
 ## 运行时拓扑
 
 ```text
