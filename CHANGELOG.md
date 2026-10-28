@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- 明确全局格式化规则的执行时机：编写与迭代阶段允许紧凑排版以减少词元消耗，每次提交前统一格式化并满足可读性与行宽要求，编写过程中无需为提交行宽反复手工排版。
+
 - 全局提交规则要求优先复用或建立项目级提交前钩子，按项目及文件类型执行格式化与单行长度检查；保护未暂存内容，格式化产生差异后审查并选择性重新暂存。无法使用钩子时显式执行等价检查，格式化后仍超长的新增或修改行需保持语义手动拆分。
 
 - 更新 `skills/akira` 固定版本：Git Guard 默认拦截新增或修改的代码行超过 120 字符，支持 `akira.guardMaxLineLength` Git 配置与 `--max-line-length` 临时覆盖，按暂存内容报告文件及行号；未改动的历史长行不阻塞提交，全目录检查仍报告历史问题。31 项 Guard 测试通过。
