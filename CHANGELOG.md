@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- 更新 `skills/akira` 固定版本：Git Guard 默认拦截新增或修改的代码行超过 120 字符，支持 `akira.guardMaxLineLength` Git 配置与 `--max-line-length` 临时覆盖，按暂存内容报告文件及行号；未改动的历史长行不阻塞提交，全目录检查仍报告历史问题。31 项 Guard 测试通过。
+
 - 修复 `auto-gpt` 多页续接漏检：使用稳定消息 ID 识别虚拟历史中的新轮次，发送后只读等待新用户消息确认；正常入口改为不因事件或 30 分钟到期退出的持续观察进程，保留全部页面与未确认待办，旧会话或旧用户裁决不能确认新任务。默认按已核验布局定位完整助手活动，未知或不唯一时拒绝；75 项本地测试（含独立浏览器回归）通过，并已在四个真实已打开会话完成只读核对。本轮只修改本地源码与仓库固定版本，不推送或更新已安装技能。
 
 ### Added
