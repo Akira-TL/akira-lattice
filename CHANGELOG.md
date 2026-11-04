@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- `browser-access` 默认优先显示当前可见弹窗，正文范围外的弹窗也先返回；按前后关系排序，正文不重复输出相同节点，共享总预算。提供 `--no-overlays` 显式关闭优先观察，不自动确认或关闭弹窗。
+
 - `browser-access` 默认将长链接放入明确标注的路径预览，保留引用点击及 `resolve-artifact` 原址读取；增加 `--full-links` 显式读取模式，避免长查询参数挤占观察预算。
 
 - `browser-access` 默认合并局部连续文字中的重复标签与重复价格组合，保留独立控件、卡片、表格单元格和预格式化文本，输出实际合并数量。
