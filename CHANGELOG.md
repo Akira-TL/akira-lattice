@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- 重新设计 `browser-access` 的任务收尾：任务开始记录实例与页面归属，结束、取消或终止后默认关闭本任务启动且仍独占的实例，复用已有浏览器时只清理本任务新建页面；人工接管、未保存输入或持续等待时保留必要页面并说明原因。新增不启动浏览器的 `close` / `stop` 命令，核对实例与准确页面范围并验证关闭结果，保留持久配置；115 项含真实浏览器的回归测试及随后补充的 14 项收尾专项测试通过，实际关闭与配置保留验证通过。
+
 - 更新 `skills/akira` 固定版本：纳入此前保留的 `midjourney-discord` 命令分派重构，各子命令统一返回结果并规范缩进，命令行为保持不变；37 项本地测试通过。
 
 - 明确 Guard 行宽仅约束识别出的代码与构建脚本：文档（包括 Markdown 代码块）、配置、数据与资源文件不设 Guard 单行上限，按项目自身规则排版。更新 `skills/akira` 固定版本，补齐 Makefile、Dockerfile、CMake 构建脚本识别，并豁免 `.min.js` 等压缩生成文件的行宽；既有语法与其他架构检查保留。35 项 Guard 测试通过。
