@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- 更新 `skills/akira` 固定版本：纳入此前保留的 `midjourney-discord` 命令分派重构，各子命令统一返回结果并规范缩进，命令行为保持不变；37 项本地测试通过。
+
 - 明确 Guard 行宽仅约束识别出的代码与构建脚本：文档（包括 Markdown 代码块）、配置、数据与资源文件不设 Guard 单行上限，按项目自身规则排版。更新 `skills/akira` 固定版本，补齐 Makefile、Dockerfile、CMake 构建脚本识别，并豁免 `.min.js` 等压缩生成文件的行宽；既有语法与其他架构检查保留。35 项 Guard 测试通过。
 
 - 明确全局格式化规则的执行时机：编写与迭代阶段允许紧凑排版以减少词元消耗，每次提交前统一格式化并满足可读性与行宽要求，编写过程中无需为提交行宽反复手工排版。
