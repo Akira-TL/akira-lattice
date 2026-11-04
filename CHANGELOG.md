@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- `browser-access` 默认精简 DOM 省略全部 `class` 属性，保留元素引用；通过 `--include-classes` 或 `include_classes: true` 按需读取原始类名，变化比较按相同选项隔离。真实浏览器回归通过，并从现有语雀页面只读提取实际返回。
+
 - `browser-access` 的精简 DOM 默认附带元素引用，覆盖命令行观察、长会话及动作后回读；提供 `--no-refs` 或 `refs: false` 显式关闭，保持旧 JSON 控件元数据接口兼容，并验证节点替换与刷新后的引用失效保护。
 
 - 集成 `browser-access` 的交互改进：同会话省略重复 DOM，等待返回具体条件和实际内容，动作可合并指定区域回读并在回读失败后阻止依赖动作；增加动作前有界等待、文档内元素引用及失效保护。截图支持视口、元素和整页，默认可保存临时 PNG，同会话可省略重复图片；技能要求保存后调用图片查看能力完成视觉检查。真实浏览器与 Midjourney、auto-gpt 调用兼容性验证通过；后台事件推送和异常退出回收尚未实现。
