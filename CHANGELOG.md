@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- 记录 `browser-access` 的开源实现研究：对照 Playwright MCP、Chrome DevTools MCP、agent-browser、browser-use 与 Stagehand 的观察、定位、事件及收尾机制，列出可借鉴方案和验证边界；本轮不改变浏览器执行行为。
+
 - 调整 `browser-access` 默认返回：Agent 直接读取保留层级、定位属性与实时状态的精简 DOM，以及动作的实际回读结果；JSON 改为显式机器接口，保留 Midjourney 等旧脚本的兼容入口。DOM 在页面侧限制节点和字符数量，正文支持按偏移续读，连续操作复用连接；错误保留必要观测和定位线索，原有任务归属收尾与页面锁定继续生效。
 
 - 重新设计 `browser-access` 的任务收尾：任务开始记录实例与页面归属，结束、取消或终止后默认关闭本任务启动且仍独占的实例，复用已有浏览器时只清理本任务新建页面；人工接管、未保存输入或持续等待时保留必要页面并说明原因。新增不启动浏览器的 `close` / `stop` 命令，核对实例与准确页面范围并验证关闭结果，保留持久配置；115 项含真实浏览器的回归测试及随后补充的 14 项收尾专项测试通过，实际关闭与配置保留验证通过。
