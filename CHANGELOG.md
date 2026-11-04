@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- `browser-access` 默认合并局部连续文字中的重复标签与重复价格组合，保留独立控件、卡片、表格单元格和预格式化文本，输出实际合并数量。
+
 - `browser-access` 折叠普通 DOM 包裹节点，引用仅保留给可交互元素与必要观察根节点；改为有界显式栈遍历，解除 16 层导致的正文中断，并保留行内空格、预格式化文本与表格合并属性。默认预算为 6000 字符和 256 个保留元素；真实语雀页面的正文默认提取完整，可见文字核对一致，深层与引用交互回归通过。
 
 - `browser-access` 默认精简 DOM 省略全部 `class` 属性，保留元素引用；通过 `--include-classes` 或 `include_classes: true` 按需读取原始类名，变化比较按相同选项隔离。真实浏览器回归通过，并从现有语雀页面只读提取实际返回。
