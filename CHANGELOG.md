@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- `browser-access` 后续观察及动作回读仅返回真实节点变化片段，区分新增、更新、删除与顺序变化；截断时不误报删除。
+
 - `browser-access` 的可读交互与 Python 会话默认在点击、输入、填写和实际选文件后回读，提供 `--no-observe` 显式关闭；机器 JSON 接口继续按需开启，文件预检不回读，回读失败不重试动作。
 
 - 修正 `browser-access` 局部去重被普通块级包裹中断的问题：Airbnb 真实正文返回已合并 20 处局部重复文字，并精简 14 个长链接，独立卡片与控件继续保留。
