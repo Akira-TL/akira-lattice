@@ -4,6 +4,8 @@ All user-visible changes to stable skills will be documented in this file.
 
 ## Unreleased
 
+- `browser-access` 可读长会话默认监听空闲页面变化，合并事件并主动输出变化片段；机器接口显式启用通知，动作回读不重复通知，退出自动移除监听，文档刷新或失去页面身份时停止。
+
 - `browser-access` 后续观察及动作回读仅返回真实节点变化片段，区分新增、更新、删除与顺序变化；截断时不误报删除。
 
 - `browser-access` 的可读交互与 Python 会话默认在点击、输入、填写和实际选文件后回读，提供 `--no-observe` 显式关闭；机器 JSON 接口继续按需开启，文件预检不回读，回读失败不重试动作。
